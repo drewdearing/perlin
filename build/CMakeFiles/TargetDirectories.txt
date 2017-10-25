@@ -1,6 +1,0 @@
-/u/ddearing/Downloads/graphics-1/a4/skinning/build/CMakeFiles/edit_cache.dir
-/u/ddearing/Downloads/graphics-1/a4/skinning/build/CMakeFiles/rebuild_cache.dir
-/u/ddearing/Downloads/graphics-1/a4/skinning/build/CMakeFiles/utgraphicsutil.dir
-/u/ddearing/Downloads/graphics-1/a4/skinning/build/src/CMakeFiles/rebuild_cache.dir
-/u/ddearing/Downloads/graphics-1/a4/skinning/build/src/CMakeFiles/edit_cache.dir
-/u/ddearing/Downloads/graphics-1/a4/skinning/build/src/CMakeFiles/skinning.dir
