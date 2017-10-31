@@ -63,6 +63,18 @@ public:
 			rotation = glm::rotate(rotation, angle, axis);
 		}
 	}
+	
+	glm::vec4 origin(){
+		glm::vec4 origin = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) * translation;
+		Joint * temp = parent;
+		while(temp != NULL){
+			origin *= temp->rotation
+			origin *= temp->translation;
+			temp = temp->parent;
+		}
+		return origin;
+	}
+
 	void setID(int i){
 		id = i;
 	}
