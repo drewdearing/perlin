@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <glm/gtx/io.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 /*
  * For debugging purpose.
@@ -59,12 +60,9 @@ void Mesh::loadpmd(const std::string& fn)
 
 	while(mr.getJoint(joint_id, offset, parent)){
 		Joint* j = new Joint();
+		skeleton.addJoint(j, parent);
 		j->setID(joint_id);
 		j->setTangent(offset);
-		if(!skeleton.addJoint(j, parent)){
-			std::cout<<"vertices are out of order."<<std::endl;
-			exit(-1);
-		}
 		joint_id++;
 	}
 }

@@ -7,6 +7,8 @@
 #include <limits>
 #include <glm/glm.hpp>
 #include <mmdadapter.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <math.h> 
 
 struct BoundingBox {
 	BoundingBox()
@@ -23,6 +25,9 @@ private:
 	glm::vec3 tangent;
 	glm::vec3 normal;
 	glm::vec3 binormal;
+	glm::mat4 rotation = glm::mat4(1.0f);
+	glm::mat4 translation = glm::mat4(1.0f);
+	float length;
 	int id;
 public:
 	Joint(){};
@@ -49,6 +54,14 @@ public:
 		normal = glm::cross(tangent, v);
 		normal /= glm::length(normal);
 		binormal = glm::cross(tangent, normal);
+		length = glm::length(tangent);
+		translation = glm::translate(translation, tangent);
+		if(parent != NULL){
+			glm::vec3 axis = glm::cross(parent->tangent, tangent);
+			float angle = glm::dot(parent->tangent, tangent)/(parent->length*length);
+			angle = (M_PI/180)*acos(angle);
+			rotation = glm::rotate(rotation, angle, axis);
+		}
 	}
 	void setID(int i){
 		id = i;
@@ -57,7 +70,6 @@ public:
 		return id;
 	}
 };
-
 
 class Skeleton {
 private:
