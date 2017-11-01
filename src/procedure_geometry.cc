@@ -1,5 +1,4 @@
 #include "procedure_geometry.h"
-#include "bone_geometry.h"
 #include "config.h"
 
 void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3>& floor_faces)
@@ -17,3 +16,18 @@ void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3
 // around in the vertex shader to produce a very smooth cylinder.  We only
 // need to send a small number of points.  Controlling the grid size gives a
 // nice wireframe.
+void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices, std::vector<glm::vec2>& skel_lines)
+{
+	int index = 0;
+	Bone * temp_bone = mesh.skeleton.getBone(index);
+	while(temp_bone != NULL){
+		glm::vec2 line;
+		skel_vertices.push_back(temp_bone->firstEndPoint());
+		line[0] = skel_vertices.size()-1;
+		skel_vertices.push_back(temp_bone->secondEndPoint());
+		line[1] = skel_vertices.size()-1;
+		skel_lines.push_back(line);
+		index++;
+		temp_bone = mesh.skeleton.getBone(index);
+	}
+}

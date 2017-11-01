@@ -81,10 +81,12 @@ int main(int argc, char* argv[])
 
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
+	std::vector<glm::vec4> skel_vertices;
+	std::vector<glm::vec2> skel_lines;
+
 	create_floor(floor_vertices, floor_faces);
 
 	// FIXME: add code to create bone and cylinder geometry
-
 	Mesh mesh;
 	mesh.loadpmd(argv[1]);
 	std::cout << "Loaded object  with  " << mesh.vertices.size()
@@ -95,6 +97,9 @@ int main(int argc, char* argv[])
 		mesh_center += mesh.vertices[i];
 	}
 	mesh_center /= mesh.vertices.size();
+
+
+	create_skel(mesh, skel_vertices, skel_lines);
 
 	/*
 	 * GUI object needs the mesh object for bone manipulation.

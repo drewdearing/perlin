@@ -2,6 +2,7 @@
 #define BONE_GEOMETRY_H
 
 #include <ostream>
+#include <iostream>
 #include <vector>
 #include <map>
 #include <limits>
@@ -19,26 +20,56 @@ struct BoundingBox {
 };
 
 class Joint {
+public:
+	glm::vec3 offset;
+	int parent_id;
+	int id;
+	Joint(){};
+	Joint(int i) : id(i){}
+};
+
+class Bone {
 private:
-	std::vector<Joint*> children;
-	Joint* parent = NULL;
+	std::vector<Bone*> children;
+	Bone* parent = NULL;
+	Joint* startPoint;
+	Joint* endPoint;
 	glm::vec3 tangent;
 	glm::vec3 normal;
 	glm::vec3 binormal;
 	glm::mat4 rotation = glm::mat4(1.0f);
 	glm::mat4 translation = glm::mat4(1.0f);
 	float length;
-	int id;
 public:
-	Joint(){};
-	void setParent(Joint* p){
+	Bone(){};
+	Bone(Joint* start, Joint* end){
+		setEndpoints(start, end);
+	}
+
+	void setParent(Bone* p){
 		parent = p;
 	}
-	void setChild(Joint* c){
+
+	void setChild(Bone* c){
 		children.push_back(c);
 	}
-	void setTangent(glm::vec3 o){
-		tangent = o;
+
+	Joint* getStartPoint(){
+		return startPoint;
+	}
+
+	Joint* getEndPoint(){
+		return endPoint;
+	}
+
+	void setEndpoints(Joint* start, Joint* end){
+		startPoint = start;
+		endPoint = end;
+		build();
+	}
+
+	void build(){
+		tangent = endPoint->offset;
 		glm::vec3 v = glm::vec3(0, 0, 0);
 		if(tangent[0] < tangent[1]){
 			if(tangent[0] < tangent[2])
@@ -50,7 +81,6 @@ public:
 			v[1] = 1;
 		else
 			v[2] = 1;
-
 		normal = glm::cross(tangent, v);
 		normal /= glm::length(normal);
 		binormal = glm::cross(tangent, normal);
@@ -62,52 +92,89 @@ public:
 			angle = (M_PI/180)*acos(angle);
 			rotation = glm::rotate(rotation, angle, axis);
 		}
+		else{
+			for(int i = 0; i < 3; i++){
+				rotation[i][0] = tangent[i];
+				rotation[i][1] = binormal[i];
+				rotation[i][2] = normal[i];
+			}
+		}
 	}
 	
-	glm::vec4 origin(){
-		glm::vec4 origin = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f) * translation;
-		Joint * temp = parent;
+	glm::vec4 firstEndPoint(){
+		glm::vec4 origin = translation * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		Bone * temp = parent;
 		while(temp != NULL){
-			origin *= temp->rotation
-			origin *= temp->translation;
+			origin = temp->rotation * origin;
+			origin = temp->translation * origin;
 			temp = temp->parent;
 		}
 		return origin;
 	}
 
-	void setID(int i){
-		id = i;
-	}
-	int getID(){
-		return id;
+	glm::vec4 secondEndPoint(){
+		glm::vec4 end = translation * rotation * glm::vec4(0.0f, 0.0f, length, 1.0f);
+		Bone * temp = parent;
+		while(temp != NULL){
+			end = temp->rotation * end;
+			end = temp->translation * end;
+			temp = temp->parent;
+		}
+		return end;
 	}
 };
+
 
 class Skeleton {
 private:
 	Joint* root = NULL;
-	std::vector<Joint *> joints;
+	std::vector<Bone *> bones;
 public:
 	Skeleton(){};
 	Skeleton(Joint* r): root(r){};
 	void setRoot(Joint* r){
 		root = r;
-		joints.push_back(r);
 	}
 
 	bool addJoint(Joint* j, int parent_id){
 		bool found = false;
-		int size = joints.size();
-		for(int i = 0; i < size; i++){
-			if(joints.at(i)->getID() == parent_id){
-				joints.at(i)->setChild(j);
-				j->setParent(joints.at(i));
-				joints.push_back(j);
-				found = true;
-				break;
+		int size = bones.size();
+
+		if(parent_id == 0){
+			Bone* b = new Bone(root, j);
+			bones.push_back(b);
+			found = true;
+		}
+		else{
+			for(int i = 0; i < size; i++){
+				Bone * current = bones.at(i);
+				if(current->getEndPoint()->id == parent_id){
+					Bone* b = new Bone(current->getEndPoint(), j);
+					current->setChild(b);
+					b->setParent(current);
+					bones.push_back(b);
+					found = true;
+					break;
+				}
 			}
 		}
+
 		return found;
+	}
+
+	Bone * getBone(unsigned i){
+		if(i >= 0 && i < bones.size())
+			return bones.at(i);
+		else
+			return NULL;
+	}
+
+	void printSkeleton(){
+		int size = bones.size();
+		for(int i = 0; i < size; i++){
+			Bone * current = bones.at(i);
+			std::cout<<"Bone "<<i<<": "<<current->getStartPoint()->id<<"->"<<current->getEndPoint()->id<<std::endl;
+		}
 	}
 };
 
