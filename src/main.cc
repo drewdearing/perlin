@@ -161,6 +161,9 @@ int main(int argc, char* argv[])
 		else
 			return &non_transparet;
 	};
+	auto line_mesh_data = [&mats]() -> const void* {
+		return mats.model;
+	};
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
@@ -170,6 +173,7 @@ int main(int argc, char* argv[])
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
 	ShaderUniform object_alpha = { "alpha", float_binder, alpha_data };
+	ShaderUniform line_mesh = { "line_mesh", matrix_binder, line_mesh_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -195,6 +199,18 @@ int main(int argc, char* argv[])
 
 	// FIXME: Create the RenderPass objects for bones here.
 	//        Otherwise do whatever you like.
+	RenderDataInput mesh_pass_input;
+	mesh_pass_input.assign(0, "vertex_position", skel_vertices.data(), skel_vertices.size(), 4, GL_FLOAT);
+	mesh_pass_input.assign_index(skel_lines.data(), skel_lines.size(), 2);
+	RenderPass mesh_pass(-1,
+			mesh_pass_input,
+			{vertex_shader, geometry_shader, fragment_shader},
+			{line_mesh, std_view, std_proj, std_light},
+			{ "fragment_color"}
+			);
+
+
+
 
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
@@ -237,6 +253,13 @@ int main(int argc, char* argv[])
 		draw_cylinder = true;
 #endif
 		// FIXME: Draw bones first.
+
+		if(draw_skeleton){
+			mesh_pass.setup();
+			CHECK_GL_ERROR(glDrawElements(GL_LINES, skel_lines.size() * 2, GL_INT, 0));
+		}
+
+
 		// Then draw floor.
 		if (draw_floor) {
 			floor_pass.setup();
