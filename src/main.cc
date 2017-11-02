@@ -42,6 +42,10 @@ const char* line_geometry_shader =
 #include "shaders/line.geom"
 ;
 
+const char* line_fragment_shader =
+#include "shaders/line.frag"
+;
+
 // FIXME: Add more shaders here.
 
 void ErrorCallback(int error, const char* description) {
@@ -208,7 +212,7 @@ int main(int argc, char* argv[])
 	mesh_pass_input.assign_index(skel_lines.data(), skel_lines.size(), 2);
 	RenderPass mesh_pass(-1,
 			mesh_pass_input,
-			{vertex_shader, line_geometry_shader, fragment_shader},
+			{vertex_shader, line_geometry_shader, line_fragment_shader},
 			{line_mesh, std_view, std_proj, std_light},
 			{ "fragment_color"}
 			);
