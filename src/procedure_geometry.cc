@@ -16,7 +16,7 @@ void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3
 // around in the vertex shader to produce a very smooth cylinder.  We only
 // need to send a small number of points.  Controlling the grid size gives a
 // nice wireframe.
-void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices, std::vector<glm::vec2>& skel_lines)
+void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices, std::vector<glm::uvec2>& skel_lines)
 {
 	int index = 0;
 	Bone * temp_bone = mesh.skeleton.getBone(index);

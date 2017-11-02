@@ -38,6 +38,10 @@ const char* floor_fragment_shader =
 #include "shaders/floor.frag"
 ;
 
+const char* line_geometry_shader =
+#include "shaders/line.geom"
+;
+
 // FIXME: Add more shaders here.
 
 void ErrorCallback(int error, const char* description) {
@@ -82,7 +86,7 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
 	std::vector<glm::vec4> skel_vertices;
-	std::vector<glm::vec2> skel_lines;
+	std::vector<glm::uvec2> skel_lines;
 
 	create_floor(floor_vertices, floor_faces);
 
@@ -204,7 +208,7 @@ int main(int argc, char* argv[])
 	mesh_pass_input.assign_index(skel_lines.data(), skel_lines.size(), 2);
 	RenderPass mesh_pass(-1,
 			mesh_pass_input,
-			{vertex_shader, geometry_shader, fragment_shader},
+			{vertex_shader, line_geometry_shader, fragment_shader},
 			{line_mesh, std_view, std_proj, std_light},
 			{ "fragment_color"}
 			);
@@ -256,7 +260,7 @@ int main(int argc, char* argv[])
 
 		if(draw_skeleton){
 			mesh_pass.setup();
-			CHECK_GL_ERROR(glDrawElements(GL_LINES, skel_lines.size() * 2, GL_INT, 0));
+			CHECK_GL_ERROR(glDrawElements(GL_LINES, skel_lines.size() * 2, GL_UNSIGNED_INT, 0));
 		}
 
 
