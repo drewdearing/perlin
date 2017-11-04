@@ -51,23 +51,16 @@ void Mesh::loadpmd(const std::string& fn)
 	glm::vec3 offset;
 	int parent;
 
-	mr.getJoint(joint_id, offset, parent);
-
-	Joint* root = new Joint(joint_id);
-	root->offset = offset;
-	root->parent_id = parent;
-	skeleton.setRoot(root);
-
-	joint_id++;
-
 	while(mr.getJoint(joint_id, offset, parent)){
 		Joint* j = new Joint(joint_id);
 		j->offset = offset;
 		j->parent_id = parent;
-		skeleton.addJoint(j, parent);
+		if(!skeleton.addJoint(j, parent))
+			std::cout<<"WARNING: joint "<< joint_id <<" not added to skeleton."<<std::endl;
 		joint_id++;
 	}
-	
+	std::cout<<"Joints: "<<joint_id<<std::endl;
+	skeleton.printSkeleton();
 }
 
 void Mesh::updateAnimation()

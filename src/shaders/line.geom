@@ -24,7 +24,7 @@ void main() {
 		world_position = gl_in[n].gl_Position;
 		vertex_normal = vs_normal[n];
 		uv_coords = vs_uv[n];
-		gl_Position = projection * view * model * gl_in[n].gl_Position;
+		gl_Position = projection * view * gl_in[n].gl_Position;
 		EmitVertex();
 	}
 	EndPrimitive();

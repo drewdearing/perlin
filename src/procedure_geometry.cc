@@ -27,6 +27,7 @@ void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices, std::vector<
 		skel_vertices.push_back(temp_bone->secondEndPoint());
 		line[1] = skel_vertices.size()-1;
 		skel_lines.push_back(line);
+		std::cout<< "Bone "<<index<<": "<<glm::to_string(skel_vertices.at(line[0]))<<" -> "<<glm::to_string(skel_vertices.at(line[1]))<<std::endl;
 		index++;
 		temp_bone = mesh.skeleton.getBone(index);
 	}

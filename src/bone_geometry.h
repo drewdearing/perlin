@@ -103,23 +103,23 @@ public:
 	}
 	
 	glm::vec4 firstEndPoint(){
-		glm::vec4 origin = translation * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		Bone * temp = parent;
-		while(temp != NULL){
-			origin = temp->rotation * origin;
-			origin = temp->translation * origin;
-			temp = temp->parent;
+		glm::vec4 origin;
+		if(parent == NULL){
+			origin = glm::vec4(startPoint->offset, 1);
+		}
+		else{
+			origin = parent->secondEndPoint();
 		}
 		return origin;
 	}
 
 	glm::vec4 secondEndPoint(){
-		glm::vec4 end = translation * rotation * glm::vec4(0.0f, 0.0f, length, 1.0f);
-		Bone * temp = parent;
-		while(temp != NULL){
-			end = temp->rotation * end;
-			end = temp->translation * end;
-			temp = temp->parent;
+		glm::vec4 end;
+		if(parent == NULL){
+			end = glm::vec4(startPoint->offset+endPoint->offset, 1);
+		}
+		else{
+			end = parent->secondEndPoint() + glm::vec4(tangent, 0);
 		}
 		return end;
 	}
@@ -128,33 +128,47 @@ public:
 
 class Skeleton {
 private:
-	Joint* root = NULL;
+	std::vector<Joint *> roots;
 	std::vector<Bone *> bones;
 public:
 	Skeleton(){};
-	Skeleton(Joint* r): root(r){};
-	void setRoot(Joint* r){
-		root = r;
+
+	Joint* parentIsRoot(int parent_id){
+		Joint* root = NULL;
+		for(unsigned i = 0; i < roots.size(); i++){
+			if(roots.at(i)->id == parent_id){
+				root = roots.at(i);
+				break;
+			}
+		}
+		return root;
 	}
 
 	bool addJoint(Joint* j, int parent_id){
 		bool found = false;
-		int size = bones.size();
-
-		if(parent_id == 0){
-			Bone* b = new Bone(root, j, NULL);
-			bones.push_back(b);
+		
+		if(parent_id == -1){
+			roots.push_back(j);
 			found = true;
 		}
 		else{
-			for(int i = 0; i < size; i++){
-				Bone * current = bones.at(i);
-				if(current->getEndPoint()->id == parent_id){
-					Bone* b = new Bone(current->getEndPoint(), j, current);
-					current->setChild(b);
-					bones.push_back(b);
-					found = true;
-					break;
+			Joint * parentRoot = parentIsRoot(parent_id);
+			if(parentRoot != NULL){
+				Bone* b = new Bone(parentRoot, j, NULL);
+				bones.push_back(b);
+				found = true;
+			}
+			else{
+				int size = bones.size();
+				for(int i = 0; i < size; i++){
+					Bone * current = bones.at(i);
+					if(current->getEndPoint()->id == parent_id){
+						Bone* b = new Bone(current->getEndPoint(), j, current);
+						current->setChild(b);
+						bones.push_back(b);
+						found = true;
+						break;
+					}
 				}
 			}
 		}
@@ -170,10 +184,13 @@ public:
 	}
 
 	void printSkeleton(){
+		std::cout<<"Skeleton"<<std::endl;
+		std::cout<<"Root Joints: "<<roots.size()<<std::endl;
+		std::cout<<"Bones: "<<bones.size()<<std::endl;
 		int size = bones.size();
 		for(int i = 0; i < size; i++){
 			Bone * current = bones.at(i);
-			std::cout<<"Bone "<<i<<": "<<current->getStartPoint()->id<<"->"<<current->getEndPoint()->id<<std::endl;
+			std::cout<<"\nBone "<<i<<": "<<current->getStartPoint()->id<<"->"<<current->getEndPoint()->id<<std::endl;
 		}
 	}
 };

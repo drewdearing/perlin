@@ -4,6 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include "bone_geometry.h"
+#include <glm/gtx/string_cast.hpp>
 
 class LineMesh;
 
