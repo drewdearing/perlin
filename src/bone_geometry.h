@@ -63,6 +63,14 @@ public:
 		return endPoint;
 	}
 
+	glm::vec3 getNormal(){
+		return normal;
+	}
+
+	glm::vec3 getBinormal(){
+		return binormal;
+	}
+
 	void setEndpoints(Joint* start, Joint* end){
 		startPoint = start;
 		endPoint = end;

@@ -46,6 +46,10 @@ const char* line_fragment_shader =
 #include "shaders/line.frag"
 ;
 
+const char* cyl_fragment_shader =
+#include "shaders/cyl.frag"
+;
+
 // FIXME: Add more shaders here.
 
 void ErrorCallback(int error, const char* description) {
@@ -91,6 +95,8 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec3> floor_faces;
 	std::vector<glm::vec4> skel_vertices;
 	std::vector<glm::uvec2> skel_lines;
+	std::vector<glm::vec4> cyl_vertices;
+	std::vector<glm::uvec2> cyl_lines;
 
 	create_floor(floor_vertices, floor_faces);
 
@@ -107,7 +113,7 @@ int main(int argc, char* argv[])
 	mesh_center /= mesh.vertices.size();
 
 
-	create_skel(mesh, skel_vertices, skel_lines);
+	create_skel(mesh, skel_vertices, skel_lines, cyl_vertices, cyl_lines);
 
 	/*
 	 * GUI object needs the mesh object for bone manipulation.
@@ -172,6 +178,9 @@ int main(int argc, char* argv[])
 	auto line_mesh_data = [&mats]() -> const void* {
 		return mats.model;
 	};
+	auto cyl_mesh_data = [&mats]() -> const void* {
+		return mats.model;
+	};
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
@@ -182,6 +191,7 @@ int main(int argc, char* argv[])
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
 	ShaderUniform object_alpha = { "alpha", float_binder, alpha_data };
 	ShaderUniform line_mesh = { "line_mesh", matrix_binder, line_mesh_data };
+	ShaderUniform cyl_mesh = { "cyl_mesh", matrix_binder, cyl_mesh_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -217,8 +227,15 @@ int main(int argc, char* argv[])
 			{ "fragment_color"}
 			);
 
-
-
+	RenderDataInput cyl_pass_input;
+	cyl_pass_input.assign(0, "vertex_position", cyl_vertices.data(), cyl_vertices.size(), 4, GL_FLOAT);
+	cyl_pass_input.assign_index(cyl_lines.data(), cyl_lines.size(), 2);
+	RenderPass cyl_pass(-1,
+			cyl_pass_input,
+			{vertex_shader, line_geometry_shader, cyl_fragment_shader},
+			{cyl_mesh, std_view, std_proj, std_light},
+			{ "fragment_color"}
+			);
 
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
@@ -229,6 +246,7 @@ int main(int argc, char* argv[])
 			{ floor_model, std_view, std_proj, std_light },
 			{ "fragment_color" }
 			);
+
 	float aspect = 0.0f;
 	std::cout << "center = " << mesh.getCenter() << "\n";
 
@@ -256,7 +274,7 @@ int main(int argc, char* argv[])
 
 		int current_bone = gui.getCurrentBone();
 #if 1
-		draw_cylinder = (current_bone != -1 && gui.isTransparent());
+		//draw_cylinder = (current_bone != -1 && gui.isTransparent());
 #else
 		draw_cylinder = true;
 #endif
@@ -267,6 +285,10 @@ int main(int argc, char* argv[])
 			CHECK_GL_ERROR(glDrawElements(GL_LINES, skel_lines.size() * 2, GL_UNSIGNED_INT, 0));
 		}
 
+		if(draw_cylinder){
+			cyl_pass.setup();
+			CHECK_GL_ERROR(glDrawElements(GL_LINES, cyl_lines.size() * 2, GL_UNSIGNED_INT, 0));
+		}
 
 		// Then draw floor.
 		if (draw_floor) {
