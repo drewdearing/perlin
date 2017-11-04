@@ -42,7 +42,8 @@ private:
 	float length;
 public:
 	Bone(){};
-	Bone(Joint* start, Joint* end){
+	Bone(Joint* start, Joint* end, Bone * parent){
+		setParent(parent);
 		setEndpoints(start, end);
 	}
 
@@ -141,7 +142,7 @@ public:
 		int size = bones.size();
 
 		if(parent_id == 0){
-			Bone* b = new Bone(root, j);
+			Bone* b = new Bone(root, j, NULL);
 			bones.push_back(b);
 			found = true;
 		}
@@ -149,9 +150,8 @@ public:
 			for(int i = 0; i < size; i++){
 				Bone * current = bones.at(i);
 				if(current->getEndPoint()->id == parent_id){
-					Bone* b = new Bone(current->getEndPoint(), j);
+					Bone* b = new Bone(current->getEndPoint(), j, current);
 					current->setChild(b);
-					b->setParent(current);
 					bones.push_back(b);
 					found = true;
 					break;
