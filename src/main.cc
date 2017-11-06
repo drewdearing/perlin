@@ -284,7 +284,6 @@ int main(int argc, char* argv[])
 		}
 
 		if(draw_cylinder){
-			std::cout<<"true "<<current_bone<<std::endl;
 			cyl_vertices = (mesh.skeleton.getBone(current_bone))->cylVertices();
 			cyl_pass.updateVBO(0, cyl_vertices.data(), cyl_vertices.size());
 			cyl_pass.setup();

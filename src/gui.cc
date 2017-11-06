@@ -122,12 +122,12 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	for(int i = 0; i < mesh_->getNumberOfBones(); i++){
 		Bone * b = mesh_->skeleton.getBone(i);
 		float t;
-		if(b->intersect(ray_world, nearPlane, t) && t < min_t){
+		if(b->intersect(ray_world, eye_, t) && t < min_t){
 			min_t = t;
 			closest_bone_id = b->getID();
 		}
 	}
-	std::cout<<"current bone: "<<closest_bone_id<<std::endl;
+	//std::cout<<"current bone: "<<closest_bone_id<<std::endl;
 	
 	current_bone_ = closest_bone_id;
 }
