@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
 
 		int current_bone = gui.getCurrentBone();
 #if 1
-		//draw_cylinder = (current_bone != -1 && gui.isTransparent());
+		draw_cylinder = (current_bone != -1 && gui.isTransparent());
 #else
 		draw_cylinder = true;
 #endif
@@ -286,6 +286,8 @@ int main(int argc, char* argv[])
 		}
 
 		if(draw_cylinder){
+			cyl_vertices = (mesh.skeleton.getBone(current_bone))->cylVertices();
+			cyl_pass.updateVBO(0, cyl_vertices.data(), cyl_vertices.size());
 			cyl_pass.setup();
 			CHECK_GL_ERROR(glDrawElements(GL_LINES, cyl_lines.size() * 2, GL_UNSIGNED_INT, 0));
 		}

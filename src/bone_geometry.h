@@ -10,6 +10,7 @@
 #include <mmdadapter.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <math.h> 
+#include "config.h"
 
 struct BoundingBox {
 	BoundingBox()
@@ -30,6 +31,7 @@ public:
 
 class Bone {
 private:
+	unsigned id;
 	std::vector<Bone*> children;
 	Bone* parent = NULL;
 	Joint* startPoint;
@@ -42,9 +44,14 @@ private:
 	float length;
 public:
 	Bone(){};
-	Bone(Joint* start, Joint* end, Bone * parent){
+	Bone(Joint* start, Joint* end, unsigned i, Bone * parent){
+		setID(i);
 		setParent(parent);
 		setEndpoints(start, end);
+	}
+
+	void setID(unsigned i){
+		id = i;
 	}
 
 	void setParent(Bone* p){
@@ -53,6 +60,10 @@ public:
 
 	void setChild(Bone* c){
 		children.push_back(c);
+	}
+
+	unsigned getID(){
+		return id;
 	}
 
 	Joint* getStartPoint(){
@@ -131,6 +142,84 @@ public:
 		}
 		return end;
 	}
+
+	std::vector<glm::vec4> cylVertices(){
+
+		std::vector<glm::vec4> cyl_vertices;
+		glm::vec3 n = (kCylinderRadius/glm::length(normal)) * normal;
+		glm::vec3 b = (kCylinderRadius/glm::length(binormal)) * binormal;
+
+		glm::vec4 fep = firstEndPoint();
+		glm::vec4 sep = secondEndPoint();
+
+		cyl_vertices.push_back(glm::vec4(n, 0) + fep);
+		cyl_vertices.push_back(glm::vec4(-n, 0) + fep);
+		cyl_vertices.push_back(glm::vec4(b, 0) + fep);
+		cyl_vertices.push_back(glm::vec4(-b, 0) + fep);
+
+		cyl_vertices.push_back(glm::vec4(n, 0) + sep);
+		cyl_vertices.push_back(glm::vec4(-n, 0) + sep);
+		cyl_vertices.push_back(glm::vec4(b, 0) + sep);
+		cyl_vertices.push_back(glm::vec4(-b, 0) + sep);
+
+		return cyl_vertices;
+	}
+
+	bool intersect(glm::vec3 ray_world, glm::vec3 eye_, float& t){
+		bool found = false;
+		glm::vec3 normals[4];
+		glm::vec3 points[4][4];
+
+		glm::vec3 n = (kCylinderRadius/glm::length(normal)) * normal;
+		glm::vec3 b = (kCylinderRadius/glm::length(binormal)) * binormal;
+
+		normals[0] = ((kCylinderRadius/sqrtf(2.0f))/glm::length(n+b))*(n+b);
+		normals[1] = ((kCylinderRadius/sqrtf(2.0f))/glm::length(n-b))*(n-b);
+		normals[2] = ((kCylinderRadius/sqrtf(2.0f))/glm::length(-n+b))*(-n-b);
+		normals[3] = ((kCylinderRadius/sqrtf(2.0f))/glm::length(-n-b))*(-n+b);
+
+		std::vector<glm::vec4> cyl_vertices = cylVertices();
+
+		points[0][0] = glm::vec3(cyl_vertices.at(0));
+		points[0][1] = glm::vec3(cyl_vertices.at(2));
+		points[0][2] = glm::vec3(cyl_vertices.at(4));
+		points[0][3] = glm::vec3(cyl_vertices.at(6));
+
+		points[1][0] = glm::vec3(cyl_vertices.at(0));
+		points[1][1] = glm::vec3(cyl_vertices.at(3));
+		points[1][2] = glm::vec3(cyl_vertices.at(4));
+		points[1][3] = glm::vec3(cyl_vertices.at(7));
+
+		points[2][0] = glm::vec3(cyl_vertices.at(1));
+		points[2][1] = glm::vec3(cyl_vertices.at(2));
+		points[2][2] = glm::vec3(cyl_vertices.at(5));
+		points[2][3] = glm::vec3(cyl_vertices.at(6));
+
+		points[3][0] = glm::vec3(cyl_vertices.at(1));
+		points[3][1] = glm::vec3(cyl_vertices.at(3));
+		points[3][2] = glm::vec3(cyl_vertices.at(5));
+		points[3][3] = glm::vec3(cyl_vertices.at(7));
+
+		for(int i = 0; i < 4; i++){
+			if(glm::dot(ray_world, normals[i]) != 0){
+				float d = -glm::dot(points[i][0], normals[i]);
+				float temp_t = -(glm::dot(eye_, normals[i]) + d)/glm::dot(ray_world, normals[i]);
+				glm::vec3 q = eye_ + temp_t * ray_world;
+				if(    glm::length(q-points[i][0]) <= glm::length(points[i][0]-points[i][3])
+					&& glm::length(q-points[i][3]) <= glm::length(points[i][0]-points[i][3])
+					&& glm::length(q-points[i][1]) <= glm::length(points[i][1]-points[i][2])
+					&& glm::length(q-points[i][2]) <= glm::length(points[i][1]-points[i][2]))
+				{
+					found = true;
+					t = temp_t;
+				}
+				if(found)
+					break;
+			}
+		}
+
+		return found;
+	}
 };
 
 
@@ -152,6 +241,10 @@ public:
 		return root;
 	}
 
+	unsigned numBones () const{
+		return bones.size();
+	}
+
 	bool addJoint(Joint* j, int parent_id){
 		bool found = false;
 		
@@ -162,7 +255,7 @@ public:
 		else{
 			Joint * parentRoot = parentIsRoot(parent_id);
 			if(parentRoot != NULL){
-				Bone* b = new Bone(parentRoot, j, NULL);
+				Bone* b = new Bone(parentRoot, j, bones.size(), NULL);
 				bones.push_back(b);
 				found = true;
 			}
@@ -171,7 +264,7 @@ public:
 				for(int i = 0; i < size; i++){
 					Bone * current = bones.at(i);
 					if(current->getEndPoint()->id == parent_id){
-						Bone* b = new Bone(current->getEndPoint(), j, current);
+						Bone* b = new Bone(current->getEndPoint(), j, bones.size(), current);
 						current->setChild(b);
 						bones.push_back(b);
 						found = true;
@@ -220,7 +313,7 @@ struct Mesh {
 	void updateAnimation();
 	int getNumberOfBones() const 
 	{ 
-		return 0;
+		return skeleton.numBones();
 		// FIXME: return number of bones in skeleton
 	}
 	glm::vec3 getCenter() const { return 0.5f * glm::vec3(bounds.min + bounds.max); }

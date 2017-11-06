@@ -30,38 +30,25 @@ void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices,
 		skel_vertices.push_back(temp_bone->secondEndPoint());
 		line[1] = skel_vertices.size()-1;
 		skel_lines.push_back(line);
-		
-		unsigned bone_set = index * 8;
-		glm::vec3 n = (kCylinderRadius/glm::length(temp_bone->getNormal())) * temp_bone->getNormal();
-		glm::vec3 b = (kCylinderRadius/glm::length(temp_bone->getBinormal())) * temp_bone->getBinormal();
-
-		cyl_vertices.push_back(glm::vec4(n, 0) + skel_vertices.at(line[0]));
-		cyl_vertices.push_back(glm::vec4(-n, 0) + skel_vertices.at(line[0]));
-		cyl_vertices.push_back(glm::vec4(b, 0) + skel_vertices.at(line[0]));
-		cyl_vertices.push_back(glm::vec4(-b, 0) + skel_vertices.at(line[0]));
-
-		cyl_vertices.push_back(glm::vec4(n, 0) + skel_vertices.at(line[1]));
-		cyl_vertices.push_back(glm::vec4(-n, 0) + skel_vertices.at(line[1]));
-		cyl_vertices.push_back(glm::vec4(b, 0) + skel_vertices.at(line[1]));
-		cyl_vertices.push_back(glm::vec4(-b, 0) + skel_vertices.at(line[1]));
-
-		cyl_lines.push_back(glm::vec2(bone_set, bone_set + 2));
-		cyl_lines.push_back(glm::vec2(bone_set, bone_set + 3));
-		cyl_lines.push_back(glm::vec2(bone_set + 1, bone_set + 2));
-		cyl_lines.push_back(glm::vec2(bone_set + 1, bone_set + 3));
-
-		cyl_lines.push_back(glm::vec2(bone_set + 4, bone_set + 6));
-		cyl_lines.push_back(glm::vec2(bone_set + 4, bone_set + 7));
-		cyl_lines.push_back(glm::vec2(bone_set + 5, bone_set + 6));
-		cyl_lines.push_back(glm::vec2(bone_set + 5, bone_set + 7));
-
-		cyl_lines.push_back(glm::vec2(bone_set, bone_set + 4));
-		cyl_lines.push_back(glm::vec2(bone_set + 1, bone_set + 5));
-		cyl_lines.push_back(glm::vec2(bone_set + 2, bone_set + 6));
-		cyl_lines.push_back(glm::vec2(bone_set + 3, bone_set + 7));
-
 		//std::cout<< "Bone "<<index<<": "<<glm::to_string(skel_vertices.at(line[0]))<<" -> "<<glm::to_string(skel_vertices.at(line[1]))<<std::endl;
 		index++;
 		temp_bone = mesh.skeleton.getBone(index);
 	}
+
+	//cyl_vertices = (mesh.skeleton.getBone(0))->cylVertices();
+
+	cyl_lines.push_back(glm::vec2(0, 2));
+	cyl_lines.push_back(glm::vec2(0, 3));
+	cyl_lines.push_back(glm::vec2(1, 2));
+	cyl_lines.push_back(glm::vec2(1, 3));
+
+	cyl_lines.push_back(glm::vec2(4, 6));
+	cyl_lines.push_back(glm::vec2(4, 7));
+	cyl_lines.push_back(glm::vec2(5, 6));
+	cyl_lines.push_back(glm::vec2(5, 7));
+
+	cyl_lines.push_back(glm::vec2(0, 4));
+	cyl_lines.push_back(glm::vec2(1, 5));
+	cyl_lines.push_back(glm::vec2(2, 6));
+	cyl_lines.push_back(glm::vec2(3, 7));
 }
