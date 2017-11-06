@@ -111,22 +111,18 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	}
 
 	// FIXME: highlight bones that have been moused over
-	float ray_x = (2.0f * mouse_x) / window_width_ - 1.0f;
-	float ray_y = 1.0f - (2.0f * mouse_y) / window_height_;
+	glm::vec3 nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
+	glm::vec3 farPlane = glm::unProject(glm::vec3(current_x_, current_y_, 1.0), view_matrix_, projection_matrix_, viewport);
 
-	glm::vec4 ray_plane = glm::vec4(ray_x, ray_y, -1.0f, 1.0f);
+	glm::vec3 ray_world = glm::normalize(farPlane-nearPlane);
 
-	glm::vec4 ray_eye = glm::inverse(projection_matrix_)*ray_plane;
-	ray_eye = glm::vec4(ray_eye.x, ray_eye.y, -1.0, 0.0);
-
-	glm::vec3 ray_world = glm::normalize(glm::vec3(glm::inverse(view_matrix_) * ray_eye));
 
 	float min_t = std::numeric_limits<float>::max();
 	int closest_bone_id = -1;
 	for(int i = 0; i < mesh_->getNumberOfBones(); i++){
 		Bone * b = mesh_->skeleton.getBone(i);
 		float t;
-		if(b->intersect(ray_world, eye_, t) && t < min_t){
+		if(b->intersect(ray_world, nearPlane, t) && t < min_t){
 			min_t = t;
 			closest_bone_id = b->getID();
 		}
