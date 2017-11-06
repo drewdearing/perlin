@@ -273,11 +273,9 @@ int main(int argc, char* argv[])
 		mats = gui.getMatrixPointers();
 
 		int current_bone = gui.getCurrentBone();
-#if 1
+
 		draw_cylinder = (current_bone != -1 && gui.isTransparent());
-#else
-		draw_cylinder = true;
-#endif
+
 		// FIXME: Draw bones first.
 
 		if(draw_skeleton){
@@ -286,6 +284,7 @@ int main(int argc, char* argv[])
 		}
 
 		if(draw_cylinder){
+			std::cout<<"true "<<current_bone<<std::endl;
 			cyl_vertices = (mesh.skeleton.getBone(current_bone))->cylVertices();
 			cyl_pass.updateVBO(0, cyl_vertices.data(), cyl_vertices.size());
 			cyl_pass.setup();

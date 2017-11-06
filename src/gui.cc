@@ -122,20 +122,18 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	glm::vec3 ray_world = glm::normalize(glm::vec3(glm::inverse(view_matrix_) * ray_eye));
 
 	float min_t = std::numeric_limits<float>::max();
-	Bone * closest_bone;
 	int closest_bone_id = -1;
 	for(int i = 0; i < mesh_->getNumberOfBones(); i++){
 		Bone * b = mesh_->skeleton.getBone(i);
 		float t;
 		if(b->intersect(ray_world, eye_, t) && t < min_t){
 			min_t = t;
-			closest_bone = b;
 			closest_bone_id = b->getID();
 		}
 	}
 	std::cout<<"current bone: "<<closest_bone_id<<std::endl;
 	
-	setCurrentBone(closest_bone_id);
+	current_bone_ = closest_bone_id;
 }
 
 void GUI::mouseButtonCallback(int button, int action, int mods)
