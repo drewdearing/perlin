@@ -167,16 +167,19 @@ public:
 
 	bool intersect(glm::vec3 ray_world, glm::vec3 eye_, float& t){
 		bool found = false;
-		glm::vec3 normals[4];
-		glm::vec3 points[4][4];
+		glm::vec3 normals[6];
+		glm::vec3 points[6][4];
 
-		glm::vec3 n = (kCylinderRadius/glm::length(normal)) * normal;
-		glm::vec3 b = (kCylinderRadius/glm::length(binormal)) * binormal;
+		glm::vec3 n = glm::normalize(normal);
+		glm::vec3 b = glm::normalize(binormal);
 
-		normals[0] = ((kCylinderRadius/sqrtf(2.0f))/glm::length(n+b))*(n+b);
-		normals[1] = ((kCylinderRadius/sqrtf(2.0f))/glm::length(n-b))*(n-b);
-		normals[2] = ((kCylinderRadius/sqrtf(2.0f))/glm::length(-n+b))*(-n-b);
-		normals[3] = ((kCylinderRadius/sqrtf(2.0f))/glm::length(-n-b))*(-n+b);
+		normals[0] = glm::normalize(n+b);
+		normals[1] = glm::normalize(n-b);
+		normals[2] = glm::normalize(-n-b);
+		normals[3] = glm::normalize(-n+b);
+		normals[4] = glm::normalize(-n+b);
+		normals[5] = glm::normalize(-tangent);
+		normals[6] = glm::normalize(tangent);
 
 		std::vector<glm::vec4> cyl_vertices = cylVertices();
 
@@ -185,39 +188,76 @@ public:
 		points[0][2] = glm::vec3(cyl_vertices.at(4));
 		points[0][3] = glm::vec3(cyl_vertices.at(6));
 
-		points[1][0] = glm::vec3(cyl_vertices.at(0));
-		points[1][1] = glm::vec3(cyl_vertices.at(3));
-		points[1][2] = glm::vec3(cyl_vertices.at(4));
-		points[1][3] = glm::vec3(cyl_vertices.at(7));
+		points[1][0] = glm::vec3(cyl_vertices.at(3));
+		points[1][1] = glm::vec3(cyl_vertices.at(0));
+		points[1][2] = glm::vec3(cyl_vertices.at(7));
+		points[1][3] = glm::vec3(cyl_vertices.at(4));
 
-		points[2][0] = glm::vec3(cyl_vertices.at(1));
-		points[2][1] = glm::vec3(cyl_vertices.at(2));
-		points[2][2] = glm::vec3(cyl_vertices.at(5));
-		points[2][3] = glm::vec3(cyl_vertices.at(6));
+		points[2][0] = glm::vec3(cyl_vertices.at(2));
+		points[2][1] = glm::vec3(cyl_vertices.at(1));
+		points[2][2] = glm::vec3(cyl_vertices.at(6));
+		points[2][3] = glm::vec3(cyl_vertices.at(5));
 
 		points[3][0] = glm::vec3(cyl_vertices.at(1));
 		points[3][1] = glm::vec3(cyl_vertices.at(3));
 		points[3][2] = glm::vec3(cyl_vertices.at(5));
 		points[3][3] = glm::vec3(cyl_vertices.at(7));
 
-		for(int i = 0; i < 4; i++){
+		points[4][0] = glm::vec3(cyl_vertices.at(1));
+		points[4][1] = glm::vec3(cyl_vertices.at(3));
+		points[4][2] = glm::vec3(cyl_vertices.at(5));
+		points[4][3] = glm::vec3(cyl_vertices.at(7));
+
+		points[5][0] = glm::vec3(cyl_vertices.at(3));
+		points[5][1] = glm::vec3(cyl_vertices.at(1));
+		points[5][2] = glm::vec3(cyl_vertices.at(0));
+		points[5][3] = glm::vec3(cyl_vertices.at(2));
+
+		points[5][0] = glm::vec3(cyl_vertices.at(5));
+		points[5][1] = glm::vec3(cyl_vertices.at(7));
+		points[5][2] = glm::vec3(cyl_vertices.at(6));
+		points[5][3] = glm::vec3(cyl_vertices.at(4));
+
+		float min_t = std::numeric_limits<float>::max();
+
+		for(int i = 0; i < 6; i++){
 			if(glm::dot(ray_world, normals[i]) != 0){
+				
 				float d = -glm::dot(points[i][0], normals[i]);
 				float temp_t = -(glm::dot(eye_, normals[i]) + d)/glm::dot(ray_world, normals[i]);
+				
 				glm::vec3 q = eye_ + temp_t * ray_world;
-				if(    glm::length(q-points[i][0]) <= glm::length(points[i][0]-points[i][3])
-					&& glm::length(q-points[i][3]) <= glm::length(points[i][0]-points[i][3])
-					&& glm::length(q-points[i][1]) <= glm::length(points[i][1]-points[i][2])
-					&& glm::length(q-points[i][2]) <= glm::length(points[i][1]-points[i][2]))
-				{
+
+				float l1 = glm::length(points[i][1]-points[i][0]);
+				float l2 = glm::length(points[i][3]-points[i][1]);
+				float l3 = l1;
+				float l4 = l2;
+
+				float l5 = glm::length(q-points[i][0]);
+				float l6 = glm::length(q-points[i][1]);
+				float l7 = glm::length(q-points[i][2]);
+				float l8 = glm::length(q-points[i][3]);
+
+				float s1 = (l5 + l6 + l1)/2.0;
+				float s2 = (l8 + l6 + l2)/2.0;
+				float s3 = (l7 + l8 + l3)/2.0;
+				float s4 = (l7 + l5 + l4)/2.0;
+
+				float area = l1*l2;
+
+				float a1 = sqrtf(s1*(s1-l5)*(s1-l6)*(s1-l1));
+				float a2 = sqrtf(s2*(s2-l8)*(s2-l6)*(s2-l2));
+				float a3 = sqrtf(s3*(s3-l7)*(s3-l8)*(s3-l3));
+				float a4 = sqrtf(s4*(s4-l7)*(s4-l5)*(s4-l4));
+
+				if( temp_t >= 0 && temp_t < min_t && (a1+a2+a3+a4) <= area){
 					found = true;
-					t = temp_t;
+					min_t = temp_t;
 				}
-				if(found)
-					break;
 			}
 		}
 
+		t = min_t;
 		return found;
 	}
 };

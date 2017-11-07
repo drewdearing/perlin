@@ -111,8 +111,8 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	}
 
 	// FIXME: highlight bones that have been moused over
-	glm::vec3 nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
-	glm::vec3 farPlane = glm::unProject(glm::vec3(current_x_, current_y_, 1.0), view_matrix_, projection_matrix_, viewport);
+	nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
+	farPlane = glm::unProject(glm::vec3(current_x_, current_y_, 1.0), view_matrix_, projection_matrix_, viewport);
 
 	glm::vec3 ray_world = glm::normalize(farPlane-nearPlane);
 

@@ -37,6 +37,11 @@ public:
 	const float* getLightPositionPtr() const { return &light_position_[0]; }
 	
 	int getCurrentBone() const { return current_bone_; }
+
+	glm::vec4 getMouseNear() { return glm::vec4(nearPlane, 1); }
+
+	glm::vec4 getMouseFar() { return glm::vec4(farPlane, 1); }
+
 	bool setCurrentBone(int i);
 
 	bool isTransparent() const { return transparent_; }
@@ -59,6 +64,9 @@ private:
 	float rotation_speed_ = 0.02f;
 	float zoom_speed_ = 0.1f;
 	float aspect_;
+
+	glm::vec3 nearPlane;
+	glm::vec3 farPlane;
 
 	glm::vec3 eye_ = glm::vec3(0.0f, 0.1f, camera_distance_);
 	glm::vec3 up_ = glm::vec3(0.0f, 1.0f, 0.0f);

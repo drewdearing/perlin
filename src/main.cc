@@ -50,6 +50,10 @@ const char* cyl_fragment_shader =
 #include "shaders/cyl.frag"
 ;
 
+const char* ray_fragment_shader =
+#include "shaders/ray.frag"
+;
+
 // FIXME: Add more shaders here.
 
 void ErrorCallback(int error, const char* description) {
@@ -97,6 +101,10 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec2> skel_lines;
 	std::vector<glm::vec4> cyl_vertices;
 	std::vector<glm::uvec2> cyl_lines;
+	std::vector<glm::vec4> ray_vertices;
+	std::vector<glm::uvec2> ray_lines;
+	ray_lines.push_back(glm::uvec2(0, 1));
+	
 
 	create_floor(floor_vertices, floor_faces);
 
@@ -181,6 +189,9 @@ int main(int argc, char* argv[])
 	auto cyl_mesh_data = [&mats]() -> const void* {
 		return mats.model;
 	};
+	auto ray_mesh_data = [&mats]() -> const void* {
+		return mats.model;
+	};
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
@@ -192,6 +203,7 @@ int main(int argc, char* argv[])
 	ShaderUniform object_alpha = { "alpha", float_binder, alpha_data };
 	ShaderUniform line_mesh = { "line_mesh", matrix_binder, line_mesh_data };
 	ShaderUniform cyl_mesh = { "cyl_mesh", matrix_binder, cyl_mesh_data };
+	ShaderUniform ray_mesh = { "ray_mesh", matrix_binder, ray_mesh_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -237,6 +249,16 @@ int main(int argc, char* argv[])
 			{ "fragment_color"}
 			);
 
+	RenderDataInput ray_pass_input;
+	ray_pass_input.assign(0, "vertex_position", ray_vertices.data(), ray_vertices.size(), 4, GL_FLOAT);
+	ray_pass_input.assign_index(ray_lines.data(), ray_lines.size(), 2);
+	RenderPass ray_pass(-1,
+			ray_pass_input,
+			{vertex_shader, line_geometry_shader, ray_fragment_shader},
+			{ray_mesh, std_view, std_proj, std_light},
+			{ "fragment_color"}
+			);
+
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
 	floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
@@ -254,6 +276,7 @@ int main(int argc, char* argv[])
 	bool draw_skeleton = true;
 	bool draw_object = true;
 	bool draw_cylinder = true;
+	bool draw_ray = true;
 
 	while (!glfwWindowShouldClose(window)) {
 		// Setup some basic window stuff.
@@ -288,6 +311,15 @@ int main(int argc, char* argv[])
 			cyl_pass.updateVBO(0, cyl_vertices.data(), cyl_vertices.size());
 			cyl_pass.setup();
 			CHECK_GL_ERROR(glDrawElements(GL_LINES, cyl_lines.size() * 2, GL_UNSIGNED_INT, 0));
+		}
+
+		if(draw_ray){
+			ray_vertices.clear();
+			ray_vertices.push_back(gui.getMouseNear());
+			ray_vertices.push_back(gui.getMouseFar());
+			ray_pass.updateVBO(0, ray_vertices.data(), ray_vertices.size());
+			ray_pass.setup();
+			CHECK_GL_ERROR(glDrawElements(GL_LINES, ray_lines.size() * 2, GL_UNSIGNED_INT, 0));
 		}
 
 		// Then draw floor.
