@@ -233,24 +233,15 @@ public:
 				float l3 = l1;
 				float l4 = l2;
 
-				float l5 = glm::length(q-points[i][0]);
-				float l6 = glm::length(q-points[i][1]);
-				float l7 = glm::length(q-points[i][2]);
-				float l8 = glm::length(q-points[i][3]);
-
-				float s1 = (l5 + l6 + l1)/2.0;
-				float s2 = (l8 + l6 + l2)/2.0;
-				float s3 = (l7 + l8 + l3)/2.0;
-				float s4 = (l7 + l5 + l4)/2.0;
-
 				float area = l1*l2;
 
-				float a1 = sqrtf(s1*(s1-l5)*(s1-l6)*(s1-l1));
-				float a2 = sqrtf(s2*(s2-l8)*(s2-l6)*(s2-l2));
-				float a3 = sqrtf(s3*(s3-l7)*(s3-l8)*(s3-l3));
-				float a4 = sqrtf(s4*(s4-l7)*(s4-l5)*(s4-l4));
+				//TODO PLS FIX THE BARYCENTRIC TRIANGTLE AREAS
+				float a1 = glm::dot(glm::cross(points[i][2]-points[i][3], q-points[i][3]), normals[i]); 
+				float a2 = glm::dot(glm::cross(points[i][0]-points[i][2], q-points[i][2]), normals[i]);
+				float a3 = glm::dot(glm::cross(points[i][1]-points[i][0], q-points[i][0]), normals[i]);
+				float a4 = glm::dot(glm::cross(points[i][3]-points[i][1], q-points[i][1]), normals[i]);
 
-				if( temp_t >= 0 && temp_t < min_t && (a1+a2+a3+a4) <= area){
+				if( temp_t >= 0 && temp_t < min_t && (a1+a2+a3+a4) == area){
 					found = true;
 					min_t = temp_t;
 				}
