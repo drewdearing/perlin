@@ -166,12 +166,30 @@ public:
 		return cyl_vertices;
 	}
 
+	std::vector<glm::vec4> normVertices(){
+		std::vector<glm::vec4> norm_vertices;
+		glm::vec3 n = (2.5f/glm::length(normal)) * normal;
+		glm::vec4 fep = firstEndPoint();
+		norm_vertices.push_back(fep);
+		norm_vertices.push_back(glm::vec4(n, 0) + fep);
+		return norm_vertices;
+	}
+
+	std::vector<glm::vec4> binormVertices(){
+		std::vector<glm::vec4> binorm_vertices;
+		glm::vec3 b = (2.5f/glm::length(binormal)) * binormal;
+		glm::vec4 fep = firstEndPoint();
+		binorm_vertices.push_back(fep);
+		binorm_vertices.push_back(glm::vec4(b, 0) + fep);
+		return binorm_vertices;
+	}
+
 	bool intersect(glm::vec3 ray_world, glm::vec3 eye_, float& t){
 		bool found = false;
 		float min_t = std::numeric_limits<float>::max();
 		glm::vec3 normals[6];
 		glm::vec3 points[6][4];
-		
+
 		std::vector<glm::vec4> cyl_vertices = cylVertices();
 
 		glm::vec3 n = glm::normalize(normal);
