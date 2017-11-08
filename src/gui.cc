@@ -114,7 +114,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
 	farPlane = glm::unProject(glm::vec3(current_x_, current_y_, 1.0), view_matrix_, projection_matrix_, viewport);
 
-	glm::vec3 ray_world = glm::normalize(farPlane-nearPlane);
+	glm::vec3 ray_world = glm::normalize(nearPlane-eye_);
 
 
 	float min_t = std::numeric_limits<float>::max();
@@ -127,9 +127,10 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 			closest_bone_id = b->getID();
 		}
 	}
-	//std::cout<<"current bone: "<<closest_bone_id<<std::endl;
+	std::cout<<"current bone: "<<closest_bone_id<<std::endl;
 	
 	current_bone_ = closest_bone_id;
+	intersect = eye_ + min_t * ray_world;
 }
 
 void GUI::mouseButtonCallback(int button, int action, int mods)

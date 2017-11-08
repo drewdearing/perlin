@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <glm/gtx/io.hpp>
 #include <glm/gtx/transform.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 /*
  * For debugging purpose.

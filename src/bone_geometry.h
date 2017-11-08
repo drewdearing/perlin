@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <mmdadapter.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <math.h> 
 #include "config.h"
 
@@ -167,8 +168,12 @@ public:
 
 	bool intersect(glm::vec3 ray_world, glm::vec3 eye_, float& t){
 		bool found = false;
+		float min_t = std::numeric_limits<float>::max();
 		glm::vec3 normals[6];
 		glm::vec3 points[6][4];
+
+		std::cout<<"start"<<std::endl;
+		std::vector<glm::vec4> cyl_vertices = cylVertices();
 
 		glm::vec3 n = glm::normalize(normal);
 		glm::vec3 b = glm::normalize(binormal);
@@ -177,77 +182,81 @@ public:
 		normals[1] = glm::normalize(n-b);
 		normals[2] = glm::normalize(-n-b);
 		normals[3] = glm::normalize(-n+b);
-		normals[4] = glm::normalize(-n+b);
-		normals[5] = glm::normalize(-tangent);
-		normals[6] = glm::normalize(tangent);
+		normals[4] = glm::normalize(-tangent);
+		normals[5] = glm::normalize(tangent);
 
-		std::vector<glm::vec4> cyl_vertices = cylVertices();
-
-		points[0][0] = glm::vec3(cyl_vertices.at(0));
+		points[0][0] = glm::vec3(cyl_vertices.at(0)); //towards
 		points[0][1] = glm::vec3(cyl_vertices.at(2));
 		points[0][2] = glm::vec3(cyl_vertices.at(4));
 		points[0][3] = glm::vec3(cyl_vertices.at(6));
 
-		points[1][0] = glm::vec3(cyl_vertices.at(3));
+		points[1][0] = glm::vec3(cyl_vertices.at(3)); //left
 		points[1][1] = glm::vec3(cyl_vertices.at(0));
 		points[1][2] = glm::vec3(cyl_vertices.at(7));
 		points[1][3] = glm::vec3(cyl_vertices.at(4));
 
-		points[2][0] = glm::vec3(cyl_vertices.at(2));
+		points[2][0] = glm::vec3(cyl_vertices.at(2)); //right
 		points[2][1] = glm::vec3(cyl_vertices.at(1));
 		points[2][2] = glm::vec3(cyl_vertices.at(6));
 		points[2][3] = glm::vec3(cyl_vertices.at(5));
 
-		points[3][0] = glm::vec3(cyl_vertices.at(1));
+		points[3][0] = glm::vec3(cyl_vertices.at(1)); //back
 		points[3][1] = glm::vec3(cyl_vertices.at(3));
 		points[3][2] = glm::vec3(cyl_vertices.at(5));
 		points[3][3] = glm::vec3(cyl_vertices.at(7));
 
-		points[4][0] = glm::vec3(cyl_vertices.at(1));
-		points[4][1] = glm::vec3(cyl_vertices.at(3));
-		points[4][2] = glm::vec3(cyl_vertices.at(5));
-		points[4][3] = glm::vec3(cyl_vertices.at(7));
+		points[4][0] = glm::vec3(cyl_vertices.at(3)); //top
+		points[4][1] = glm::vec3(cyl_vertices.at(1));
+		points[4][2] = glm::vec3(cyl_vertices.at(0));
+		points[4][3] = glm::vec3(cyl_vertices.at(2));
 
-		points[5][0] = glm::vec3(cyl_vertices.at(3));
-		points[5][1] = glm::vec3(cyl_vertices.at(1));
-		points[5][2] = glm::vec3(cyl_vertices.at(0));
-		points[5][3] = glm::vec3(cyl_vertices.at(2));
-
-		points[5][0] = glm::vec3(cyl_vertices.at(5));
+		points[5][0] = glm::vec3(cyl_vertices.at(5)); //bottom
 		points[5][1] = glm::vec3(cyl_vertices.at(7));
 		points[5][2] = glm::vec3(cyl_vertices.at(6));
 		points[5][3] = glm::vec3(cyl_vertices.at(4));
 
-		float min_t = std::numeric_limits<float>::max();
-
 		for(int i = 0; i < 6; i++){
-			if(glm::dot(ray_world, normals[i]) != 0){
-				
-				float d = -glm::dot(points[i][0], normals[i]);
-				float temp_t = -(glm::dot(eye_, normals[i]) + d)/glm::dot(ray_world, normals[i]);
+			glm::vec3 p0 = points[i][0];
+			glm::vec3 p1 = points[i][1];
+			glm::vec3 p2 = points[i][2];
+			glm::vec3 p3 = points[i][2];
+
+			glm::vec3 normal = normals[i];
+			float d = glm::dot(normal, p0);
+			float g = glm::dot(p1-p0, glm::cross(ray_world, p2-p0));
+			float notParallel = glm::dot(normal, ray_world);
+			float lineInt = glm::dot(p2-p0, glm::cross(eye_ - p0, p1-p0))/g;
+
+			if(notParallel != 0 && lineInt > 0.00000001){
+
+				float temp_t = (d - glm::dot(normal, eye_)) / notParallel;
 				
 				glm::vec3 q = eye_ + temp_t * ray_world;
 
-				float l1 = glm::length(points[i][1]-points[i][0]);
-				float l2 = glm::length(points[i][3]-points[i][1]);
-				float l3 = l1;
-				float l4 = l2;
+				float min_x = std::min(p0[0], std::min(p1[0],p2[0]));
+				float min_y = std::min(p0[1], std::min(p1[1],p2[1]));
+				float min_z = std::min(p0[2], std::min(p1[2],p2[2]));
+				float max_x = std::max(p0[0], std::max(p1[0],p2[0]));
+				float max_y = std::max(p0[1], std::max(p1[1],p2[1]));
+				float max_z = std::max(p0[2], std::max(p1[2],p2[2]));
 
-				float area = l1*l2;
 
-				//TODO PLS FIX THE BARYCENTRIC TRIANGTLE AREAS
-				float a1 = glm::dot(glm::cross(points[i][2]-points[i][3], q-points[i][3]), normals[i]); 
-				float a2 = glm::dot(glm::cross(points[i][0]-points[i][2], q-points[i][2]), normals[i]);
-				float a3 = glm::dot(glm::cross(points[i][1]-points[i][0], q-points[i][0]), normals[i]);
-				float a4 = glm::dot(glm::cross(points[i][3]-points[i][1], q-points[i][1]), normals[i]);
-
-				if( temp_t >= 0 && temp_t < min_t && (a1+a2+a3+a4) == area){
+				if( temp_t >= 0.00000001
+					&& temp_t < min_t
+					&& q[0] >= min_x
+					&& q[0] <= max_x
+					&& q[1] >= min_y
+					&& q[1] <= max_y
+					&& q[2] >= min_z
+					&& q[2] <= max_z
+					)
+				{
 					found = true;
 					min_t = temp_t;
 				}
 			}
 		}
-
+		
 		t = min_t;
 		return found;
 	}

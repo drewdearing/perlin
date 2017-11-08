@@ -38,9 +38,10 @@ public:
 	
 	int getCurrentBone() const { return current_bone_; }
 
-	glm::vec4 getMouseNear() { return glm::vec4(nearPlane, 1); }
+	glm::vec4 getMouseNear() { return glm::vec4(center_, 1); }
 
-	glm::vec4 getMouseFar() { return glm::vec4(farPlane, 1); }
+	glm::vec4 getMouseFar() { return glm::vec4(intersect, 1); }
+
 
 	bool setCurrentBone(int i);
 
@@ -67,6 +68,7 @@ private:
 
 	glm::vec3 nearPlane;
 	glm::vec3 farPlane;
+	glm::vec3 intersect;
 
 	glm::vec3 eye_ = glm::vec3(0.0f, 0.1f, camera_distance_);
 	glm::vec3 up_ = glm::vec3(0.0f, 1.0f, 0.0f);
