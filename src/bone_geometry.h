@@ -112,15 +112,16 @@ public:
 			glm::vec3 axis = glm::cross(parent->tangent, tangent);
 			float angle = glm::dot(parent->tangent, tangent)/(parent->length*length);
 			angle = (M_PI/180)*acos(angle);
-			deformed = glm::rotate(deformed, angle, axis);
+			rotation = glm::rotate(rotation, angle, axis);
+			deformed = rotation;
 		}
 		else{
 			for(int i = 0; i < 3; i++){
 				rotation[i][0] = tangent[i];
 				rotation[i][1] = binormal[i];
 				rotation[i][2] = normal[i];
-				deformed = rotation;
 			}
+			deformed = rotation;
 		}
 	}
 	

@@ -190,6 +190,7 @@ int main(int argc, char* argv[])
 		else
 			return &non_transparet;
 	};
+	glm::mat4 mesh_model_matrix = glm::mat4(1.0f);
 	auto line_mesh_data = [&mats]() -> const void* {
 		return mats.model;
 	};
@@ -211,10 +212,10 @@ int main(int argc, char* argv[])
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
 	ShaderUniform object_alpha = { "alpha", float_binder, alpha_data };
-	ShaderUniform line_mesh = { "line_mesh", matrix_binder, line_mesh_data };
-	ShaderUniform cyl_mesh = { "cyl_mesh", matrix_binder, cyl_mesh_data };
-	ShaderUniform norm_mesh = { "norm_mesh", matrix_binder, norm_mesh_data };
-	ShaderUniform binorm_mesh = { "binorm_mesh", matrix_binder, binorm_mesh_data };
+	ShaderUniform line_mesh = { "line_mesh", bone_matrix_binder, line_mesh_data };
+	ShaderUniform cyl_mesh = { "cyl_mesh", bone_matrix_binder, cyl_mesh_data };
+	ShaderUniform norm_mesh = { "norm_mesh", bone_matrix_binder, norm_mesh_data };
+	ShaderUniform binorm_mesh = { "binorm_mesh", bone_matrix_binder, binorm_mesh_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -246,7 +247,7 @@ int main(int argc, char* argv[])
 	RenderPass mesh_pass(-1,
 			mesh_pass_input,
 			{vertex_shader, line_geometry_shader, line_fragment_shader},
-			{line_mesh, std_view, std_proj, std_light},
+			{std_model, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -256,7 +257,7 @@ int main(int argc, char* argv[])
 	RenderPass cyl_pass(-1,
 			cyl_pass_input,
 			{vertex_shader, line_geometry_shader, cyl_fragment_shader},
-			{cyl_mesh, std_view, std_proj, std_light},
+			{std_model, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -266,7 +267,7 @@ int main(int argc, char* argv[])
 	RenderPass norm_pass(-1,
 			norm_pass_input,
 			{vertex_shader, line_geometry_shader, norm_fragment_shader},
-			{norm_mesh, std_view, std_proj, std_light},
+			{std_model, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -276,7 +277,7 @@ int main(int argc, char* argv[])
 	RenderPass binorm_pass(-1,
 			binorm_pass_input,
 			{vertex_shader, line_geometry_shader, binorm_fragment_shader},
-			{binorm_mesh, std_view, std_proj, std_light},
+			{std_model, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
