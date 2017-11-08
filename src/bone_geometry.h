@@ -287,11 +287,13 @@ public:
 	/* ->Convert the drag direction into a vector in world coordinates
 	 * ->Take its cross product with the look direction
 	 * ->Rotate all basis vectors (deformed[]) of the bone 
-	 * about this axis by rotation_speed radians
+	 *   about this axis by rotation_speed radians
 	 */
 
 	void applyRotation(int delta_x, int delta_y, float rotation_speed){
-		deformed = glm::rotate(deformed, rotation_speed, glm::vec3(0, 1, 0));
+
+		//current hard-coded to rotate along x and y axis. change it later, no shiet
+		deformed = glm::rotate(deformed, rotation_speed, glm::normalize(glm::vec3(delta_x, delta_y, 0)));
 		glm::vec4 temp = deformed * glm::vec4(tangent.x, tangent.y, tangent.z, 0);
 		tangent = glm::vec3(temp.x, temp.y, temp.z);
 	}	
