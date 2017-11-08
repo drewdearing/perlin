@@ -253,12 +253,12 @@ public:
 				
 				glm::vec3 q = eye_ + temp_t * ray_world;
 
-				float min_x = std::min(p0[0], std::min(p1[0],p2[0]));
-				float min_y = std::min(p0[1], std::min(p1[1],p2[1]));
-				float min_z = std::min(p0[2], std::min(p1[2],p2[2]));
-				float max_x = std::max(p0[0], std::max(p1[0],p2[0]));
-				float max_y = std::max(p0[1], std::max(p1[1],p2[1]));
-				float max_z = std::max(p0[2], std::max(p1[2],p2[2]));
+				float min_x = std::min(p0[0], std::min(p1[0], std::min(p2[0], p3[0])));
+				float min_y = std::min(p0[1], std::min(p1[1], std::min(p2[1], p3[1])));
+				float min_z = std::min(p0[2], std::min(p1[2], std::min(p2[2], p3[2])));
+				float max_x = std::max(p0[0], std::max(p1[0], std::max(p2[0], p3[0])));
+				float max_y = std::max(p0[1], std::max(p1[1], std::max(p2[1], p3[1])));
+				float max_z = std::max(p0[2], std::max(p1[2], std::max(p2[2], p3[2])));
 
 
 				if( temp_t >= 0.00000001
@@ -291,12 +291,19 @@ public:
 	 *   about this axis by rotation_speed radians
 	 */
 
-	void applyRotation(int delta_x, int delta_y, float rotation_speed){
+	void applyRotation(float rotation_speed, glm::vec3 axis){
 
 		//current hard-coded to rotate along x and y axis. change it later, no shiet
-		deformed = glm::rotate(deformed, rotation_speed, glm::normalize(glm::vec3(delta_x, delta_y, 0)));
+		deformed = glm::rotate(deformed, rotation_speed, axis);
 		glm::vec4 temp = deformed * glm::vec4(tangent.x, tangent.y, tangent.z, 0);
-		tangent = glm::vec3(temp.x, temp.y, temp.z);
+		glm::vec4 temp_norm = deformed * glm::vec4(normal.x, normal.y, normal.z, 0);
+		glm::vec4 temp_binormal = deformed * glm::vec4(binormal.x, binormal.y, binormal.z, 0);
+		tangent = glm::vec3(temp);
+		normal = glm::vec3(temp_norm);
+		binormal = glm::vec3(temp_binormal);
+		for(unsigned i = 0; i < children.size(); i++){
+			children.at(i)->applyRotation(rotation_speed, axis);
+		}
 	}	
 };
 

@@ -66,8 +66,6 @@ private:
 	float zoom_speed_ = 0.1f;
 	float aspect_;
 
-	glm::vec3 nearPlane;
-	glm::vec3 farPlane;
 	glm::vec3 intersect;
 
 	glm::vec3 eye_ = glm::vec3(0.0f, 0.1f, camera_distance_);

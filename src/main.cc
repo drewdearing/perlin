@@ -113,6 +113,21 @@ int main(int argc, char* argv[])
 	norm_lines.push_back(glm::uvec2(0, 1));
 	binorm_lines.push_back(glm::uvec2(0, 1));
 
+	cyl_lines.push_back(glm::vec2(0, 2));
+	cyl_lines.push_back(glm::vec2(0, 3));
+	cyl_lines.push_back(glm::vec2(1, 2));
+	cyl_lines.push_back(glm::vec2(1, 3));
+
+	cyl_lines.push_back(glm::vec2(4, 6));
+	cyl_lines.push_back(glm::vec2(4, 7));
+	cyl_lines.push_back(glm::vec2(5, 6));
+	cyl_lines.push_back(glm::vec2(5, 7));
+
+	cyl_lines.push_back(glm::vec2(0, 4));
+	cyl_lines.push_back(glm::vec2(1, 5));
+	cyl_lines.push_back(glm::vec2(2, 6));
+	cyl_lines.push_back(glm::vec2(3, 7));
+
 	create_floor(floor_vertices, floor_faces);
 
 	// FIXME: add code to create bone and cylinder geometry
@@ -128,7 +143,7 @@ int main(int argc, char* argv[])
 	mesh_center /= mesh.vertices.size();
 
 
-	create_skel(mesh, skel_vertices, skel_lines, cyl_vertices, cyl_lines);
+	create_skel(mesh, skel_vertices, skel_lines);
 
 	/*
 	 * GUI object needs the mesh object for bone manipulation.
@@ -247,7 +262,7 @@ int main(int argc, char* argv[])
 	RenderPass mesh_pass(-1,
 			mesh_pass_input,
 			{vertex_shader, line_geometry_shader, line_fragment_shader},
-			{std_model, std_view, std_proj, std_light, std_camera, object_alpha},
+			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -257,7 +272,7 @@ int main(int argc, char* argv[])
 	RenderPass cyl_pass(-1,
 			cyl_pass_input,
 			{vertex_shader, line_geometry_shader, cyl_fragment_shader},
-			{std_model, std_view, std_proj, std_light, std_camera, object_alpha},
+			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -267,7 +282,7 @@ int main(int argc, char* argv[])
 	RenderPass norm_pass(-1,
 			norm_pass_input,
 			{vertex_shader, line_geometry_shader, norm_fragment_shader},
-			{std_model, std_view, std_proj, std_light, std_camera, object_alpha},
+			{norm_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -277,7 +292,7 @@ int main(int argc, char* argv[])
 	RenderPass binorm_pass(-1,
 			binorm_pass_input,
 			{vertex_shader, line_geometry_shader, binorm_fragment_shader},
-			{std_model, std_view, std_proj, std_light, std_camera, object_alpha},
+			{binorm_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -323,6 +338,10 @@ int main(int argc, char* argv[])
 		// FIXME: Draw bones first.
 
 		if(draw_skeleton){
+			skel_vertices.clear();
+			skel_lines.clear();
+			create_skel(mesh, skel_vertices, skel_lines);
+			mesh_pass.updateVBO(0, skel_vertices.data(), skel_vertices.size());
 			mesh_pass.setup();
 			CHECK_GL_ERROR(glDrawElements(GL_LINES, skel_lines.size() * 2, GL_UNSIGNED_INT, 0));
 		}

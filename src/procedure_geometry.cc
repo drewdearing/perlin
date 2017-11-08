@@ -17,9 +17,7 @@ void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3
 // need to send a small number of points.  Controlling the grid size gives a
 // nice wireframe.
 void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices,
-				 std::vector<glm::uvec2>& skel_lines,
-				 std::vector<glm::vec4>& cyl_vertices,
-				 std::vector<glm::uvec2>& cyl_lines)
+				 std::vector<glm::uvec2>& skel_lines)
 {
 	int index = 0;
 	Bone * temp_bone = mesh.skeleton.getBone(index);
@@ -34,21 +32,4 @@ void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices,
 		index++;
 		temp_bone = mesh.skeleton.getBone(index);
 	}
-
-	//cyl_vertices = (mesh.skeleton.getBone(0))->cylVertices();
-
-	cyl_lines.push_back(glm::vec2(0, 2));
-	cyl_lines.push_back(glm::vec2(0, 3));
-	cyl_lines.push_back(glm::vec2(1, 2));
-	cyl_lines.push_back(glm::vec2(1, 3));
-
-	cyl_lines.push_back(glm::vec2(4, 6));
-	cyl_lines.push_back(glm::vec2(4, 7));
-	cyl_lines.push_back(glm::vec2(5, 6));
-	cyl_lines.push_back(glm::vec2(5, 7));
-
-	cyl_lines.push_back(glm::vec2(0, 4));
-	cyl_lines.push_back(glm::vec2(1, 5));
-	cyl_lines.push_back(glm::vec2(2, 6));
-	cyl_lines.push_back(glm::vec2(3, 7));
 }

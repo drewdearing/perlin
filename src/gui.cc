@@ -95,6 +95,9 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	bool drag_camera = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_RIGHT;
 	bool drag_bone = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT;
 
+	glm::vec3 nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
+	glm::vec3 ray_world = glm::normalize(nearPlane-eye_);
+
 	if (drag_camera) {
 		glm::vec3 axis = glm::normalize(
 				orientation_ *
@@ -107,13 +110,11 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		look_ = glm::column(orientation_, 2);
 	} else if (drag_bone && current_bone_ != -1) {
 		Bone* bone2Move = mesh_->skeleton.getBone(current_bone_);
-		bone2Move -> applyRotation(delta_x, delta_y, rotation_speed_);
+		bone2Move -> applyRotation(rotation_speed_/60, ray_world);
 		return ;
 	}
 
 	// FIXME: highlight bones that have been moused over
-	nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
-	glm::vec3 ray_world = glm::normalize(nearPlane-eye_);
 
 	float min_t = std::numeric_limits<float>::max();
 	int closest_bone_id = -1;
