@@ -171,8 +171,7 @@ public:
 		float min_t = std::numeric_limits<float>::max();
 		glm::vec3 normals[6];
 		glm::vec3 points[6][4];
-
-		std::cout<<"start"<<std::endl;
+		
 		std::vector<glm::vec4> cyl_vertices = cylVertices();
 
 		glm::vec3 n = glm::normalize(normal);
@@ -185,32 +184,32 @@ public:
 		normals[4] = glm::normalize(-tangent);
 		normals[5] = glm::normalize(tangent);
 
-		points[0][0] = glm::vec3(cyl_vertices.at(0)); //towards
+		points[0][0] = glm::vec3(cyl_vertices.at(0));
 		points[0][1] = glm::vec3(cyl_vertices.at(2));
 		points[0][2] = glm::vec3(cyl_vertices.at(4));
 		points[0][3] = glm::vec3(cyl_vertices.at(6));
 
-		points[1][0] = glm::vec3(cyl_vertices.at(3)); //left
+		points[1][0] = glm::vec3(cyl_vertices.at(3));
 		points[1][1] = glm::vec3(cyl_vertices.at(0));
 		points[1][2] = glm::vec3(cyl_vertices.at(7));
 		points[1][3] = glm::vec3(cyl_vertices.at(4));
 
-		points[2][0] = glm::vec3(cyl_vertices.at(2)); //right
+		points[2][0] = glm::vec3(cyl_vertices.at(2));
 		points[2][1] = glm::vec3(cyl_vertices.at(1));
 		points[2][2] = glm::vec3(cyl_vertices.at(6));
 		points[2][3] = glm::vec3(cyl_vertices.at(5));
 
-		points[3][0] = glm::vec3(cyl_vertices.at(1)); //back
+		points[3][0] = glm::vec3(cyl_vertices.at(1));
 		points[3][1] = glm::vec3(cyl_vertices.at(3));
 		points[3][2] = glm::vec3(cyl_vertices.at(5));
 		points[3][3] = glm::vec3(cyl_vertices.at(7));
 
-		points[4][0] = glm::vec3(cyl_vertices.at(3)); //top
+		points[4][0] = glm::vec3(cyl_vertices.at(3));
 		points[4][1] = glm::vec3(cyl_vertices.at(1));
 		points[4][2] = glm::vec3(cyl_vertices.at(0));
 		points[4][3] = glm::vec3(cyl_vertices.at(2));
 
-		points[5][0] = glm::vec3(cyl_vertices.at(5)); //bottom
+		points[5][0] = glm::vec3(cyl_vertices.at(5));
 		points[5][1] = glm::vec3(cyl_vertices.at(7));
 		points[5][2] = glm::vec3(cyl_vertices.at(6));
 		points[5][3] = glm::vec3(cyl_vertices.at(4));
@@ -256,7 +255,7 @@ public:
 				}
 			}
 		}
-		
+
 		t = min_t;
 		return found;
 	}

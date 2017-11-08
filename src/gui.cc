@@ -112,10 +112,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 
 	// FIXME: highlight bones that have been moused over
 	nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
-	farPlane = glm::unProject(glm::vec3(current_x_, current_y_, 1.0), view_matrix_, projection_matrix_, viewport);
-
 	glm::vec3 ray_world = glm::normalize(nearPlane-eye_);
-
 
 	float min_t = std::numeric_limits<float>::max();
 	int closest_bone_id = -1;
