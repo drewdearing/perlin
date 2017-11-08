@@ -41,6 +41,7 @@ private:
 	glm::vec3 normal;
 	glm::vec3 binormal;
 	glm::mat4 rotation = glm::mat4(1.0f);
+	glm::mat4 deformed = glm::mat4(1.0f);
 	glm::mat4 translation = glm::mat4(1.0f);
 	float length;
 public:
@@ -111,13 +112,14 @@ public:
 			glm::vec3 axis = glm::cross(parent->tangent, tangent);
 			float angle = glm::dot(parent->tangent, tangent)/(parent->length*length);
 			angle = (M_PI/180)*acos(angle);
-			rotation = glm::rotate(rotation, angle, axis);
+			deformed = glm::rotate(deformed, angle, axis);
 		}
 		else{
 			for(int i = 0; i < 3; i++){
 				rotation[i][0] = tangent[i];
 				rotation[i][1] = binormal[i];
 				rotation[i][2] = normal[i];
+				deformed = rotation;
 			}
 		}
 	}
@@ -277,6 +279,22 @@ public:
 		t = min_t;
 		return found;
 	}
+
+	/***********************
+	 * Manipulate the bone *
+	 ***********************/
+
+	/* ->Convert the drag direction into a vector in world coordinates
+	 * ->Take its cross product with the look direction
+	 * ->Rotate all basis vectors (deformed[]) of the bone 
+	 * about this axis by rotation_speed radians
+	 */
+
+	void applyRotation(int delta_x, int delta_y, float rotation_speed){
+		deformed = glm::rotate(deformed, rotation_speed, glm::vec3(0, 1, 0));
+		glm::vec4 temp = deformed * glm::vec4(tangent.x, tangent.y, tangent.z, 0);
+		tangent = glm::vec3(temp.x, temp.y, temp.z);
+	}	
 };
 
 

@@ -106,7 +106,10 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		up_ = glm::column(orientation_, 1);
 		look_ = glm::column(orientation_, 2);
 	} else if (drag_bone && current_bone_ != -1) {
+		// std::cout << "Dragging: Bone #" << current_bone_ << std::endl;
 		// FIXME: Handle bone rotation
+		Bone* bone2Move = mesh_->skeleton.getBone(current_bone_);
+		bone2Move -> applyRotation(delta_x, delta_y, rotation_speed_);
 		return ;
 	}
 
@@ -124,7 +127,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 			closest_bone_id = b->getID();
 		}
 	}
-	std::cout<<"current bone: "<<closest_bone_id<<std::endl;
+	//std::cout<<"current bone: "<<closest_bone_id<<std::endl;
 	
 	current_bone_ = closest_bone_id;
 	intersect = eye_ + min_t * ray_world;
