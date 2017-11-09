@@ -255,9 +255,7 @@ public:
 			if(notParallel != 0 && lineInt > 0.00000001){
 
 				float temp_t = (d - glm::dot(normal, eye_)) / notParallel;
-				if(temp_t < min_t)
-					min_t = temp_t;
-				
+
 				glm::vec3 q = eye_ + temp_t * ray_world;
 
 				float min_x = std::min(p0[0], std::min(p1[0], std::min(p2[0], p3[0])));
@@ -269,6 +267,7 @@ public:
 
 
 				if( temp_t >= 0.00000001
+					&& temp_t < min_t
 					&& q[0] >= min_x
 					&& q[0] <= max_x
 					&& q[1] >= min_y
@@ -278,6 +277,7 @@ public:
 					)
 				{
 					found = true;
+					min_t = temp_t;
 				}
 			}
 		}
