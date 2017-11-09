@@ -58,8 +58,6 @@ void Mesh::loadpmd(const std::string& fn)
 			std::cout<<"WARNING: joint "<< joint_id <<" not added to skeleton."<<std::endl;
 		joint_id++;
 	}
-	std::cout<<"Joints: "<<joint_id<<std::endl;
-	skeleton.printSkeleton();
 }
 
 void Mesh::updateAnimation()

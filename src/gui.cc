@@ -62,6 +62,10 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		else
 			roll_speed = roll_speed_;
 		// FIXME: actually roll the bone here
+		if(current_bone_ != -1){
+			Bone * b = mesh_->skeleton.getBone(current_bone_);
+			b->roll(roll_speed, b->getTangent());
+		}
 	} else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
 		fps_mode_ = !fps_mode_;
 	} else if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_RELEASE) {
@@ -109,9 +113,12 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		up_ = glm::column(orientation_, 1);
 		look_ = glm::column(orientation_, 2);
 	} else if (drag_bone && current_bone_ != -1) {
-		Bone* bone2Move = mesh_->skeleton.getBone(current_bone_);
-		bone2Move -> applyRotation(rotation_speed_/60, ray_world);
-		return ;
+		Bone* b = mesh_->skeleton.getBone(current_bone_);
+		glm::vec3 drag_start = glm::unProject(glm::vec3(last_x_, last_y_, 0.0), view_matrix_, projection_matrix_, viewport);
+		float angle = rotation_speed_;
+		angle = (delta_x < 0 || delta_y < 0) ? -angle:angle;
+		b->applyRotation(angle, ray_world);
+		return;
 	}
 
 	// FIXME: highlight bones that have been moused over

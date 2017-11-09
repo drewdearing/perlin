@@ -10,6 +10,7 @@
 #include <mmdadapter.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 #include <math.h> 
 #include "config.h"
 
@@ -74,6 +75,10 @@ public:
 
 	Joint* getEndPoint(){
 		return endPoint;
+	}
+
+	glm::vec3 getTangent(){
+		return tangent;
 	}
 
 	glm::vec3 getNormal(){
@@ -250,6 +255,8 @@ public:
 			if(notParallel != 0 && lineInt > 0.00000001){
 
 				float temp_t = (d - glm::dot(normal, eye_)) / notParallel;
+				if(temp_t < min_t)
+					min_t = temp_t;
 				
 				glm::vec3 q = eye_ + temp_t * ray_world;
 
@@ -262,7 +269,6 @@ public:
 
 
 				if( temp_t >= 0.00000001
-					&& temp_t < min_t
 					&& q[0] >= min_x
 					&& q[0] <= max_x
 					&& q[1] >= min_y
@@ -272,7 +278,6 @@ public:
 					)
 				{
 					found = true;
-					min_t = temp_t;
 				}
 			}
 		}
@@ -292,19 +297,22 @@ public:
 	 */
 
 	void applyRotation(float rotation_speed, glm::vec3 axis){
-
-		//current hard-coded to rotate along x and y axis. change it later, no shiet
-		deformed = glm::rotate(deformed, rotation_speed, axis);
-		glm::vec4 temp = deformed * glm::vec4(tangent.x, tangent.y, tangent.z, 0);
-		glm::vec4 temp_norm = deformed * glm::vec4(normal.x, normal.y, normal.z, 0);
-		glm::vec4 temp_binormal = deformed * glm::vec4(binormal.x, binormal.y, binormal.z, 0);
-		tangent = glm::vec3(temp);
-		normal = glm::vec3(temp_norm);
-		binormal = glm::vec3(temp_binormal);
+		tangent = glm::rotate(tangent, rotation_speed, axis);
+		normal = glm::rotate(normal, rotation_speed, axis);
+		binormal = glm::rotate(binormal, rotation_speed, axis);
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->applyRotation(rotation_speed, axis);
 		}
-	}	
+	}
+
+	void roll(float roll_speed, glm::vec3 axis){
+		tangent = glm::rotate(tangent, roll_speed, axis);
+		normal = glm::rotate(normal, roll_speed, axis);
+		binormal = glm::rotate(binormal, roll_speed, axis);
+		for(unsigned i = 0; i < children.size(); i++){
+			children.at(i)->roll(roll_speed, axis);
+		}
+	}
 };
 
 
