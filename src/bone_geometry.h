@@ -407,7 +407,6 @@ struct Mesh {
 	int getNumberOfBones() const 
 	{ 
 		return skeleton.numBones();
-		// FIXME: return number of bones in skeleton
 	}
 	glm::vec3 getCenter() const { return 0.5f * glm::vec3(bounds.min + bounds.max); }
 private:

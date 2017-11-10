@@ -49,15 +49,39 @@ void Mesh::loadpmd(const std::string& fn)
 	int joint_id = 0;
 	glm::vec3 offset;
 	int parent;
+	std::vector<SparseTuple> vst;
 
 	while(mr.getJoint(joint_id, offset, parent)){
 		Joint* j = new Joint(joint_id);
 		j->offset = offset;
 		j->parent_id = parent;
+
+		SparseTuple st(10, 10, 10);
+		vst.push_back(st);
+
 		if(!skeleton.addJoint(j, parent))
 			std::cout<<"WARNING: joint "<< joint_id <<" not added to skeleton."<<std::endl;
 		joint_id++;
 	}
+
+	mr.getJointWeights(vst);
+
+	std::cout << " vst.size: " << vst.size() << std::endl;
+	// std::cout << "\tST._jid: " << vst[0].jid << std::endl;
+	// std::cout << "\tST._vid: " << vst[0].vid << std::endl;
+	// std::cout << "\tST.weight: " << vst[0].weight <<std::endl;
+
+	for(int i = 0; i < 20; ++i){
+		std::cout << "\t" << vst[i].jid << "\t" << vst[i].vid << "\t" << vst[i].weight << std::endl;
+	}
+
+	std::cout << "\t.\t.\t.\n\t.\t.\t.\n\t.\t.\t." << std::endl;
+
+	for(int j = 0; j < 20; ++j){
+		int i = vst.size() - 20 + j;
+		std::cout << "\t" << vst[i].jid << "\t" << vst[i].vid << "\t" << vst[i].weight << std::endl;
+	}
+
 }
 
 void Mesh::updateAnimation()
