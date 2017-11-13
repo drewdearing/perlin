@@ -66,22 +66,16 @@ void Mesh::loadpmd(const std::string& fn)
 
 	mr.getJointWeights(vst);
 
-	std::cout << " vst.size: " << vst.size() << std::endl;
-	// std::cout << "\tST._jid: " << vst[0].jid << std::endl;
-	// std::cout << "\tST._vid: " << vst[0].vid << std::endl;
-	// std::cout << "\tST.weight: " << vst[0].weight <<std::endl;
-
+	/* was printing out joints just to make sure i was doing it right
+	std::cout << "vst.size: " << vst.size() << std::endl;
 	for(int i = 0; i < 20; ++i){
 		std::cout << "\t" << vst[i].jid << "\t" << vst[i].vid << "\t" << vst[i].weight << std::endl;
 	}
-
 	std::cout << "\t.\t.\t.\n\t.\t.\t.\n\t.\t.\t." << std::endl;
-
 	for(int j = 0; j < 20; ++j){
 		int i = vst.size() - 20 + j;
 		std::cout << "\t" << vst[i].jid << "\t" << vst[i].vid << "\t" << vst[i].weight << std::endl;
-	}
-
+	}*/
 }
 
 void Mesh::updateAnimation()
