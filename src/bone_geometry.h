@@ -296,6 +296,22 @@ public:
 	 *   about this axis by rotation_speed radians
 	 */
 
+	float rotationDirection(float rotation_speed_, glm::vec3 look_, glm::vec3 direction){
+		glm::vec3 n = glm::normalize(glm::cross(look_, tangent));
+		glm::vec3 fep = glm::vec3(firstEndPoint());
+		float d = -glm::dot(n, fep);
+		glm::vec3 q = fep + direction;
+		float res = glm::dot(q, n) + d;
+		if(res != 0){
+			if(res < 0)
+				return -rotation_speed_;
+			else
+				return rotation_speed_;
+		}
+		else
+			return 0;
+	}
+
 	void applyRotation(float rotation_speed, glm::vec3 axis){
 		tangent = glm::rotate(tangent, rotation_speed, axis);
 		normal = glm::rotate(normal, rotation_speed, axis);
