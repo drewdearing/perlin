@@ -49,40 +49,54 @@ void Mesh::loadpmd(const std::string& fn)
 	int joint_id = 0;
 	glm::vec3 offset;
 	int parent;
-	std::vector<SparseTuple> vst;
+
+	mr.getJointWeights(vst);
 
 	while(mr.getJoint(joint_id, offset, parent)){
 		Joint* j = new Joint(joint_id);
 		j->offset = offset;
 		j->parent_id = parent;
 
-		SparseTuple st(10, 10, 10);
-		vst.push_back(st);
-
 		if(!skeleton.addJoint(j, parent))
 			std::cout<<"WARNING: joint "<< joint_id <<" not added to skeleton."<<std::endl;
+		else
+			skeleton.joints.push_back(j);
+
 		joint_id++;
 	}
 
-	mr.getJointWeights(vst);
-
-	/* was printing out joints just to make sure i was doing it right
-	std::cout << "vst.size: " << vst.size() << std::endl;
-	for(int i = 0; i < 20; ++i){
-		std::cout << "\t" << vst[i].jid << "\t" << vst[i].vid << "\t" << vst[i].weight << std::endl;
+	for(unsigned i = 0; i < vst.size(); i++){
+		SparseTuple current = vst.at(i);
+		Joint * j = skeleton.joints.at(current.jid);
+		for(unsigned b = 0; b < j->bones.size(); b++){
+			j->bones.at(b)->addWeight(current.vid, current.weight/(j->bones).size());
+		}
 	}
-	std::cout << "\t.\t.\t.\n\t.\t.\t.\n\t.\t.\t." << std::endl;
-	for(int j = 0; j < 20; ++j){
-		int i = vst.size() - 20 + j;
-		std::cout << "\t" << vst[i].jid << "\t" << vst[i].vid << "\t" << vst[i].weight << std::endl;
-	}*/
 }
 
 void Mesh::updateAnimation()
 {
-	animated_vertices = vertices;
-	// FIXME: blend the vertices to animated_vertices, rather than copy
-	//        the data directly.
+	std::vector<glm::vec4> new_vertices = vertices;
+
+	for(unsigned i = 0; i < skeleton.numBones(); i++){
+		Bone * current = skeleton.getBone(i);
+		if(current->isDirty()){
+			for(unsigned j = 0; j < current->vertex_weights.size(); j++){
+				glm::vec2 current_set = current->vertex_weights.at(j);
+				int vid = int(current_set[0]);
+				float weight = current_set[1];
+				glm::vec4 displacement = glm::vec4(weight * current->getDisplace(), 0);
+				glm::vec3 axis = current->axisRotate();
+				float angle = current->angleRotate(weight);
+
+				glm::vec3 v = glm::vec3(new_vertices.at(vid)) - current->originalStartPoint();
+				new_vertices.at(vid) = glm::vec4(current->originalStartPoint() + glm::rotate(v, angle, axis), 1);
+				new_vertices.at(vid) += displacement;
+			}
+		}
+	}
+
+	animated_vertices = new_vertices;
 }
 
 

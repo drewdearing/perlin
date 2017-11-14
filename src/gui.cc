@@ -65,6 +65,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		if(current_bone_ != -1){
 			Bone * b = mesh_->skeleton.getBone(current_bone_);
 			b->roll(roll_speed, b->getTangent());
+			pose_changed_ = true;
 		}
 	} else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
 		fps_mode_ = !fps_mode_;
@@ -117,6 +118,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		Bone* b = mesh_->skeleton.getBone(current_bone_);
 		float angle = b->rotationDirection(rotation_speed_, look_, nearPlane-lastPlane);
 		b->applyRotation(angle, look_);
+		pose_changed_ = true;
 		return;
 	}
 

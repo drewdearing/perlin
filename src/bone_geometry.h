@@ -22,9 +22,12 @@ struct BoundingBox {
 	glm::vec3 max;
 };
 
+class Bone;
+
 class Joint {
 public:
 	glm::vec3 offset;
+	std::vector<Bone *> bones;
 	int parent_id;
 	int id;
 	Joint(){};
@@ -38,6 +41,8 @@ private:
 	Bone* parent = NULL;
 	Joint* startPoint;
 	Joint* endPoint;
+	glm::vec3 originalStart;
+	glm::vec3 originalEnd;
 	glm::vec3 tangent;
 	glm::vec3 normal;
 	glm::vec3 binormal;
@@ -51,6 +56,12 @@ public:
 		setID(i);
 		setParent(parent);
 		setEndpoints(start, end);
+	}
+
+	std::vector<glm::vec2> vertex_weights;
+
+	void addWeight(int id, float weight){
+		vertex_weights.push_back(glm::vec2(float(id), weight));
 	}
 
 	void setID(unsigned i){
@@ -67,6 +78,16 @@ public:
 
 	unsigned getID(){
 		return id;
+	}
+
+	bool isDirty(){
+
+		glm::vec3 fep = glm::vec3(firstEndPoint());
+		glm::vec3 sep = glm::vec3(secondEndPoint());
+
+		bool startSame = originalStart[0] == fep[0] && originalStart[1] == fep[1] && originalStart[2] == fep[2];
+		bool endSame = originalEnd[0] == sep[0] && originalEnd[1] == sep[1] && originalEnd[2] == sep[2];
+		return !startSame || !endSame;
 	}
 
 	Joint* getStartPoint(){
@@ -87,6 +108,30 @@ public:
 
 	glm::vec3 getBinormal(){
 		return binormal;
+	}
+
+	glm::vec3 originalStartPoint(){
+		return originalStart;
+	}
+
+	glm::vec3 getDisplace(){
+		return glm::vec3(firstEndPoint())-originalStart;
+	}
+
+	glm::vec3 axisRotate(){
+		glm::vec3 old = originalEnd - originalStart;
+		glm::vec3 current = glm::vec3(secondEndPoint()) - glm::vec3(firstEndPoint());
+
+		glm::vec3 axis = glm::cross(old, current);
+
+		return axis;
+	}
+
+	float angleRotate(float weight){
+		glm::vec3 oldTangent = originalEnd - originalStart;
+		float angle = acos(glm::dot(tangent, oldTangent) / (glm::length(oldTangent) * glm::length(tangent)));
+
+		return weight * angle;
 	}
 
 	void setEndpoints(Joint* start, Joint* end){
@@ -128,6 +173,9 @@ public:
 			}
 			deformed = rotation;
 		}
+
+		originalStart = glm::vec3(firstEndPoint());
+		originalEnd = glm::vec3(secondEndPoint());
 	}
 	
 	glm::vec4 firstEndPoint(){
@@ -142,13 +190,7 @@ public:
 	}
 
 	glm::vec4 secondEndPoint(){
-		glm::vec4 end;
-		if(parent == NULL){
-			end = glm::vec4(startPoint->offset+endPoint->offset, 1);
-		}
-		else{
-			end = parent->secondEndPoint() + glm::vec4(tangent, 0);
-		}
+		glm::vec4 end = firstEndPoint() + glm::vec4(tangent, 0);
 		return end;
 	}
 
@@ -313,18 +355,22 @@ public:
 	}
 
 	void applyRotation(float rotation_speed, glm::vec3 axis){
+
 		tangent = glm::rotate(tangent, rotation_speed, axis);
 		normal = glm::rotate(normal, rotation_speed, axis);
 		binormal = glm::rotate(binormal, rotation_speed, axis);
+
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->applyRotation(rotation_speed, axis);
 		}
 	}
 
 	void roll(float roll_speed, glm::vec3 axis){
+
 		tangent = glm::rotate(tangent, roll_speed, axis);
 		normal = glm::rotate(normal, roll_speed, axis);
 		binormal = glm::rotate(binormal, roll_speed, axis);
+
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->roll(roll_speed, axis);
 		}
@@ -337,6 +383,8 @@ private:
 	std::vector<Joint *> roots;
 	std::vector<Bone *> bones;
 public:
+	std::vector<Joint *> joints;
+
 	Skeleton(){};
 
 	Joint* parentIsRoot(int parent_id){
@@ -365,6 +413,7 @@ public:
 			Joint * parentRoot = parentIsRoot(parent_id);
 			if(parentRoot != NULL){
 				Bone* b = new Bone(parentRoot, j, bones.size(), NULL);
+				parentRoot->bones.push_back(b);
 				bones.push_back(b);
 				found = true;
 			}
@@ -375,6 +424,7 @@ public:
 					if(current->getEndPoint()->id == parent_id){
 						Bone* b = new Bone(current->getEndPoint(), j, bones.size(), current);
 						current->setChild(b);
+						current->getEndPoint()->bones.push_back(b);
 						bones.push_back(b);
 						found = true;
 						break;
@@ -409,6 +459,7 @@ struct Mesh {
 	Mesh();
 	~Mesh();
 	std::vector<glm::vec4> vertices;
+	std::vector<SparseTuple> vst;
 	std::vector<glm::vec4> animated_vertices;
 	std::vector<glm::uvec3> faces;
 	std::vector<glm::vec4> vertex_normals;
