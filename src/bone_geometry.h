@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <mmdadapter.h>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <math.h> 
@@ -49,11 +50,10 @@ private:
 	glm::vec3 tangent;
 	glm::vec3 normal;
 	glm::vec3 binormal;
-	glm::mat4 rotation = glm::mat4(1.0f);
+	
 	glm::mat4 defaultTransformation = glm::mat4(1.0f);
 	glm::mat4 currentTransformation;
-	glm::mat4 deformed = glm::mat4(1.0f);
-	glm::mat4 translation = glm::mat4(1.0f);
+
 	float length;
 public:
 	Bone(){};
@@ -64,6 +64,10 @@ public:
 	}
 
 	std::vector<glm::vec2> vertex_weights;
+	glm::mat4 deformed = glm::mat4(1.0f);
+	glm::mat4 translation = glm::mat4(1.0f);
+	glm::mat4 rotation = glm::mat4(1.0f);
+	glm::mat4 world_position = glm::mat4(1.0f);
 
 	void addWeight(int id, float weight){
 		vertex_weights.push_back(glm::vec2(float(id), weight));
@@ -175,12 +179,15 @@ public:
 			deformed = rotation;
 		}
 		else{
-			for(int i = 0; i < 3; i++){
-				rotation[i][0] = tangent[i];
-				rotation[i][1] = binormal[i];
-				rotation[i][2] = normal[i];
-			}
+			rotation = glm::column(rotation, 0, glm::vec4(tangent, 0));
+			rotation = glm::column(rotation, 1, glm::vec4(normal, 0));
+			rotation = glm::column(rotation, 2, glm::vec4(binormal, 0));
+
 			deformed = rotation;
+		}
+	
+		if(parent!=NULL){
+			world_position = glm::translate(parent -> rotation * parent -> world_position, tangent);
 		}
 
 		originalStart = glm::vec3(firstEndPoint());
@@ -194,28 +201,35 @@ public:
 		currentTransformation = defaultTransformation;
 	}
 
-	glm::vec4 worldToLocal(glm::vec4 world){
+	glm::vec4 worldToLocal(glm::vec4 world_point){
 		glm::vec4 coord;
-		
-		//n and b with normal t
-		glm::vec3 vector1 = glm::vec3(world) - originalStart;
-		float dist = glm::dot(glm::normalize(originalTangent), vector1);
-		glm::vec3 point1 = glm::vec3(world) - dist * glm::normalize(originalTangent);
 
-		glm::vec3 bigBoy = point1 - originalStart;
-
-		coord[0] = bigBoy[0];
-		coord[1] = bigBoy[1];
-
-		//n and t with normal b
-		glm::vec3 vector2 = glm::vec3(world) - originalStart;
-		float dist2 = glm::dot(glm::normalize(originalBinormal), vector2);
-		glm::vec3 point2 = glm::vec3(world) - dist2 * glm::normalize(originalBinormal);
-
-		glm::vec3 bigBoy2 = point2 - originalStart;
-
-		coord[2] = bigBoy2[2];
+		coord[0] = glm::dot((glm::vec3(world_point) - originalStart), glm::normalize(originalNormal));
+		coord[1] = glm::dot((glm::vec3(world_point) - originalStart), glm::normalize(originalBinormal));
+		coord[2] = glm::dot((glm::vec3(world_point) - originalStart), glm::normalize(originalTangent));
 		coord[3] = 1.0f;
+
+
+
+		//n and b with normal t
+		// glm::vec3 vector1 = glm::vec3(world_point) - originalStart;
+		// float dist = glm::dot(glm::normalize(originalTangent), vector1) + glm::dot(glm::normalize(binormal), vector1);
+		// glm::vec3 point1 = glm::vec3(world_point) - dist * glm::normalize(originalTangent);
+
+		// glm::vec3 bigBoy = point1 - originalStart;
+
+		// coord[0] = bigBoy[0];
+		// coord[1] = bigBoy[1];
+
+		// //n and t with normal b
+		// glm::vec3 vector2 = glm::vec3(world_point) - originalStart;
+		// float dist2 = glm::dot(glm::normalize(originalBinormal), vector2);
+		// glm::vec3 point2 = glm::vec3(world_point) - dist2 * glm::normalize(originalBinormal);
+
+		// glm::vec3 bigBoy2 = point2 - originalStart;
+
+		// coord[2] = bigBoy2[2];
+		// coord[3] = 1.0f;
 
 
 		return coord;
@@ -226,7 +240,7 @@ public:
 
 		glm::vec3 fep = glm::vec3(firstEndPoint());
 
-		return glm::vec4(fep + local[0] * glm::normalize(normal) + local[1] * glm::normalize(binormal) + local[2] * glm::normalize(tangent), 1);
+		return glm::vec4(fep + (local[0] * glm::normalize(normal)) + (local[1] * glm::normalize(binormal)) + (local[2] * glm::normalize(tangent)), 1);
 
 	}
 	
