@@ -84,8 +84,15 @@ void Mesh::updateAnimation()
 			glm::vec2 current_set = current->vertex_weights.at(j);
 			int vid = int(current_set[0]);
 			float weight = current_set[1];
-			glm::vec4 localCoords = current->worldToLocal(vertices.at(vid));
-			glm::vec4 newWorldCoords = current->localToWorld(localCoords);
+			glm::vec4 newWorldCoords;
+
+			if(current->isDirty()){
+				glm::vec4 localCoords = current->worldToLocal(vertices.at(vid));
+				newWorldCoords = current->localToWorld(localCoords);
+			}
+			else{
+				newWorldCoords = vertices.at(vid);
+			}
 
 			new_vertices.at(vid) += weight * newWorldCoords;
 		}

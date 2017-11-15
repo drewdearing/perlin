@@ -37,10 +37,12 @@ public:
 class Bone {
 private:
 	unsigned id;
-	std::vector<Bone*> children;
+	float length;
+	bool dirty = false;
 	Bone* parent = NULL;
 	Joint* startPoint;
 	Joint* endPoint;
+	std::vector<Bone*> children;
 	glm::vec3 originalStart;
 	glm::vec3 originalEnd;
 	glm::vec3 originalNormal;
@@ -49,7 +51,6 @@ private:
 	glm::vec3 tangent;
 	glm::vec3 normal;
 	glm::vec3 binormal;
-	float length;
 public:
 	Bone(){};
 	Bone(Joint* start, Joint* end, unsigned i, Bone * parent){
@@ -98,6 +99,10 @@ public:
 
 	glm::vec3 getBinormal(){
 		return binormal;
+	}
+
+	bool isDirty(){
+		return dirty;
 	}
 
 	void setEndpoints(Joint* start, Joint* end){
@@ -333,6 +338,7 @@ public:
 		tangent = glm::rotate(tangent, rotation_speed, axis);
 		normal = glm::rotate(normal, rotation_speed, axis);
 		binormal = glm::rotate(binormal, rotation_speed, axis);
+		dirty = true;
 
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->applyRotation(rotation_speed, axis);
@@ -344,6 +350,7 @@ public:
 		tangent = glm::rotate(tangent, roll_speed, axis);
 		normal = glm::rotate(normal, roll_speed, axis);
 		binormal = glm::rotate(binormal, roll_speed, axis);
+		dirty = true;
 
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->roll(roll_speed, axis);
