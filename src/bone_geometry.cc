@@ -59,15 +59,13 @@ void Mesh::loadpmd(const std::string& fn)
 
 		if(!skeleton.addJoint(j, parent))
 			std::cout<<"WARNING: joint "<< joint_id <<" not added to skeleton."<<std::endl;
-		else
-			skeleton.joints.push_back(j);
-
+		
 		joint_id++;
 	}
 
 	for(unsigned i = 0; i < vst.size(); i++){
 		SparseTuple current = vst.at(i);
-		Joint * j = skeleton.joints.at(current.jid);
+		Joint * j = skeleton.getJoint(current.jid);
 		for(unsigned b = 0; b < j->bones.size(); b++){
 			j->bones.at(b)->addWeight(current.vid, current.weight/(j->bones).size());
 		}

@@ -336,7 +336,9 @@ public:
 		tangent = glm::rotate(tangent, rotation_speed, axis);
 		normal = glm::rotate(normal, rotation_speed, axis);
 		binormal = glm::rotate(binormal, rotation_speed, axis);
-		dirty = true;
+		dirty = !glm::all(glm::equal(tangent, originalTangent)) ||
+				!glm::all(glm::equal(binormal, originalBinormal)) ||
+				!glm::all(glm::equal(normal, originalNormal));
 
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->applyRotation(rotation_speed, axis);
@@ -348,7 +350,9 @@ public:
 		tangent = glm::rotate(tangent, roll_speed, axis);
 		normal = glm::rotate(normal, roll_speed, axis);
 		binormal = glm::rotate(binormal, roll_speed, axis);
-		dirty = true;
+		dirty = !glm::all(glm::equal(tangent, originalTangent)) ||
+				!glm::all(glm::equal(binormal, originalBinormal)) ||
+				!glm::all(glm::equal(normal, originalNormal));
 
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->roll(roll_speed, axis);
@@ -360,9 +364,9 @@ public:
 class Skeleton {
 private:
 	std::vector<Joint *> roots;
+	std::vector<Joint *> joints;
 	std::vector<Bone *> bones;
 public:
-	std::vector<Joint *> joints;
 
 	Skeleton(){};
 
@@ -386,6 +390,7 @@ public:
 		
 		if(parent_id == -1){
 			roots.push_back(j);
+			joints.push_back(j);
 			found = true;
 		}
 		else{
@@ -394,6 +399,7 @@ public:
 				Bone* b = new Bone(parentRoot, j, bones.size(), NULL);
 				parentRoot->bones.push_back(b);
 				bones.push_back(b);
+				joints.push_back(j);
 				found = true;
 			}
 			else{
@@ -405,6 +411,7 @@ public:
 						current->setChild(b);
 						current->getEndPoint()->bones.push_back(b);
 						bones.push_back(b);
+						joints.push_back(j);
 						found = true;
 						break;
 					}
@@ -418,6 +425,13 @@ public:
 	Bone * getBone(unsigned i){
 		if(i >= 0 && i < bones.size())
 			return bones.at(i);
+		else
+			return NULL;
+	}
+
+	Joint * getJoint(unsigned i){
+		if(i >= 0 && i < joints.size())
+			return joints.at(i);
 		else
 			return NULL;
 	}
