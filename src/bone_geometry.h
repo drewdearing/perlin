@@ -464,10 +464,7 @@ struct Mesh {
 
 	void loadpmd(const std::string& fn);
 	void updateAnimation();
-	int getNumberOfBones() const 
-	{ 
-		return skeleton.numBones();
-	}
+	int getNumberOfBones() const { return skeleton.numBones(); }
 	glm::vec3 getCenter() const { return 0.5f * glm::vec3(bounds.min + bounds.max); }
 private:
 	void computeBounds();
