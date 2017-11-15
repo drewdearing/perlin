@@ -152,8 +152,6 @@ public:
 	}
 
 	glm::vec4 localToWorld(glm::vec4 local){
-		glm::vec4 coord;
-
 		glm::vec3 fep = glm::vec3(firstEndPoint());
 		glm::vec3 n = glm::normalize(normal);
 		glm::vec3 b = glm::normalize(binormal);
