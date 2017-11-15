@@ -16,7 +16,7 @@ namespace {
 	bool IntersectCylinder(const glm::vec3& origin, const glm::vec3& direction,
 			float radius, float height, float* t)
 	{
-		//FIXME perform proper ray-cylinder collision detection
+		//Cylinder Intersection is handled in Bone Class
 		return true;
 	}
 }
@@ -73,7 +73,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		// FIXME: actually roll the bone here
 		if(current_bone_ != -1){
 			Bone * b = mesh_->skeleton.getBone(current_bone_);
-			b->roll(roll_speed, b->getTangent());
+			b->rotate(roll_speed, b->getTangent());
 			pose_changed_ = true;
 		}
 	} else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
@@ -109,6 +109,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	bool drag_camera = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_RIGHT;
 	bool drag_bone = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT;
 
+	//calculate world coordinates of mouse movements
 	glm::vec3 lastPlane = glm::unProject(glm::vec3(last_x_, last_y_, 0.0), view_matrix_, projection_matrix_, viewport);
 	glm::vec3 nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
 	glm::vec3 ray_world = glm::normalize(nearPlane-eye_);
@@ -124,9 +125,10 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		up_ = glm::column(orientation_, 1);
 		look_ = glm::column(orientation_, 2);
 	} else if (drag_bone && current_bone_ != -1) {
+		//rotate current bone
 		Bone* b = mesh_->skeleton.getBone(current_bone_);
 		float angle = b->rotationDirection(rotation_speed_, look_, nearPlane-lastPlane);
-		b->applyRotation(angle, look_);
+		b->rotate(angle, look_);
 		pose_changed_ = true;
 		return;
 	}
@@ -143,7 +145,6 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 			closest_bone_id = b->getID();
 		}
 	}
-	//std::cout<<"current bone: "<<closest_bone_id<<std::endl;
 	
 	current_bone_ = closest_bone_id;
 	intersect = eye_ + min_t * ray_world;

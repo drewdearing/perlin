@@ -24,6 +24,8 @@ struct BoundingBox {
 
 class Bone;
 
+//Joint class stores initial information about Joints
+//Also keeps pointers of all bones that utilize them.
 class Joint {
 public:
 	glm::vec3 offset;
@@ -34,6 +36,9 @@ public:
 	Joint(int i) : id(i){}
 };
 
+//Bone class
+//Keeps track of all current manipulation of a bone
+//Stores children bones and its parent
 class Bone {
 private:
 	unsigned id;
@@ -140,6 +145,7 @@ public:
 		originalBinormal = binormal;
 	}
 
+	//Convert World Coordinates to local bone coordniates
 	glm::vec4 worldToLocal(glm::vec4 world_point){
 		glm::vec4 coord;
 
@@ -151,6 +157,7 @@ public:
 		return coord;
 	}
 
+	//Convert Local Coordinates to World Coordinates
 	glm::vec4 localToWorld(glm::vec4 local){
 		glm::vec3 fep = glm::vec3(firstEndPoint());
 		glm::vec3 n = glm::normalize(normal);
@@ -161,6 +168,7 @@ public:
 
 	}
 	
+	//get World Coordinates of Start of Bone
 	glm::vec4 firstEndPoint(){
 		glm::vec4 origin;
 		if(parent == NULL){
@@ -172,11 +180,13 @@ public:
 		return origin;
 	}
 
+	//get World Coordinates of End of Bone
 	glm::vec4 secondEndPoint(){
 		glm::vec4 end = firstEndPoint() + glm::vec4(tangent, 0);
 		return end;
 	}
 
+	//return all verticies for bone cylinder
 	std::vector<glm::vec4> cylVertices(){
 
 		std::vector<glm::vec4> cyl_vertices;
@@ -199,6 +209,7 @@ public:
 		return cyl_vertices;
 	}
 
+	//return all vertices for Normal Line
 	std::vector<glm::vec4> normVertices(){
 		std::vector<glm::vec4> norm_vertices;
 		glm::vec3 n = (2.5f/glm::length(normal)) * normal;
@@ -208,6 +219,7 @@ public:
 		return norm_vertices;
 	}
 
+	//return all vertices for Binormal Line
 	std::vector<glm::vec4> binormVertices(){
 		std::vector<glm::vec4> binorm_vertices;
 		glm::vec3 b = (2.5f/glm::length(binormal)) * binormal;
@@ -217,6 +229,9 @@ public:
 		return binorm_vertices;
 	}
 
+	//Check for Intersection with given Ray and Bone Cylinder
+	//Returns true if intersection occurs and sets t to the
+	//closest point of intersection on the cylinder.
 	bool intersect(glm::vec3 ray_world, glm::vec3 eye_, float& t){
 		bool found = false;
 		float min_t = std::numeric_limits<float>::max();
@@ -311,10 +326,7 @@ public:
 		return found;
 	}
 
-	/***********************
-	 * Manipulate the bone *
-	 ***********************/
-
+	//Return the speed and direction of bone rotation given the vector of mouse movement
 	float rotationDirection(float rotation_speed_, glm::vec3 look_, glm::vec3 direction){
 		glm::vec3 n = glm::normalize(glm::cross(look_, tangent));
 		glm::vec3 fep = glm::vec3(firstEndPoint());
@@ -331,7 +343,8 @@ public:
 			return 0;
 	}
 
-	void applyRotation(float rotation_speed, glm::vec3 axis){
+	//Rotate bone by rotation_speed on a given axis
+	void rotate(float rotation_speed, glm::vec3 axis){
 
 		tangent = glm::rotate(tangent, rotation_speed, axis);
 		normal = glm::rotate(normal, rotation_speed, axis);
@@ -341,26 +354,13 @@ public:
 				!glm::all(glm::equal(normal, originalNormal));
 
 		for(unsigned i = 0; i < children.size(); i++){
-			children.at(i)->applyRotation(rotation_speed, axis);
-		}
-	}
-
-	void roll(float roll_speed, glm::vec3 axis){
-
-		tangent = glm::rotate(tangent, roll_speed, axis);
-		normal = glm::rotate(normal, roll_speed, axis);
-		binormal = glm::rotate(binormal, roll_speed, axis);
-		dirty = !glm::all(glm::equal(tangent, originalTangent)) ||
-				!glm::all(glm::equal(binormal, originalBinormal)) ||
-				!glm::all(glm::equal(normal, originalNormal));
-
-		for(unsigned i = 0; i < children.size(); i++){
-			children.at(i)->roll(roll_speed, axis);
+			children.at(i)->rotate(rotation_speed, axis);
 		}
 	}
 };
 
-
+//Skeleton Class
+//Stores all bones, joints, and root joints
 class Skeleton {
 private:
 	std::vector<Joint *> roots;
