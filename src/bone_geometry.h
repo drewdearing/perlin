@@ -9,7 +9,6 @@
 #include <glm/glm.hpp>
 #include <mmdadapter.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <math.h> 
@@ -50,10 +49,6 @@ private:
 	glm::vec3 tangent;
 	glm::vec3 normal;
 	glm::vec3 binormal;
-	
-	glm::mat4 defaultTransformation = glm::mat4(1.0f);
-	glm::mat4 currentTransformation;
-
 	float length;
 public:
 	Bone(){};
@@ -64,10 +59,6 @@ public:
 	}
 
 	std::vector<glm::vec2> vertex_weights;
-	glm::mat4 deformed = glm::mat4(1.0f);
-	glm::mat4 translation = glm::mat4(1.0f);
-	glm::mat4 rotation = glm::mat4(1.0f);
-	glm::mat4 world_position = glm::mat4(1.0f);
 
 	void addWeight(int id, float weight){
 		vertex_weights.push_back(glm::vec2(float(id), weight));
@@ -87,16 +78,6 @@ public:
 
 	unsigned getID(){
 		return id;
-	}
-
-	bool isDirty(){
-
-		glm::vec3 fep = glm::vec3(firstEndPoint());
-		glm::vec3 sep = glm::vec3(secondEndPoint());
-
-		bool startSame = originalStart[0] == fep[0] && originalStart[1] == fep[1] && originalStart[2] == fep[2];
-		bool endSame = originalEnd[0] == sep[0] && originalEnd[1] == sep[1] && originalEnd[2] == sep[2];
-		return !startSame || !endSame;
 	}
 
 	Joint* getStartPoint(){
@@ -119,34 +100,6 @@ public:
 		return binormal;
 	}
 
-	glm::vec3 originalStartPoint(){
-		return originalStart;
-	}
-
-	glm::vec3 originalEndPoint(){
-		return originalEnd;
-	}
-
-	glm::vec3 originalNormalVector(){
-		return originalNormal;
-	}
-
-	glm::vec3 axisRotate(){
-		glm::vec3 old = originalEnd - originalStart;
-		glm::vec3 current = glm::vec3(secondEndPoint()) - glm::vec3(firstEndPoint());
-
-		glm::vec3 axis = glm::cross(old, current);
-
-		return axis;
-	}
-
-	float angleRotate(float weight){
-		glm::vec3 oldTangent = originalEnd - originalStart;
-		float angle = acos(glm::dot(tangent, oldTangent) / (glm::length(oldTangent) * glm::length(tangent)));
-
-		return weight * angle;
-	}
-
 	void setEndpoints(Joint* start, Joint* end){
 		startPoint = start;
 		endPoint = end;
@@ -155,7 +108,9 @@ public:
 
 	void build(){
 		tangent = endPoint->offset;
+		
 		glm::vec3 v = glm::vec3(0, 0, 0);
+		
 		if(tangent[0] < tangent[1]){
 			if(tangent[0] < tangent[2])
 				v[0] = 1;
@@ -166,39 +121,18 @@ public:
 			v[1] = 1;
 		else
 			v[2] = 1;
+
 		normal = glm::cross(tangent, v);
 		normal /= glm::length(normal);
 		binormal = glm::cross(tangent, normal);
+		
 		length = glm::length(tangent);
-		translation = glm::translate(translation, tangent);
-		if(parent != NULL){
-			glm::vec3 axis = glm::cross(parent->tangent, tangent);
-			float angle = glm::dot(parent->tangent, tangent)/(parent->length*length);
-			angle = (M_PI/180)*acos(angle);
-			rotation = glm::rotate(rotation, angle, axis);
-			deformed = rotation;
-		}
-		else{
-			rotation = glm::column(rotation, 0, glm::vec4(tangent, 0));
-			rotation = glm::column(rotation, 1, glm::vec4(normal, 0));
-			rotation = glm::column(rotation, 2, glm::vec4(binormal, 0));
-
-			deformed = rotation;
-		}
-	
-		if(parent!=NULL){
-			world_position = glm::translate(parent -> rotation * parent -> world_position, tangent);
-		}
 
 		originalStart = glm::vec3(firstEndPoint());
 		originalEnd = glm::vec3(secondEndPoint());
 		originalTangent = tangent;
 		originalNormal = normal;
 		originalBinormal = binormal;
-
-		defaultTransformation[3] = glm::vec4(tangent, 1);
-		std::cout<<"\n"<<glm::to_string(defaultTransformation)<<std::endl;
-		currentTransformation = defaultTransformation;
 	}
 
 	glm::vec4 worldToLocal(glm::vec4 world_point){
@@ -209,29 +143,6 @@ public:
 		coord[2] = glm::dot((glm::vec3(world_point) - originalStart), glm::normalize(originalTangent));
 		coord[3] = 1.0f;
 
-
-
-		//n and b with normal t
-		// glm::vec3 vector1 = glm::vec3(world_point) - originalStart;
-		// float dist = glm::dot(glm::normalize(originalTangent), vector1) + glm::dot(glm::normalize(binormal), vector1);
-		// glm::vec3 point1 = glm::vec3(world_point) - dist * glm::normalize(originalTangent);
-
-		// glm::vec3 bigBoy = point1 - originalStart;
-
-		// coord[0] = bigBoy[0];
-		// coord[1] = bigBoy[1];
-
-		// //n and t with normal b
-		// glm::vec3 vector2 = glm::vec3(world_point) - originalStart;
-		// float dist2 = glm::dot(glm::normalize(originalBinormal), vector2);
-		// glm::vec3 point2 = glm::vec3(world_point) - dist2 * glm::normalize(originalBinormal);
-
-		// glm::vec3 bigBoy2 = point2 - originalStart;
-
-		// coord[2] = bigBoy2[2];
-		// coord[3] = 1.0f;
-
-
 		return coord;
 	}
 
@@ -239,8 +150,11 @@ public:
 		glm::vec4 coord;
 
 		glm::vec3 fep = glm::vec3(firstEndPoint());
+		glm::vec3 n = glm::normalize(normal);
+		glm::vec3 b = glm::normalize(binormal);
+		glm::vec3 t = glm::normalize(tangent);
 
-		return glm::vec4(fep + (local[0] * glm::normalize(normal)) + (local[1] * glm::normalize(binormal)) + (local[2] * glm::normalize(tangent)), 1);
+		return glm::vec4(fep + (local[0] * n) + (local[1] * b) + (local[2] * t), 1);
 
 	}
 	
@@ -398,12 +312,6 @@ public:
 	 * Manipulate the bone *
 	 ***********************/
 
-	/* ->Convert the drag direction into a vector in world coordinates
-	 * ->Take its cross product with the look direction
-	 * ->Rotate all basis vectors (deformed[]) of the bone 
-	 *   about this axis by rotation_speed radians
-	 */
-
 	float rotationDirection(float rotation_speed_, glm::vec3 look_, glm::vec3 direction){
 		glm::vec3 n = glm::normalize(glm::cross(look_, tangent));
 		glm::vec3 fep = glm::vec3(firstEndPoint());
@@ -426,8 +334,6 @@ public:
 		normal = glm::rotate(normal, rotation_speed, axis);
 		binormal = glm::rotate(binormal, rotation_speed, axis);
 
-		currentTransformation[3] = glm::vec4(tangent, 1);
-
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->applyRotation(rotation_speed, axis);
 		}
@@ -438,8 +344,6 @@ public:
 		tangent = glm::rotate(tangent, roll_speed, axis);
 		normal = glm::rotate(normal, roll_speed, axis);
 		binormal = glm::rotate(binormal, roll_speed, axis);
-
-		currentTransformation[3] = glm::vec4(tangent, 1);
 
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->roll(roll_speed, axis);
