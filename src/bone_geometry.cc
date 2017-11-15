@@ -76,23 +76,18 @@ void Mesh::loadpmd(const std::string& fn)
 
 void Mesh::updateAnimation()
 {
-	std::vector<glm::vec4> new_vertices = vertices;
+	std::vector<glm::vec4> new_vertices(vertices.size());
 
 	for(unsigned i = 0; i < skeleton.numBones(); i++){
 		Bone * current = skeleton.getBone(i);
-		if(current->isDirty()){
-			for(unsigned j = 0; j < current->vertex_weights.size(); j++){
-				glm::vec2 current_set = current->vertex_weights.at(j);
-				int vid = int(current_set[0]);
-				float weight = current_set[1];
-				glm::vec4 displacement = glm::vec4(weight * current->getDisplace(), 0);
-				glm::vec3 axis = current->axisRotate();
-				float angle = current->angleRotate(weight);
+		for(unsigned j = 0; j < current->vertex_weights.size(); j++){
+			glm::vec2 current_set = current->vertex_weights.at(j);
+			int vid = int(current_set[0]);
+			float weight = current_set[1];
+			glm::vec4 localCoords = current->worldToLocal(vertices.at(vid));
+			glm::vec4 newWorldCoords = current->localToWorld(localCoords);
 
-				glm::vec3 v = glm::vec3(new_vertices.at(vid)) - current->originalStartPoint();
-				new_vertices.at(vid) = glm::vec4(current->originalStartPoint() + glm::rotate(v, angle, axis), 1);
-				new_vertices.at(vid) += displacement;
-			}
+			new_vertices.at(vid) += weight * newWorldCoords;
 		}
 	}
 

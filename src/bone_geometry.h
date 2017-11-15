@@ -43,10 +43,15 @@ private:
 	Joint* endPoint;
 	glm::vec3 originalStart;
 	glm::vec3 originalEnd;
+	glm::vec3 originalNormal;
+	glm::vec3 originalTangent;
+	glm::vec3 originalBinormal;
 	glm::vec3 tangent;
 	glm::vec3 normal;
 	glm::vec3 binormal;
 	glm::mat4 rotation = glm::mat4(1.0f);
+	glm::mat4 defaultTransformation = glm::mat4(1.0f);
+	glm::mat4 currentTransformation;
 	glm::mat4 deformed = glm::mat4(1.0f);
 	glm::mat4 translation = glm::mat4(1.0f);
 	float length;
@@ -114,8 +119,12 @@ public:
 		return originalStart;
 	}
 
-	glm::vec3 getDisplace(){
-		return glm::vec3(firstEndPoint())-originalStart;
+	glm::vec3 originalEndPoint(){
+		return originalEnd;
+	}
+
+	glm::vec3 originalNormalVector(){
+		return originalNormal;
 	}
 
 	glm::vec3 axisRotate(){
@@ -176,6 +185,49 @@ public:
 
 		originalStart = glm::vec3(firstEndPoint());
 		originalEnd = glm::vec3(secondEndPoint());
+		originalTangent = tangent;
+		originalNormal = normal;
+		originalBinormal = binormal;
+
+		defaultTransformation[3] = glm::vec4(tangent, 1);
+		std::cout<<"\n"<<glm::to_string(defaultTransformation)<<std::endl;
+		currentTransformation = defaultTransformation;
+	}
+
+	glm::vec4 worldToLocal(glm::vec4 world){
+		glm::vec4 coord;
+		
+		//n and b with normal t
+		glm::vec3 vector1 = glm::vec3(world) - originalStart;
+		float dist = glm::dot(glm::normalize(originalTangent), vector1);
+		glm::vec3 point1 = glm::vec3(world) - dist * glm::normalize(originalTangent);
+
+		glm::vec3 bigBoy = point1 - originalStart;
+
+		coord[0] = bigBoy[0];
+		coord[1] = bigBoy[1];
+
+		//n and t with normal b
+		glm::vec3 vector2 = glm::vec3(world) - originalStart;
+		float dist2 = glm::dot(glm::normalize(originalBinormal), vector2);
+		glm::vec3 point2 = glm::vec3(world) - dist2 * glm::normalize(originalBinormal);
+
+		glm::vec3 bigBoy2 = point2 - originalStart;
+
+		coord[2] = bigBoy2[2];
+		coord[3] = 1.0f;
+
+
+		return coord;
+	}
+
+	glm::vec4 localToWorld(glm::vec4 local){
+		glm::vec4 coord;
+
+		glm::vec3 fep = glm::vec3(firstEndPoint());
+
+		return glm::vec4(fep + local[0] * glm::normalize(normal) + local[1] * glm::normalize(binormal) + local[2] * glm::normalize(tangent), 1);
+
 	}
 	
 	glm::vec4 firstEndPoint(){
@@ -360,6 +412,8 @@ public:
 		normal = glm::rotate(normal, rotation_speed, axis);
 		binormal = glm::rotate(binormal, rotation_speed, axis);
 
+		currentTransformation[3] = glm::vec4(tangent, 1);
+
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->applyRotation(rotation_speed, axis);
 		}
@@ -370,6 +424,8 @@ public:
 		tangent = glm::rotate(tangent, roll_speed, axis);
 		normal = glm::rotate(normal, roll_speed, axis);
 		binormal = glm::rotate(binormal, roll_speed, axis);
+
+		currentTransformation[3] = glm::vec4(tangent, 1);
 
 		for(unsigned i = 0; i < children.size(); i++){
 			children.at(i)->roll(roll_speed, axis);
