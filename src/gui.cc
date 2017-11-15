@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
+#include <ctime>
 #include <limits>
 
 namespace {
@@ -51,6 +52,14 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	}
 	if (key == GLFW_KEY_J && action == GLFW_RELEASE) {
 		//FIXME save out a screenshot using SaveJPEG
+		unsigned char * buffer = (unsigned char *) malloc(3 * sizeof(unsigned char) * window_height_ * window_width_);
+		std::string filename("Screenshot ");
+		time_t rawtime;
+  		time (&rawtime);
+		filename.append(ctime (&rawtime));
+		glReadPixels(0, 0, window_width_, window_height_, GL_RGB, GL_UNSIGNED_BYTE, buffer);
+		SaveJPEG(filename, window_width_ , window_height_, buffer);
+		free(buffer);
 	}
 
 	if (captureWASDUPDOWN(key, action))
