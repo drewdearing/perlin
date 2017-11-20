@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
 	cyl_lines.push_back(glm::vec2(2, 6));
 	cyl_lines.push_back(glm::vec2(3, 7));
 
-	PerlinMap floorMap = PerlinMap(100, 100, 8, 8.0, 0.0, 5.0, 0.5);
+	PerlinMap floorMap = PerlinMap(100, 100, 8, 8.0, -100.0, 100.0, 10);
 	floorMap.createFloor(floor_vertices, floor_faces);
 
 	// FIXME: add code to create bone and cylinder geometry
