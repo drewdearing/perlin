@@ -30,6 +30,7 @@
 # include <numeric>
 # include <algorithm>
 # include <random>
+# include <ctime>
 
 namespace siv
 {
@@ -61,7 +62,13 @@ namespace siv
 
 	public:
 
-		explicit PerlinNoise(std::uint32_t seed = std::default_random_engine::default_seed)
+		PerlinNoise(){
+			srand(time(NULL));
+			std::uint32_t seed = rand();
+			reseed(seed);
+		}
+
+		PerlinNoise(std::uint32_t seed)
 		{
 			reseed(seed);
 		}
