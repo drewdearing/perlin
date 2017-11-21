@@ -11,6 +11,7 @@ private:
 	double frequency;
 	double fx;
 	double fy;
+	double fz;
 	std::uint32_t seed;
 	float max_height;
 	float min_height;
@@ -18,15 +19,15 @@ private:
 	float centerY;
 	float vert_distance;
 	float radius;
-	bool dirty = true;
-	bool seedSet = false;
-	double fz = 0;
+	bool dirty;
+	bool seedSet;
 public:
 	PerlinMap(int h, int w, int o, double f, float min, float max, float d, float r):
 	height(h),
 	width(w),
 	octaves(o),
 	frequency(f),
+	seedSet(false),
 	max_height(max),
 	min_height(min),
 	vert_distance(d),
@@ -59,11 +60,11 @@ public:
 		fx = width / frequency;
 		fy = height / frequency;
 
-		centerX = (width - 1)/2.0f;
-		centerY = (height - 1)/2.0f;
+		setCenter(0, 0);
 
 		seed = perlin.getSeed();
 		seedSet = true;
+		dirty = true;
 	}
 
 	void createFloor(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces){
@@ -147,6 +148,23 @@ public:
 		float distanceY = (float(y) - centerY) * vert_distance;
 		float elevation = min_height + (perlin.octaveNoise0_1(float(x) / fx, float(y) / fy, fz, octaves) * (max_height-min_height));
 		return glm::vec4(distanceY, elevation, distanceX, 1);
+	}
+
+	void setCenter(float x, float y){
+		float cX = (width - 1)/2.0f;
+		float cY = (height - 1)/2.0f;
+		centerX = cX + x/vert_distance;
+		centerY = cY + y/vert_distance;
+		dirty = true;
+	}
+
+	glm::vec2 getCenter(){
+		float cX = (width - 1)/2.0f;
+		float cY = (height - 1)/2.0f;
+		float wX = (centerX - cX) * vert_distance;
+		float wY = (centerY - cY) * vert_distance;
+
+		return glm::vec2(wX, wY);
 	}
 	
 };
