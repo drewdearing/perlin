@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
 		minimum height = -250
 		maximum height = 250
 		vertex distance of 5
-		render radius of 5 vertices
+		render radius of 25 vertices
 		non-explicit seed
 	*/
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 25);
@@ -387,8 +387,6 @@ int main(int argc, char* argv[])
 			floor_pass.setup();
 			// Draw our triangles.
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
-			glm::vec2 floor_center = floorMap.getCenter();
-			floorMap.setCenter(floor_center[0], floor_center[1] + 5);
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {

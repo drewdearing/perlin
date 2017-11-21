@@ -15,6 +15,8 @@ private:
 	std::uint32_t seed;
 	float max_height;
 	float min_height;
+	float originX;
+	float originY;
 	float centerX;
 	float centerY;
 	float vert_distance;
@@ -59,6 +61,10 @@ public:
 
 		fx = width / frequency;
 		fy = height / frequency;
+		fz = 0;
+
+		originX = (width - 1)/2.0f;
+		originY = (height - 1)/2.0f;
 
 		setCenter(0, 0);
 
@@ -150,19 +156,39 @@ public:
 		return glm::vec4(distanceY, elevation, distanceX, 1);
 	}
 
-	void setCenter(float x, float y){
-		float cX = (width - 1)/2.0f;
-		float cY = (height - 1)/2.0f;
-		centerX = cX + x/vert_distance;
-		centerY = cY + y/vert_distance;
-		dirty = true;
+	bool setCenter(float x, float y){
+		float newX = originX + x/vert_distance;
+		float newY = originY + y/vert_distance;
+
+		int min_x = std::max((int)ceil(newX - radius), 0);
+		int max_x = std::min((int)floor(newX + radius), width-1);
+		int min_y = std::max((int)ceil(newY - radius), 0);
+		int max_y = std::min((int)floor(newY + radius), height-1);
+
+		if(max_x - newX < newX - min_x)
+			newX = max_x - radius;
+		else
+			newX = min_x + radius;
+
+		if(max_y - newY < newY - min_y)
+			newY = max_y - radius;
+		else
+			newY = min_y + radius;
+
+		bool change = newX != centerX || newY != centerY;
+
+		if(change){
+			centerX = newX;
+			centerY = newY;
+			dirty = true;
+		}
+
+		return change;
 	}
 
 	glm::vec2 getCenter(){
-		float cX = (width - 1)/2.0f;
-		float cY = (height - 1)/2.0f;
-		float wX = (centerX - cX) * vert_distance;
-		float wY = (centerY - cY) * vert_distance;
+		float wX = (centerX - originX) * vert_distance;
+		float wY = (centerY - originX) * vert_distance;
 
 		return glm::vec2(wX, wY);
 	}
