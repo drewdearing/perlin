@@ -44,6 +44,10 @@ void GUI::assignMesh(Mesh* mesh)
 	center_ = mesh_->getCenter();
 }
 
+void GUI::assignFloorMap(PerlinMap * map){
+	floorMap = map;
+}
+
 void GUI::keyCallback(int key, int scancode, int action, int mods)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -193,10 +197,12 @@ bool GUI::setCurrentBone(int i)
 bool GUI::captureWASDUPDOWN(int key, int action)
 {
 	if (key == GLFW_KEY_W) {
-		if (fps_mode_)
-			eye_ += zoom_speed_ * look_;
-		else
-			camera_distance_ -= zoom_speed_;
+		
+			glm::vec2 center = floorMap->getCenter();
+			glm::vec2 dir = glm::vec2(look_.x, look_.z);
+			glm::vec2 newCenter = center + dir;
+			floorMap->setCenter(newCenter.x, newCenter.y);
+		
 		return true;
 	} else if (key == GLFW_KEY_S) {
 		if (fps_mode_)

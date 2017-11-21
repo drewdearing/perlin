@@ -6,7 +6,6 @@
 #include "render_pass.h"
 #include "config.h"
 #include "gui.h"
-#include "PerlinMap.h"
 
 #include <algorithm>
 #include <fstream>
@@ -162,6 +161,7 @@ int main(int argc, char* argv[])
 	 * GUI object needs the mesh object for bone manipulation.
 	 */
 	gui.assignMesh(&mesh);
+	gui.assignFloorMap(&floorMap);
 
 	glm::vec4 light_position = glm::vec4(0.0f, 100.0f, 0.0f, 1.0f);
 	MatrixPointers mats; // Define MatrixPointers here for lambda to capture
