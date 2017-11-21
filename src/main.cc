@@ -129,7 +129,18 @@ int main(int argc, char* argv[])
 	cyl_lines.push_back(glm::vec2(2, 6));
 	cyl_lines.push_back(glm::vec2(3, 7));
 
-	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250.0, 250.0, 5);
+	/*
+		create perlin map with
+		1000x1000 vertices
+		6 octaves
+		frequency of 8
+		minimum height = -250
+		maximum height = 250
+		vertex distance of 5
+		render radius of 5 vertices
+		non-explicit seed
+	*/
+	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250.0, 250.0, 5, 5);
 	floorMap.createFloor(floor_vertices, floor_faces);
 
 	// FIXME: add code to create bone and cylinder geometry
