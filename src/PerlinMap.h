@@ -2,44 +2,6 @@
 #include "PerlinNoise.h"
 #include <iostream>
 
-class Map {
-private:
-	std::vector<float> values;
-	int width;
-	int height;
-public:
-	Map(){};
-
-	Map(int w, int h) : width(w), height(h){
-		setSize(w*h);
-	}
-
-	void setSize(int size){
-		values.resize(size);
-	}
-
-	bool inBounds(int x, int y){
-		return (x >= 0 && x < width) && (y >= 0 && y < height);
-	}
-
-	bool setValue(int x, int y, float value){
-		if(inBounds(x, y)){
-			values.at(y * width + x) = value;
-			return true;
-		}
-		else
-			return false;
-	}
-
-	float getValue(int x, int y){
-		if(inBounds(x, y)){
-			return values.at(y * width + x);
-		}
-		else
-			return -1;
-	}
-};
-
 class PerlinMap {
 private:
 	siv::PerlinNoise perlin;
@@ -52,9 +14,13 @@ private:
 	std::uint32_t seed;
 	float max_height;
 	float min_height;
+	float centerX;
+	float centerY;
 	float vert_distance;
 	float radius;
+	bool dirty = true;
 	bool seedSet = false;
+	double fz = 0;
 public:
 	PerlinMap(int h, int w, int o, double f, float min, float max, float d, float r):
 	height(h),
@@ -93,6 +59,9 @@ public:
 		fx = width / frequency;
 		fy = height / frequency;
 
+		centerX = (width - 1)/2.0f;
+		centerY = (height - 1)/2.0f;
+
 		seed = perlin.getSeed();
 		seedSet = true;
 	}
@@ -104,8 +73,6 @@ public:
 		float distanceY;
 		float elevation;
 
-		float centerX = (width - 1)/2.0f;
-		float centerY = (height - 1)/2.0f;
 		int min_x = ceil(centerX - radius);
 		int max_x = floor(centerX + radius);
 		int min_y = ceil(centerY - radius);
@@ -126,13 +93,13 @@ public:
 
 				distanceX = (float(currentX) - centerX) * vert_distance;
 				distanceY = (float(currentY) - centerY) * vert_distance;
-				elevation = min_height + (perlin.octaveNoise0_1(currentX / fx, currentY / fy, octaves) * (max_height-min_height));
+				elevation = min_height + (perlin.octaveNoise0_1(currentX / fx, currentY / fy, fz, octaves) * (max_height-min_height));
 				vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
 				
 				if(x == current_width - 1){
 					currentX++;
 					distanceX = (float(currentX) - centerX) * vert_distance;
-					elevation = min_height + (perlin.octaveNoise0_1(currentX / fx, currentY / fy, octaves) * (max_height-min_height));
+					elevation = min_height + (perlin.octaveNoise0_1(currentX / fx, currentY / fy, fz, octaves) * (max_height-min_height));
 					vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
 				}
 
@@ -159,9 +126,27 @@ public:
 		for(int x = 0; x <= current_width; x++){
 			currentX = min_x + x;
 			distanceX = (float(currentX) - centerX) * vert_distance;
-			elevation = min_height + (perlin.octaveNoise0_1(currentX / fx, currentY / fy, octaves) * (max_height-min_height));
+			elevation = min_height + (perlin.octaveNoise0_1(currentX / fx, currentY / fy, fz, octaves) * (max_height-min_height));
 			vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
 		}
+
+		dirty = false;
+	}
+
+	void updateZ(float offset){
+		fz += offset;
+		dirty = true;
+	}
+
+	bool isDirty(){
+		return dirty;
+	}
+
+	glm::vec4 getCoordinate(int x, int y){
+		float distanceX = (float(x) - centerX) * vert_distance;
+		float distanceY = (float(y) - centerY) * vert_distance;
+		float elevation = min_height + (perlin.octaveNoise0_1(float(x) / fx, float(y) / fy, fz, octaves) * (max_height-min_height));
+		return glm::vec4(distanceY, elevation, distanceX, 1);
 	}
 	
 };

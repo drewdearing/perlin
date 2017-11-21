@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 		render radius of 5 vertices
 		non-explicit seed
 	*/
-	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250.0, 250.0, 5, 5);
+	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 100);
 	floorMap.createFloor(floor_vertices, floor_faces);
 
 	// FIXME: add code to create bone and cylinder geometry
@@ -378,9 +378,16 @@ int main(int argc, char* argv[])
 
 		// Then draw floor.
 		if (draw_floor) {
+			if(floorMap.isDirty()){
+				floor_vertices.clear();
+				floor_faces.clear();
+				floorMap.createFloor(floor_vertices, floor_faces);
+				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
+			}
 			floor_pass.setup();
 			// Draw our triangles.
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
+			floorMap.updateZ(0.01);
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {
