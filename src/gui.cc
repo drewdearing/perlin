@@ -112,19 +112,25 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 
 		glm::vec3 mouse_world = nearPlane-lastPlane;
 		glm::vec3 axis = glm::normalize(glm::cross(look_, mouse_world));
-		float r = M_PI/20.0f;
 
+		float r = M_PI/50.0f;
+
+		eye_ = center_ + glm::rotate(eye_-center_, r, axis);
+		look_ = glm::normalize(center_ - eye_);
 		tangent_ = glm::rotate(tangent_, r, axis);
-		up_ = glm::rotate(up_, r, axis);
-		look_ = glm::rotate(look_, r, axis);
+		tangent_.y = 0;
+		tangent_ = glm::normalize(tangent_);
+		up_ = glm::cross(look_, tangent_);
 
-		std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
+		/*std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
 		for(int i=0; i < parentBones->size(); i++){
 			Bone * b = parentBones->at(i);
 			b->rotate(r, axis);
 		}
 
-		pose_changed_ = true;
+		pose_changed_ = true;*/
+
+		
 	}
 }
 
@@ -136,11 +142,6 @@ void GUI::mouseButtonCallback(int button, int action, int mods)
 
 void GUI::updateMatrices()
 {
-	// Compute our view, and projection matrices.
-	if (fps_mode_)
-		center_ = eye_ + camera_distance_ * look_;
-	else
-		eye_ = center_ - camera_distance_ * look_;
 
 	view_matrix_ = glm::lookAt(eye_, center_, up_);
 	light_position_ = glm::vec4(eye_, 1.0f);
@@ -188,11 +189,13 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	} else if (key == GLFW_KEY_SPACE) {
 		mesh_->height_offset += 1;
 		center_.y += 1;
+		eye_ = center_ - look_ * camera_distance_;
 		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_LEFT_SHIFT) {
 		mesh_->height_offset -= 1;
 		center_.y -= 1;
+		eye_ = center_ - look_ * camera_distance_;
 		pose_changed_ = true;
 		return true;
 	}
