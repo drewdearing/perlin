@@ -165,15 +165,18 @@ public:
 		int min_y = std::max((int)ceil(newY - radius), 0);
 		int max_y = std::min((int)floor(newY + radius), height-1);
 
-		if(max_x - newX < newX - min_x)
-			newX = max_x - radius;
-		else
-			newX = min_x + radius;
-
-		if(max_y - newY < newY - min_y)
-			newY = max_y - radius;
-		else
-			newY = min_y + radius;
+		if(min_x == 0 || max_x == width-1){
+			if(max_x - newX < newX - min_x)
+				newX = max_x - radius;
+			else
+				newX = min_x + radius;
+		}
+		if(min_y == 0 || max_y == height-1){
+			if(max_y - newY < newY - min_y)
+				newY = max_y - radius;
+			else
+				newY = min_y + radius;
+		}
 
 		bool change = newX != centerX || newY != centerY;
 
@@ -191,6 +194,10 @@ public:
 		float wY = (centerY - originX) * vert_distance;
 
 		return glm::vec2(wX, wY);
+	}
+
+	float getVertDistance() {
+		return vert_distance;
 	}
 	
 };

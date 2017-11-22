@@ -196,31 +196,20 @@ bool GUI::setCurrentBone(int i)
 
 bool GUI::captureWASDUPDOWN(int key, int action)
 {
+	glm::vec2 c = floorMap->getCenter();
+	glm::vec2 dir_f = floorMap->getVertDistance() * glm::normalize(glm::vec2(look_.z, look_.x));
+	glm::vec2 dir_s = floorMap->getVertDistance() * glm::normalize(glm::vec2(tangent_.z, tangent_.x));
 	if (key == GLFW_KEY_W) {
-		
-			glm::vec2 center = floorMap->getCenter();
-			glm::vec2 dir = glm::vec2(look_.x, look_.z);
-			glm::vec2 newCenter = center + dir;
-			floorMap->setCenter(newCenter.x, newCenter.y);
-		
+		floorMap->setCenter(c.x+dir_f.x, c.y+dir_f.y);
 		return true;
 	} else if (key == GLFW_KEY_S) {
-		if (fps_mode_)
-			eye_ -= zoom_speed_ * look_;
-		else
-			camera_distance_ += zoom_speed_;
+		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.y);
 		return true;
 	} else if (key == GLFW_KEY_A) {
-		if (fps_mode_)
-			eye_ -= pan_speed_ * tangent_;
-		else
-			center_ -= pan_speed_ * tangent_;
+		floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.y);
 		return true;
 	} else if (key == GLFW_KEY_D) {
-		if (fps_mode_)
-			eye_ += pan_speed_ * tangent_;
-		else
-			center_ += pan_speed_ * tangent_;
+		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.y);
 		return true;
 	} else if (key == GLFW_KEY_DOWN) {
 		if (fps_mode_)
