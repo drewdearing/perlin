@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 		render radius of 25 vertices
 		non-explicit seed
 	*/
-	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 25);
+	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -5, 5, 5, 25);
 	floorMap.createFloor(floor_vertices, floor_faces);
 
 	// FIXME: add code to create bone and cylinder geometry
@@ -382,7 +382,15 @@ int main(int argc, char* argv[])
 				floor_vertices.clear();
 				floor_faces.clear();
 				floorMap.createFloor(floor_vertices, floor_faces);
-				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
+				floor_pass_input = RenderDataInput();
+				floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
+				floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
+				floor_pass = RenderPass(-1,
+						floor_pass_input,
+						{ vertex_shader, geometry_shader, floor_fragment_shader},
+						{ floor_model, std_view, std_proj, std_light },
+						{ "fragment_color" }
+						);
 			}
 			floor_pass.setup();
 			// Draw our triangles.
