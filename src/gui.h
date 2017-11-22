@@ -21,7 +21,6 @@ public:
 	~GUI();
 	void assignMesh(Mesh*);
 	void assignFloorMap(PerlinMap *);
-	void centerMouse();
 
 	void keyCallback(int key, int scancode, int action, int mods);
 	void mousePosCallback(double mouse_x, double mouse_y);

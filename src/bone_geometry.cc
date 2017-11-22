@@ -91,7 +91,7 @@ void Mesh::updateAnimation()
 			else{
 				newWorldCoords = vertices.at(vid);
 			}
-
+			newWorldCoords.y += height_offset;
 			new_vertices.at(vid) += weight * newWorldCoords;
 		}
 	}

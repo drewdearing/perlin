@@ -467,6 +467,7 @@ struct Mesh {
 	std::vector<Material> materials;
 	BoundingBox bounds;
 	Skeleton skeleton;
+	float height_offset;
 
 	void loadpmd(const std::string& fn);
 	void updateAnimation();

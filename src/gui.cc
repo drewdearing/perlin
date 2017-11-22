@@ -185,17 +185,15 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	} else if (key == GLFW_KEY_D) {
 		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.y);
 		return true;
-	} else if (key == GLFW_KEY_DOWN) {
-		if (fps_mode_)
-			eye_ -= pan_speed_ * up_;
-		else
-			center_ -= pan_speed_ * up_;
+	} else if (key == GLFW_KEY_SPACE) {
+		mesh_->height_offset += 1;
+		center_.y += 1;
+		pose_changed_ = true;
 		return true;
-	} else if (key == GLFW_KEY_UP) {
-		if (fps_mode_)
-			eye_ += pan_speed_ * up_;
-		else
-			center_ += pan_speed_ * up_;
+	} else if (key == GLFW_KEY_LEFT_SHIFT) {
+		mesh_->height_offset -= 1;
+		center_.y -= 1;
+		pose_changed_ = true;
 		return true;
 	}
 	return false;
