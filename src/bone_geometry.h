@@ -365,6 +365,7 @@ class Skeleton {
 private:
 	std::vector<Joint *> roots;
 	std::vector<Joint *> joints;
+	std::vector<Bone *> parent_bones;
 	std::vector<Bone *> bones;
 public:
 
@@ -398,6 +399,7 @@ public:
 			if(parentRoot != NULL){
 				Bone* b = new Bone(parentRoot, j, bones.size(), NULL);
 				parentRoot->bones.push_back(b);
+				parent_bones.push_back(b);
 				bones.push_back(b);
 				joints.push_back(j);
 				found = true;
@@ -427,6 +429,10 @@ public:
 			return bones.at(i);
 		else
 			return NULL;
+	}
+
+	std::vector<Bone *> * parentBones(){
+		return &parent_bones;
 	}
 
 	Joint * getJoint(unsigned i){

@@ -25,6 +25,7 @@ GUI::GUI(GLFWwindow* window)
 	:window_(window)
 {
 	glfwSetWindowUserPointer(window_, this);
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window_, KeyCallback);
 	glfwSetCursorPosCallback(window_, MousePosCallback);
 	glfwSetMouseButtonCallback(window_, MouseButtonCallback);
@@ -103,55 +104,28 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	current_y_ = window_height_ - mouse_y;
 	float delta_x = current_x_ - last_x_;
 	float delta_y = current_y_ - last_y_;
-	if (sqrt(delta_x * delta_x + delta_y * delta_y) < 1e-15)
-		return;
-	glm::vec3 mouse_direction = glm::normalize(glm::vec3(delta_x, delta_y, 0.0f));
-	glm::vec2 mouse_start = glm::vec2(last_x_, last_y_);
-	glm::vec2 mouse_end = glm::vec2(current_x_, current_y_);
-	glm::uvec4 viewport = glm::uvec4(0, 0, window_width_, window_height_);
 
-	bool drag_camera = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_RIGHT;
-	bool drag_bone = drag_state_ && current_button_ == GLFW_MOUSE_BUTTON_LEFT;
+	if(delta_x != 0 || delta_y != 0){
+		glm::uvec4 viewport = glm::uvec4(0, 0, window_width_, window_height_);
+		glm::vec3 lastPlane = glm::unProject(glm::vec3(last_x_, last_y_, 0.0), view_matrix_, projection_matrix_, viewport);
+		glm::vec3 nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
 
-	//calculate world coordinates of mouse movements
-	glm::vec3 lastPlane = glm::unProject(glm::vec3(last_x_, last_y_, 0.0), view_matrix_, projection_matrix_, viewport);
-	glm::vec3 nearPlane = glm::unProject(glm::vec3(current_x_, current_y_, 0.0), view_matrix_, projection_matrix_, viewport);
-	glm::vec3 ray_world = glm::normalize(nearPlane-eye_);
+		glm::vec3 mouse_world = nearPlane-lastPlane;
+		glm::vec3 axis = glm::normalize(glm::cross(look_, mouse_world));
+		float r = M_PI/20.0f;
 
-	if (drag_camera) {
-		glm::vec3 axis = glm::normalize(
-				orientation_ *
-				glm::vec3(mouse_direction.y, -mouse_direction.x, 0.0f)
-				);
-		orientation_ =
-			glm::mat3(glm::rotate(rotation_speed_, axis) * glm::mat4(orientation_));
-		tangent_ = glm::column(orientation_, 0);
-		up_ = glm::column(orientation_, 1);
-		look_ = glm::column(orientation_, 2);
-	} else if (drag_bone && current_bone_ != -1) {
-		//rotate current bone
-		Bone* b = mesh_->skeleton.getBone(current_bone_);
-		float angle = b->rotationDirection(rotation_speed_, look_, nearPlane-lastPlane);
-		b->rotate(angle, look_);
-		pose_changed_ = true;
-		return;
-	}
+		tangent_ = glm::rotate(tangent_, r, axis);
+		up_ = glm::rotate(up_, r, axis);
+		look_ = glm::rotate(look_, r, axis);
 
-	// FIXME: highlight bones that have been moused over
-
-	float min_t = std::numeric_limits<float>::max();
-	int closest_bone_id = -1;
-	for(int i = 0; i < mesh_->getNumberOfBones(); i++){
-		Bone * b = mesh_->skeleton.getBone(i);
-		float t;
-		if(b->intersect(ray_world, eye_, t) && t < min_t){
-			min_t = t;
-			closest_bone_id = b->getID();
+		std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
+		for(int i=0; i < parentBones->size(); i++){
+			Bone * b = parentBones->at(i);
+			b->rotate(r, axis);
 		}
+
+		pose_changed_ = true;
 	}
-	
-	current_bone_ = closest_bone_id;
-	intersect = eye_ + min_t * ray_world;
 }
 
 void GUI::mouseButtonCallback(int button, int action, int mods)

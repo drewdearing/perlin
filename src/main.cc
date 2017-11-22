@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 		render radius of 25 vertices
 		non-explicit seed
 	*/
-	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -5, 5, 5, 25);
+	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 25);
 	floorMap.createFloor(floor_vertices, floor_faces);
 
 	// FIXME: add code to create bone and cylinder geometry
@@ -340,7 +340,7 @@ int main(int argc, char* argv[])
 		glDepthFunc(GL_LESS);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glCullFace(GL_BACK);
-
+		
 		gui.updateMatrices();
 		mats = gui.getMatrixPointers();
 
