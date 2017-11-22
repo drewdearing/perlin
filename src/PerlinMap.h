@@ -80,10 +80,10 @@ public:
 		float distanceY;
 		float elevation;
 
-		int min_x = ceil(centerX - radius);
-		int max_x = floor(centerX + radius);
-		int min_y = ceil(centerY - radius);
-		int max_y = floor(centerY + radius);
+		int min_x = std::max((int)ceil(centerX - radius), 0);
+		int max_x = std::min((int)floor(centerX + radius), width-1);
+		int min_y = std::max((int)ceil(centerY - radius), 0);
+		int max_y = std::min((int)floor(centerY + radius), height-1);
 		int current_width = max_x - min_x;
 		int current_height = max_y - min_y;
 
@@ -160,23 +160,14 @@ public:
 		float newX = originX + x/vert_distance;
 		float newY = originY + y/vert_distance;
 
-		int min_x = std::max((int)ceil(newX - radius), 0);
-		int max_x = std::min((int)floor(newX + radius), width-1);
-		int min_y = std::max((int)ceil(newY - radius), 0);
-		int max_y = std::min((int)floor(newY + radius), height-1);
-
-		if(min_x == 0 || max_x == width-1){
-			if(max_x - newX < newX - min_x)
-				newX = max_x - radius;
-			else
-				newX = min_x + radius;
-		}
-		if(min_y == 0 || max_y == height-1){
-			if(max_y - newY < newY - min_y)
-				newY = max_y - radius;
-			else
-				newY = min_y + radius;
-		}
+		if(newX < 0)
+			newX = 0;
+		if(newX >= width)
+			newX = width - 1;
+		if(newY < 0)
+			newY = 0;
+		if(newY >= height)
+			newY = height - 1;
 
 		bool change = newX != centerX || newY != centerY;
 
