@@ -425,7 +425,7 @@ public:
 	}
 
 	Bone * getBone(unsigned i){
-		if(i >= 0 && i < bones.size())
+		if(i < bones.size())
 			return bones.at(i);
 		else
 			return NULL;
@@ -436,7 +436,7 @@ public:
 	}
 
 	Joint * getJoint(unsigned i){
-		if(i >= 0 && i < joints.size())
+		if(i < joints.size())
 			return joints.at(i);
 		else
 			return NULL;

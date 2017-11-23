@@ -7,7 +7,7 @@
 #include "PerlinMap.h"
 #include <chrono>
 
-class Mesh;
+struct Mesh;
 
 /*
  * Hint: call glUniformMatrix4fv on thest pointers
@@ -23,6 +23,7 @@ public:
 	void assignMesh(Mesh*);
 	void assignFloorMap(PerlinMap *);
 	void updateTime();
+	void updateFrameRate();
 
 	void keyCallback(int key, int scancode, int action, int mods);
 	void mousePosCallback(double mouse_x, double mouse_y);
@@ -63,6 +64,7 @@ private:
 	bool transparent_ = false;
 	int current_bone_ = -1;
 	int current_button_ = -1;
+	int frame_rate;
 	float roll_speed_ = 0.1;
 	float last_x_ = 0.0f, last_y_ = 0.0f, current_x_ = 0.0f, current_y_ = 0.0f;
 	float camera_distance_ = 30.0;
@@ -71,6 +73,7 @@ private:
 	float zoom_speed_ = 0.1f;
 	float aspect_;
 	float frame = 1000.0f/60.0f;
+
 	std::chrono::high_resolution_clock::time_point current_time;
 	std::chrono::duration<float, std::milli> delta_time;
 

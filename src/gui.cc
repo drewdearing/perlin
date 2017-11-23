@@ -10,17 +10,6 @@
 #include <ctime>
 #include <limits>
 
-namespace {
-	// Intersect a cylinder with radius 1/2, height 1, with base centered at
-	// (0, 0, 0) and up direction (0, 1, 0).
-	bool IntersectCylinder(const glm::vec3& origin, const glm::vec3& direction,
-			float radius, float height, float* t)
-	{
-		//Cylinder Intersection is handled in Bone Class
-		return true;
-	}
-}
-
 GUI::GUI(GLFWwindow* window)
 	:window_(window)
 {
@@ -100,6 +89,12 @@ void GUI::updateTime(){
 	std::chrono::high_resolution_clock::time_point old_time = current_time;
 	current_time = std::chrono::high_resolution_clock::now();
 	delta_time = current_time-old_time;
+	updateFrameRate();
+}
+
+void GUI::updateFrameRate(){
+	frame_rate = floor(1000.0f/delta_time.count());
+	std::cout<<frame_rate<<std::endl;
 }
 
 void GUI::mousePosCallback(double mouse_x, double mouse_y)

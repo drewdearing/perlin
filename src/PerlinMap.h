@@ -8,6 +8,9 @@ private:
 	int height;
 	int width;
 	int octaves;
+	int diameter_x;
+	int diameter_y;
+	int radius;
 	double frequency;
 	double fx;
 	double fy;
@@ -20,11 +23,10 @@ private:
 	float centerX;
 	float centerY;
 	float vert_distance;
-	float radius;
 	bool dirty;
 	bool seedSet;
 public:
-	PerlinMap(int h, int w, int o, double f, float min, float max, float d, float r):
+	PerlinMap(int h, int w, int o, double f, float min, float max, float d, int r):
 	height(h),
 	width(w),
 	octaves(o),
@@ -38,7 +40,7 @@ public:
 		build();
 	};
 
-	PerlinMap(int h, int w, int o, double f, float min, float max, float d, float r, std::uint32_t s):
+	PerlinMap(int h, int w, int o, double f, float min, float max, float d, int r, std::uint32_t s):
 	height(h),
 	width(w),
 	octaves(o),
@@ -63,6 +65,14 @@ public:
 		fy = height / frequency;
 		fz = 0;
 
+		diameter_x = radius * 2;
+		diameter_y = radius * 2;
+
+		if(diameter_x > width)
+			diameter_x = width;
+		if(diameter_y > height)
+			diameter_y = height;
+
 		originX = (width - 1)/2.0f;
 		originY = (height - 1)/2.0f;
 
@@ -80,10 +90,20 @@ public:
 		float distanceY;
 		float elevation;
 
-		int min_x = std::max((int)ceil(centerX - radius), 0);
-		int max_x = std::min((int)floor(centerX + radius), width-1);
-		int min_y = std::max((int)ceil(centerY - radius), 0);
-		int max_y = std::min((int)floor(centerY + radius), height-1);
+		int min_x = std::max((int)ceil(centerX - float(radius)), 0);
+		int max_x = std::min((int)floor(centerX + float(radius)), width-1);
+		int min_y = std::max((int)ceil(centerY - float(radius)), 0);
+		int max_y = std::min((int)floor(centerY + float(radius)), height-1);
+
+		if(min_x == 0)
+			max_x = diameter_x - 1;
+		else if(max_x == width-1)
+			min_x = width - diameter_x;
+		if(min_y == 0)
+			max_y = diameter_y - 1;
+		else if(max_y == height-1)
+			min_y = height - diameter_y;
+
 		int current_width = max_x - min_x;
 		int current_height = max_y - min_y;
 
@@ -115,7 +135,7 @@ public:
 				vertex[2] = index + current_width + 1;
 				vertex[3] = vertex[2] + 1;
 
-				if(defaultDiag){
+				if(1){ //temporarily do not alternate diag
 					faces.push_back(glm::uvec3(vertex[2], vertex[0], vertex[1]));
 					faces.push_back(glm::uvec3(vertex[3], vertex[2], vertex[1]));
 				}
@@ -135,6 +155,39 @@ public:
 			distanceX = (float(currentX) - centerX) * vert_distance;
 			elevation = min_height + (perlin.octaveNoise0_1(currentX / fx, currentY / fy, fz, octaves) * (max_height-min_height));
 			vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
+		}
+
+		dirty = false;
+	}
+
+	void updateFloor(std::vector<glm::vec4>& vertices){
+		int currentX;
+		int currentY;
+		float distanceX;
+		float distanceY;
+		float elevation;
+
+		int min_x = std::max((int)ceil(centerX - float(radius)), 0);
+		int max_x = std::min((int)floor(centerX + float(radius)), width-1);
+		int min_y = std::max((int)ceil(centerY - float(radius)), 0);
+		int max_y = std::min((int)floor(centerY + float(radius)), height-1);
+
+		if(min_x == 0)
+			max_x = diameter_x - 1;
+		else if(max_x == width-1)
+			min_x = width - diameter_x;
+		if(min_y == 0)
+			max_y = diameter_y - 1;
+		else if(max_y == height-1)
+			min_y = height - diameter_y;
+
+		for(int y = min_y; y <= max_y; y++){
+			distanceY = (float(y) - centerY) * vert_distance;
+			for(int x = min_x; x <= max_x; x++){
+				distanceX = (float(x) - centerX) * vert_distance;
+				elevation = min_height + (perlin.octaveNoise0_1(x / fx, y / fy, fz, octaves) * (max_height-min_height));
+				vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
+			}
 		}
 
 		dirty = false;

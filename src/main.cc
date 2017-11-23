@@ -381,17 +381,8 @@ int main(int argc, char* argv[])
 		if (draw_floor) {
 			if(floorMap.isDirty()){
 				floor_vertices.clear();
-				floor_faces.clear();
-				floorMap.createFloor(floor_vertices, floor_faces);
-				floor_pass_input = RenderDataInput();
-				floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
-				floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
-				floor_pass = RenderPass(-1,
-						floor_pass_input,
-						{ vertex_shader, geometry_shader, floor_fragment_shader},
-						{ floor_model, std_view, std_proj, std_light },
-						{ "fragment_color" }
-						);
+				floorMap.updateFloor(floor_vertices);
+				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
 			}
 			floor_pass.setup();
 			// Draw our triangles.
