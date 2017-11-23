@@ -32,6 +32,8 @@ void GUI::assignMesh(Mesh* mesh)
 {
 	mesh_ = mesh;
 	center_ = mesh_->getCenter();
+	center_.y += mesh_->height_offset;
+	eye_ = center_ - look_ * camera_distance_;
 }
 
 void GUI::assignFloorMap(PerlinMap * map){
@@ -131,13 +133,13 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		axis.x = 0;
 		axis.z = 0;
 
-		std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
+		/*std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
 		for(int i=0; i < parentBones->size(); i++){
 			Bone * b = parentBones->at(i);
 			b->rotate(r, axis);
 		}
 
-		pose_changed_ = true;
+		pose_changed_ = true;*/
 
 		
 	}
