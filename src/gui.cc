@@ -120,7 +120,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		tangent_ = glm::rotate(tangent_, r, axis);
 		tangent_.y = 0;
 		tangent_ = glm::normalize(tangent_);
-		up_ = glm::cross(look_, tangent_);
+		up_ = -glm::normalize(glm::cross(look_, tangent_));
 
 		/*std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
 		for(int i=0; i < parentBones->size(); i++){
