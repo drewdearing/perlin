@@ -82,6 +82,8 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		current_bone_ %= mesh_->getNumberOfBones();
 	} else if (key == GLFW_KEY_T && action != GLFW_RELEASE) {
 		transparent_ = !transparent_;
+	} else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
+		display_fr = !display_fr;
 	}
 }
 
@@ -93,8 +95,10 @@ void GUI::updateTime(){
 }
 
 void GUI::updateFrameRate(){
-	frame_rate = floor(1000.0f/delta_time.count());
-	std::cout<<frame_rate<<std::endl;
+	if(display_fr){
+		frame_rate = floor(1000.0f/delta_time.count());
+		std::cout<<frame_rate<<std::endl;
+	}
 }
 
 void GUI::mousePosCallback(double mouse_x, double mouse_y)
