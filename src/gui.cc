@@ -96,6 +96,12 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	}
 }
 
+void GUI::updateTime(){
+	std::chrono::high_resolution_clock::time_point old_time = current_time;
+	current_time = std::chrono::high_resolution_clock::now();
+	delta_time = current_time-old_time;
+}
+
 void GUI::mousePosCallback(double mouse_x, double mouse_y)
 {
 	last_x_ = current_x_;
@@ -113,22 +119,26 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		glm::vec3 mouse_world = nearPlane-lastPlane;
 		glm::vec3 axis = glm::normalize(glm::cross(look_, mouse_world));
 
-		float r = M_PI/50.0f;
+		float r = M_PI/50.0f * (delta_time.count()/frame);
 
+
+		glm::vec3 old_look_ = look_;
 		eye_ = center_ + glm::rotate(eye_-center_, r, axis);
 		look_ = glm::normalize(center_ - eye_);
 		tangent_ = glm::rotate(tangent_, r, axis);
 		tangent_.y = 0;
 		tangent_ = glm::normalize(tangent_);
 		up_ = -glm::normalize(glm::cross(look_, tangent_));
+		axis.x = 0;
+		axis.z = 0;
 
-		/*std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
+		std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
 		for(int i=0; i < parentBones->size(); i++){
 			Bone * b = parentBones->at(i);
 			b->rotate(r, axis);
 		}
 
-		pose_changed_ = true;*/
+		pose_changed_ = true;
 
 		
 	}

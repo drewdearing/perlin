@@ -326,6 +326,7 @@ int main(int argc, char* argv[])
 	bool draw_skeleton = true;
 	bool draw_object = true;
 	bool draw_cylinder = true;
+	gui.updateTime();
 
 	while (!glfwWindowShouldClose(window)) {
 		// Setup some basic window stuff.
@@ -423,6 +424,7 @@ int main(int argc, char* argv[])
 		// Poll and swap.
 		glfwPollEvents();
 		glfwSwapBuffers(window);
+		gui.updateTime();
 	}
 	glfwDestroyWindow(window);
 	glfwTerminate();

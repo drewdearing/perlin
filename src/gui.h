@@ -5,6 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <GLFW/glfw3.h>
 #include "PerlinMap.h"
+#include <chrono>
 
 class Mesh;
 
@@ -21,6 +22,7 @@ public:
 	~GUI();
 	void assignMesh(Mesh*);
 	void assignFloorMap(PerlinMap *);
+	void updateTime();
 
 	void keyCallback(int key, int scancode, int action, int mods);
 	void mousePosCallback(double mouse_x, double mouse_y);
@@ -68,6 +70,10 @@ private:
 	float rotation_speed_ = 0.02f;
 	float zoom_speed_ = 0.1f;
 	float aspect_;
+	float frame = 1000.0f/60.0f;
+	std::chrono::high_resolution_clock::time_point current_time;
+	std::chrono::duration<float, std::milli> delta_time;
+
 
 	glm::vec3 intersect;
 
