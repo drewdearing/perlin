@@ -94,8 +94,8 @@ public:
 				currentX = min_x + x;
 				currentY = min_y + y;
 
-				bool xEven = x % 2 == 0;
-				bool yEven = y % 2 == 0;
+				bool xEven = currentX % 2 == 0;
+				bool yEven = currentY % 2 == 0;
 				bool defaultDiag = (xEven && yEven) || (!xEven && !yEven);
 
 				distanceX = (float(currentX) - centerX) * vert_distance;
