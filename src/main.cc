@@ -153,7 +153,7 @@ int main(int argc, char* argv[])
 		mesh_center += mesh.vertices[i];
 	}
 	mesh_center /= mesh.vertices.size();
-	mesh.height_offset = floorMap.getCoordinate(0,0).y;
+	mesh.height_offset = floorMap.getElevation(0,0);
 
 
 	create_skel(mesh, skel_vertices, skel_lines);

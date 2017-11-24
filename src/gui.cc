@@ -74,6 +74,13 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		}
 	} else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
 		fps_mode_ = !fps_mode_;
+		if(!fps_mode_){
+			mesh_->height_offset = floorMap->getElevation(0,0);
+			center_ = mesh_->getCenter();
+			center_.y += mesh_->height_offset;
+			eye_ = center_ - look_ * camera_distance_;
+			pose_changed_ = true;
+		}
 	} else if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_RELEASE) {
 		current_bone_--;
 		current_bone_ += mesh_->getNumberOfBones();
@@ -183,19 +190,65 @@ bool GUI::setCurrentBone(int i)
 bool GUI::captureWASDUPDOWN(int key, int action)
 {
 	glm::vec2 c = floorMap->getCenter();
-	glm::vec2 dir_f = floorMap->getVertDistance() * glm::normalize(glm::vec2(look_.z, look_.x));
-	glm::vec2 dir_s = floorMap->getVertDistance() * glm::normalize(glm::vec2(tangent_.z, tangent_.x));
+	glm::vec3 dir_f;
+	glm::vec3 dir_s;
+
+	if(fps_mode_){
+		dir_f = floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
+		dir_s = floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
+	}
+	else{
+		dir_f = floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, 0, look_.x));
+		dir_s = floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
+	}
+
 	if (key == GLFW_KEY_W) {
-		floorMap->setCenter(c.x+dir_f.x, c.y+dir_f.y);
+		floorMap->setCenter(c.x+dir_f.x, c.y+dir_f.z);
+		if(fps_mode_){
+			mesh_->height_offset += dir_f.y;
+			center_.y += dir_f.y;
+		}
+		else{
+			mesh_->height_offset = floorMap->getElevation(0,0);
+			center_ = mesh_->getCenter();
+			center_.y += mesh_->height_offset;
+		}
+		eye_ = center_ - look_ * camera_distance_;
+		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_S) {
-		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.y);
+		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.z);
+		if(fps_mode_){
+			mesh_->height_offset -= dir_f.y;
+			center_.y -= dir_f.y;
+		}
+		else{
+			mesh_->height_offset = floorMap->getElevation(0,0);
+			center_ = mesh_->getCenter();
+			center_.y += mesh_->height_offset;
+		}
+		eye_ = center_ - look_ * camera_distance_;
+		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_A) {
-		floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.y);
+		floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.z);
+		if(!fps_mode_){
+			mesh_->height_offset = floorMap->getElevation(0,0);
+			center_ = mesh_->getCenter();
+			center_.y += mesh_->height_offset;
+			eye_ = center_ - look_ * camera_distance_;
+			pose_changed_ = true;
+		}
 		return true;
 	} else if (key == GLFW_KEY_D) {
-		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.y);
+		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.z);
+		if(!fps_mode_){
+			mesh_->height_offset = floorMap->getElevation(0,0);
+			center_ = mesh_->getCenter();
+			center_.y += mesh_->height_offset;
+			eye_ = center_ - look_ * camera_distance_;
+			pose_changed_ = true;
+		}
 		return true;
 	} else if (key == GLFW_KEY_SPACE) {
 		mesh_->height_offset += 1;

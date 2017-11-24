@@ -202,11 +202,56 @@ public:
 		return dirty;
 	}
 
-	glm::vec4 getCoordinate(int x, int y){
-		float distanceX = (float(x) - centerX) * vert_distance;
-		float distanceY = (float(y) - centerY) * vert_distance;
-		float elevation = min_height + (perlin.octaveNoise0_1(float(x) / fx, float(y) / fy, fz, octaves) * (max_height-min_height));
-		return glm::vec4(distanceY, elevation, distanceX, 1);
+	float getElevation(float x, float y){
+		float newX = centerX + x/vert_distance;
+		float newY = centerY + y/vert_distance;
+		float elevation;
+
+		if(floor(newX) == newX && floor(newY) == newY){
+			elevation = min_height + (perlin.octaveNoise0_1(float(x) / fx, float(y) / fy, fz, octaves) * (max_height-min_height));
+		}
+		else{
+			int square_x = floor(newX);
+			int square_y = floor(newY);
+			int vertex[4][2];
+			float v_elevation[4];
+			float distance[4];
+			float weight[4];
+			float total_distance = 0;
+
+			vertex[0][0] = square_x;
+			vertex[0][1] = square_y;
+
+			vertex[1][0] = square_x + 1;
+			vertex[1][1] = square_y;
+
+			vertex[2][0] = square_x;
+			vertex[2][1] = square_y + 1;
+
+			vertex[3][0] = square_x + 1;
+			vertex[3][1] = square_y + 1;
+
+			for(int i = 0; i < 4; i++){
+				glm::vec2 local_distance;
+				v_elevation[i] = min_height + (perlin.octaveNoise0_1(float(vertex[i][0]) / fx, float(vertex[i][1]) / fy, fz, octaves) * (max_height-min_height));
+				local_distance[0] = newX - float(vertex[i][0]);
+				local_distance[1] = newY - float(vertex[i][1]);
+				distance[i] = glm::length(local_distance);
+				total_distance += distance[i];
+			}
+			weight[0] = distance[0]/total_distance;
+			weight[1] = distance[1]/total_distance;
+			weight[2] = distance[2]/total_distance;
+			weight[3] = distance[3]/total_distance;
+
+			elevation = weight[0] * v_elevation[0] 
+					  + weight[1] * v_elevation[1]
+					  + weight[2] * v_elevation[2]
+					  + weight[3] * v_elevation[3];
+
+		}
+
+		return elevation;
 	}
 
 	bool setCenter(float x, float y){
