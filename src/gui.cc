@@ -251,16 +251,20 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		return true;
 	} else if (key == GLFW_KEY_SPACE) {
-		mesh_->height_offset += 1;
-		center_.y += 1;
-		eye_ = center_ - look_ * camera_distance_;
-		pose_changed_ = true;
+		if(fps_mode_){
+			mesh_->height_offset += 1;
+			center_.y += 1;
+			eye_ = center_ - look_ * camera_distance_;
+			pose_changed_ = true;
+		}
 		return true;
 	} else if (key == GLFW_KEY_LEFT_SHIFT) {
-		mesh_->height_offset -= 1;
-		center_.y -= 1;
-		eye_ = center_ - look_ * camera_distance_;
-		pose_changed_ = true;
+		if(fps_mode_){
+			mesh_->height_offset -= 1;
+			center_.y -= 1;
+			eye_ = center_ - look_ * camera_distance_;
+			pose_changed_ = true;
+		}
 		return true;
 	}
 	return false;
