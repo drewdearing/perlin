@@ -5,8 +5,6 @@
 class PerlinMap {
 private:
 	siv::PerlinNoise perlin;
-	std::vector<glm::vec4> normalMap;
-	std::vector<glm::vec4> heightMap;
 	int height;
 	int width;
 	int octaves;
@@ -83,74 +81,6 @@ public:
 		seed = perlin.getSeed();
 		seedSet = true;
 		dirty = true;
-
-	}
-
-	unsigned normalMapSize(){
-		return normalMap.size();
-	}
-
-	void createNormalMap(){
-		int front;
-		int side;
-		float coord[3][2];
-		float elevation[3];
-		glm::vec3 point[3];
-		glm::vec3 vector[2];
-		for(int y = 0; y < height; y++){
-			if(y > 0)
-				front = y - 1;
-			else
-				front = y + 1;
-			for(int x = 0; x < width; x++){
-				if(x > 0)
-					side = x - 1;
-				else
-					side = x + 1;
-				elevation[0] = getVertexElevation(x, y);
-				elevation[1] = getVertexElevation(x, front);
-				elevation[2] = getVertexElevation(side, y);
-
-				coord[0][0] = (x - originX) * vert_distance;
-				coord[0][1] = (y - originY) * vert_distance;
-				coord[1][0] = coord[0][0];
-				coord[1][1] = (front - originY) * vert_distance;
-				coord[2][0] = (side - originX) * vert_distance;
-				coord[2][1] = coord[0][1];
-
-				point[0] = glm::vec3(coord[0][0], elevation[0], coord[0][1]);
-				point[1] = glm::vec3(coord[1][0], elevation[1], coord[1][1]);
-				point[2] = glm::vec3(coord[2][0], elevation[2], coord[2][1]);
-
-				vector[0] = point[1] - point[0];
-				vector[1] = point[2] - point[0];
-
-				normalMap.push_back(glm::vec4(glm::normalize(glm::cross(vector[1], vector[0])), 1));
-			}
-		}
-	}
-
-	void createHeightMap(){
-		float coord[2];
-		float elevation;
-		for(int y = 0; y < height; y++){
-			for(int x = 0; x < width; x++){
-				elevation = getVertexElevation(x, y);
-
-				coord[0] = (x - originX) * vert_distance;
-				coord[1] = (y - originY) * vert_distance;
-
-				heightMap.push_back(glm::vec4(glm::vec3(coord[0], elevation, coord[1]), 1));
-			}
-		}
-	}
-
-	std::vector<glm::vec4> * getNormalMap(){
-		return &normalMap;
-	}
-
-	std::vector<glm::vec4> * getHeightMap(){
-		return &normalMap;
 	}
 
 	void createFloor(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces){
@@ -354,7 +284,7 @@ public:
 
 	glm::vec2 getCenter(){
 		float wX = (centerX - originX) * vert_distance;
-		float wY = (centerY - originY) * vert_distance;
+		float wY = (centerY - originX) * vert_distance;
 
 		return glm::vec2(wX, wY);
 	}

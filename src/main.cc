@@ -26,10 +26,6 @@ const char* vertex_shader =
 #include "shaders/default.vert"
 ;
 
-const char* floor_vertex_shader =
-#include "shaders/floor.vert"
-;
-
 const char* geometry_shader =
 #include "shaders/default.geom"
 ;
@@ -145,8 +141,6 @@ int main(int argc, char* argv[])
 	*/
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 25);
 	floorMap.createFloor(floor_vertices, floor_faces);
-	floorMap.createNormalMap();
-	floorMap.createHeightMap();
 
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
@@ -270,7 +264,7 @@ int main(int argc, char* argv[])
 			},
 			{ std_model, std_view, std_proj,
 			  std_light,
-			  std_camera, object_alpha }, {},
+			  std_camera, object_alpha },
 			{ "fragment_color" }
 			);
 
@@ -282,7 +276,7 @@ int main(int argc, char* argv[])
 	RenderPass mesh_pass(-1,
 			mesh_pass_input,
 			{vertex_shader, line_geometry_shader, line_fragment_shader},
-			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha}, {},
+			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -292,7 +286,7 @@ int main(int argc, char* argv[])
 	RenderPass cyl_pass(-1,
 			cyl_pass_input,
 			{vertex_shader, line_geometry_shader, cyl_fragment_shader},
-			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha}, {},
+			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -302,7 +296,7 @@ int main(int argc, char* argv[])
 	RenderPass norm_pass(-1,
 			norm_pass_input,
 			{vertex_shader, line_geometry_shader, norm_fragment_shader},
-			{norm_mesh, std_view, std_proj, std_light, std_camera, object_alpha}, {},
+			{norm_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -312,7 +306,7 @@ int main(int argc, char* argv[])
 	RenderPass binorm_pass(-1,
 			binorm_pass_input,
 			{vertex_shader, line_geometry_shader, binorm_fragment_shader},
-			{binorm_mesh, std_view, std_proj, std_light, std_camera, object_alpha}, {},
+			{binorm_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
 			{ "fragment_color"}
 			);
 
@@ -321,8 +315,8 @@ int main(int argc, char* argv[])
 	floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
 	RenderPass floor_pass(-1,
 			floor_pass_input,
-			{ floor_vertex_shader, geometry_shader, floor_fragment_shader},
-			{ floor_model, std_view, std_proj, std_light}, {floorMap.getHeightMap(), floorMap.getNormalMap()},
+			{ vertex_shader, geometry_shader, floor_fragment_shader},
+			{ floor_model, std_view, std_proj, std_light },
 			{ "fragment_color" }
 			);
 
@@ -386,11 +380,11 @@ int main(int argc, char* argv[])
 
 		// Then draw floor.
 		if (draw_floor) {
-			/*if(floorMap.isDirty()){
+			if(floorMap.isDirty()){
 				floor_vertices.clear();
 				floorMap.updateFloor(floor_vertices);
 				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
-			}*/
+			}
 			floor_pass.setup();
 			// Draw our triangles.
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));

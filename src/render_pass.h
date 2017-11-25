@@ -18,7 +18,6 @@
 #include <map>
 #include <functional>
 #include <material.h>
-#include <sstream>
 
 /*
  * ShaderUniform: description of a uniform in a shader program.
@@ -131,7 +130,6 @@ public:
 	           const RenderDataInput& input,
 	           const std::vector<const char*> shaders, // Order: VS, GS, FS 
 	           const std::vector<ShaderUniform> uniforms,
-	           const std::vector<std::vector<glm::vec4> *> textures,
 	           const std::vector<const char*> output // Order: 0, 1, 2...
 		  );
 	~RenderPass();
@@ -160,14 +158,12 @@ private:
 	RenderDataInput input_;
 	std::vector<ShaderUniform> uniforms_;
 	std::vector<std::vector<ShaderUniform>> material_uniforms_;
-	std::vector<unsigned> glbuffers_, unilocs_, malocs_, texbuffers;
+
+	std::vector<unsigned> glbuffers_, unilocs_, malocs_;
 	std::vector<unsigned> gltextures_, matexids_;
-	std::vector<int> texuniforms;
-	std::vector<std::string> tex_names;
 	unsigned sampler2d_;
 	unsigned vs_ = 0, gs_ = 0, fs_ = 0;
 	unsigned sp_ = 0;
-	size_t textureIndexStart;
 	
 	static unsigned compileShader(const char*, int type);
 	static std::map<const char*, unsigned> shader_cache_;

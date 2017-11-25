@@ -36,7 +36,6 @@ RenderPass::RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
 	   const RenderDataInput& input,
 	   const std::vector<const char*> shaders, // Order: VS, GS, FS 
 	   const std::vector<ShaderUniform> uniforms,
-	   const std::vector<std::vector<glm::vec4> *> textures,
 	   const std::vector<const char*> output // Order: 0, 1, 2...
 	  )
 	: vao_(vao), input_(input), uniforms_(uniforms)
@@ -57,14 +56,10 @@ RenderPass::RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
 		glAttachShader(sp_, gs_);
 
 	// ... and then buffers
-	size_t nbuffer = input.getNBuffers() + textures.size();
-	textureIndexStart = input.getNBuffers();
-	if (input.hasIndex()){
+	size_t nbuffer = input.getNBuffers();
+	if (input.hasIndex())
 		nbuffer++;
-		textureIndexStart++;
-	}
 	glbuffers_.resize(nbuffer);
-	texbuffers.resize(textures.size());
 	CHECK_GL_ERROR(glGenBuffers(nbuffer, glbuffers_.data()));
 	for (int i = 0; i < input.getNBuffers(); i++) {
 		auto meta = input.getBufferMeta(i);
@@ -80,15 +75,6 @@ RenderPass::RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
 		CHECK_GL_ERROR(glEnableVertexAttribArray(meta.position));
 		// ... because we need program to bind location
 		CHECK_GL_ERROR(glBindAttribLocation(sp_, meta.position, meta.name.c_str()));
-	}
-
-	for(int i = textureIndexStart; i < nbuffer; i++){
-		int texture_index = i - textureIndexStart;
-		CHECK_GL_ERROR(glBindBuffer(GL_TEXTURE_BUFFER, glbuffers_[i]));
-		CHECK_GL_ERROR(glBufferData(GL_TEXTURE_BUFFER, textures[texture_index]->size() * sizeof(glm::vec4), textures[texture_index]->data(), GL_STATIC_DRAW));
-		
-		CHECK_GL_ERROR(glGenTextures(1, &texbuffers[texture_index]));
-		CHECK_GL_ERROR(glBindBuffer(GL_TEXTURE_BUFFER, 0));
 	}
 	// .. bind output position
 	for (size_t i = 0; i < output.size(); i++) {
@@ -115,12 +101,6 @@ RenderPass::RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
 	if (input_.hasMaterial()) {
 		createMaterialTexture();
 		initMaterialUniform();
-	}
-	texuniforms.resize(texbuffers.size());
-	tex_names.resize(texbuffers.size());
-	for(int i = 0; i < texbuffers.size(); i++){
-		tex_names[i] = std::string("texture").append(std::to_string(i));
-		CHECK_GL_ERROR(texuniforms[i] = glGetUniformLocation(sp_, tex_names[i].c_str()));
 	}
 }
 
@@ -279,16 +259,6 @@ void RenderPass::setup()
 	CHECK_GL_ERROR(glBindVertexArray(vao_));
 	// Use our program.
 	CHECK_GL_ERROR(glUseProgram(sp_));
-
-	for(int i = 0; i < texuniforms.size(); i++){
-		int texture_index = textureIndexStart + i;
-		CHECK_GL_ERROR(glActiveTexture(GL_TEXTURE0 + i));
-
-		CHECK_GL_ERROR(glBindTexture(GL_TEXTURE_BUFFER, texbuffers[i]));
-		CHECK_GL_ERROR(glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, glbuffers_[texture_index]));
-
-		glUniform1i(texuniforms[i], 0);
-	}
 
 	bind_uniforms(uniforms_, unilocs_);
 }
