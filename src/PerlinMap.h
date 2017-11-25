@@ -5,7 +5,6 @@
 class PerlinMap {
 private:
 	siv::PerlinNoise perlin;
-	siv::PerlinNoise water;
 	int height;
 	int width;
 	int octaves;
@@ -68,8 +67,6 @@ public:
 
 		diameter_x = radius * 2;
 		diameter_y = radius * 2;
-
-		water = siv::PerlinNoise();
 
 		if(diameter_x > width)
 			diameter_x = width;
