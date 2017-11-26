@@ -5,6 +5,7 @@
 class PerlinMap {
 private:
 	siv::PerlinNoise perlin;
+	std::vector<glm::vec4> vertex_normals;
 	int height;
 	int width;
 	int octaves;
@@ -135,14 +136,8 @@ public:
 				vertex[2] = index + current_width + 1;
 				vertex[3] = vertex[2] + 1;
 
-				if(1){ //temporarily do not alternate diag
-					faces.push_back(glm::uvec3(vertex[2], vertex[0], vertex[1]));
-					faces.push_back(glm::uvec3(vertex[3], vertex[2], vertex[1]));
-				}
-				else{
-					faces.push_back(glm::uvec3(vertex[3], vertex[2], vertex[0]));
-					faces.push_back(glm::uvec3(vertex[3], vertex[0], vertex[1]));
-				}
+				faces.push_back(glm::uvec3(vertex[2], vertex[0], vertex[1]));
+				faces.push_back(glm::uvec3(vertex[3], vertex[2], vertex[1]));
 			}
 		}
 
@@ -158,6 +153,74 @@ public:
 		}
 
 		dirty = false;
+	}
+
+	glm::vec4 getNormal(int x, int y, std::vector<glm::vec4>& vertices){
+		glm::vec3 normal;
+		if(x >= 0 && x < diameter_x){
+			if(y >= 0 && y < diameter_y){
+				int vert_index = y * diameter_x + x;
+				bool left = x - 1 >= 0 && y + 1 < diameter_y;
+				bool top = y - 1 >= 0 && x + 1 < diameter_x;
+				bool diag = x - 1 >= 0 && y - 1 >= 0;
+				bool self = x + 1 < diameter_x && y + 1 < diameter_y;
+
+				if(self){
+					glm::vec3 self_vertex[3];
+					self_vertex[0] = glm::vec3(vertices.at(vert_index + diameter_x));
+					self_vertex[1] = glm::vec3(vertices.at(vert_index));
+					self_vertex[2] = glm::vec3(vertices.at(vert_index + 1));
+					
+					normal += glm::normalize(glm::cross(self_vertex[1]-self_vertex[0], self_vertex[2]-self_vertex[0]));
+				}
+				if(left){
+					glm::vec3 left_vertex[4];
+
+					left_vertex[0] = glm::vec3(vertices.at(vert_index - 1));
+					left_vertex[1] = glm::vec3(vertices.at(vert_index));
+					left_vertex[2] = glm::vec3(vertices.at(vert_index + diameter_x - 1));
+					left_vertex[3] = glm::vec3(vertices.at(vert_index + diameter_x));
+
+					normal += glm::normalize(glm::cross(left_vertex[0]-left_vertex[2], left_vertex[1]-left_vertex[2]));
+
+					normal += glm::normalize(glm::cross(left_vertex[2]-left_vertex[3], left_vertex[1]-left_vertex[3]));
+				}
+				if(top){
+					glm::vec3 top_vertex[4];
+
+					top_vertex[0] = glm::vec3(vertices.at(vert_index - diameter_x));
+					top_vertex[1] = glm::vec3(vertices.at(vert_index - diameter_x + 1));
+					top_vertex[2] = glm::vec3(vertices.at(vert_index));
+					top_vertex[3] = glm::vec3(vertices.at(vert_index + 1));
+
+					normal += glm::normalize(glm::cross(top_vertex[0]-top_vertex[2], top_vertex[1]-top_vertex[2]));
+
+					normal += glm::normalize(glm::cross(top_vertex[2]-top_vertex[3], top_vertex[1]-top_vertex[3]));
+				}
+				if(diag){
+					glm::vec3 diag_vertex[3];
+					diag_vertex[0] = glm::vec3(vertices.at(vert_index));
+					diag_vertex[1] = glm::vec3(vertices.at(vert_index - 1));
+					diag_vertex[2] = glm::vec3(vertices.at(vert_index - diameter_x));
+					
+					normal += glm::normalize(glm::cross(diag_vertex[1]-diag_vertex[0], diag_vertex[2]-diag_vertex[0]));
+				}
+			}
+		}
+		return glm::vec4(glm::normalize(normal), 0);
+	}
+
+	std::vector<glm::vec4> * normals(){
+		return &vertex_normals;
+	}
+
+	void createNormals(std::vector<glm::vec4>& vertices){
+		for(int y = 0; y < diameter_y; y++){
+			for(int x = 0; x < diameter_x; x++){
+				std::cout<<x<<","<<y<<std::endl;
+				vertex_normals.push_back(getNormal(x, y, vertices));
+			}
+		}
 	}
 
 	void updateFloor(std::vector<glm::vec4>& vertices){

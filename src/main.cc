@@ -26,8 +26,20 @@ const char* vertex_shader =
 #include "shaders/default.vert"
 ;
 
+const char* floor_vertex_shader =
+#include "shaders/floor.vert"
+;
+
 const char* geometry_shader =
 #include "shaders/default.geom"
+;
+
+const char* floor_geometry_shader =
+#include "shaders/floor.geom"
+;
+
+const char* line_geometry_shader =
+#include "shaders/line.geom"
 ;
 
 const char* fragment_shader =
@@ -36,10 +48,6 @@ const char* fragment_shader =
 
 const char* floor_fragment_shader =
 #include "shaders/floor.frag"
-;
-
-const char* line_geometry_shader =
-#include "shaders/line.geom"
 ;
 
 const char* line_fragment_shader =
@@ -141,6 +149,7 @@ int main(int argc, char* argv[])
 	*/
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 25);
 	floorMap.createFloor(floor_vertices, floor_faces);
+	floorMap.createNormals(floor_vertices);
 
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
@@ -312,10 +321,11 @@ int main(int argc, char* argv[])
 
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
+	object_pass_input.assign(1, "normal", floorMap.normals()->data(), floorMap.normals()->size(), 4, GL_FLOAT);
 	floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
 	RenderPass floor_pass(-1,
 			floor_pass_input,
-			{ vertex_shader, geometry_shader, floor_fragment_shader},
+			{ floor_vertex_shader, floor_geometry_shader, floor_fragment_shader},
 			{ floor_model, std_view, std_proj, std_light },
 			{ "fragment_color" }
 			);
