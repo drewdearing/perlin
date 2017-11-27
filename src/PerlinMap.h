@@ -121,7 +121,7 @@ public:
 				distanceX = (float(currentX) - centerX) * vert_distance;
 				distanceY = (float(currentY) - centerY) * vert_distance;
 				elevation = getVertexElevation(currentX, currentY);
-				vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
+				vertices.push_back(glm::vec4(distanceX, elevation, distanceY, 1));
 				normals.push_back(getNormal(currentX, currentY));
 
 				
@@ -129,7 +129,7 @@ public:
 					currentX++;
 					distanceX = (float(currentX) - centerX) * vert_distance;
 					elevation = getVertexElevation(currentX, currentY);
-					vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
+					vertices.push_back(glm::vec4(distanceX, elevation, distanceY, 1));
 					normals.push_back(getNormal(currentX, currentY));
 				}
 
