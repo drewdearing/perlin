@@ -149,8 +149,7 @@ int main(int argc, char* argv[])
 		non-explicit seed
 	*/
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 25);
-	floorMap.createFloor(floor_vertices, floor_faces);
-	floorMap.createNormals(floor_normals);
+	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
 
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;

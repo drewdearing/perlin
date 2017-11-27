@@ -83,7 +83,7 @@ public:
 		dirty = true;
 	}
 
-	void createFloor(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces){
+	void createFloor(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces, std::vector<glm::vec4>& normals){
 		int currentX;
 		int currentY;
 		float distanceX;
@@ -122,12 +122,15 @@ public:
 				distanceY = (float(currentY) - centerY) * vert_distance;
 				elevation = getVertexElevation(currentX, currentY);
 				vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
+				normals.push_back(getNormal(currentX, currentY));
+
 				
 				if(x == current_width - 1){
 					currentX++;
 					distanceX = (float(currentX) - centerX) * vert_distance;
 					elevation = getVertexElevation(currentX, currentY);
 					vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
+					normals.push_back(getNormal(currentX, currentY));
 				}
 
 				vertex[0] = index;
@@ -149,91 +152,23 @@ public:
 			distanceX = (float(currentX) - centerX) * vert_distance;
 			elevation = getVertexElevation(currentX, currentY);
 			vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
+			normals.push_back(getNormal(currentX, currentY));
 		}
 
 		dirty = false;
 	}
 
-	glm::vec4 getNormal(int x, int y){
-		glm::vec3 normal;
+	glm::vec4 getNormal(int x, int y){ //not accurate (working on more efficient solution)
 
-		glm::vec3 self_vertex[3];
+		float left = perlin.octaveNoise0_1(float(x - 1) / fx, float(y) / fy, fz, octaves);
+		float right = perlin.octaveNoise0_1(float(x + 1) / fx, float(y) / fy, fz, octaves);
+		float up = perlin.octaveNoise0_1(float(x) / fx, float(y + 1) / fy, fz, octaves);
+		float down = perlin.octaveNoise0_1(float(x) / fx, float(y - 1) / fy, fz, octaves);
 
-		self_vertex[0] = glm::vec3(getVertexPoint(x, y + 1));
-		self_vertex[1] = glm::vec3(getVertexPoint(x, y));
-		self_vertex[2] = glm::vec3(getVertexPoint(x + 1, y));
 		
-		normal += glm::normalize(glm::cross(self_vertex[1]-self_vertex[0], self_vertex[2]-self_vertex[0]));
-
-		glm::vec3 left_vertex[4];
-
-		left_vertex[0] = glm::vec3(getVertexPoint(x - 1, y));
-		left_vertex[1] = glm::vec3(getVertexPoint(x, y));
-		left_vertex[2] = glm::vec3(getVertexPoint(x - 1, y + 1));
-		left_vertex[3] = glm::vec3(getVertexPoint(x, y + 1));
-
-		normal += glm::normalize(glm::cross(left_vertex[0]-left_vertex[2], left_vertex[1]-left_vertex[2]));
-
-		normal += glm::normalize(glm::cross(left_vertex[2]-left_vertex[3], left_vertex[1]-left_vertex[3]));
-
-		glm::vec3 top_vertex[4];
-
-		top_vertex[0] = glm::vec3(getVertexPoint(x, y - 1));
-		top_vertex[1] = glm::vec3(getVertexPoint(x + 1, y - 1));
-		top_vertex[2] = glm::vec3(getVertexPoint(x, y));
-		top_vertex[3] = glm::vec3(getVertexPoint(x + 1, y));
-
-		normal += glm::normalize(glm::cross(top_vertex[0]-top_vertex[2], top_vertex[1]-top_vertex[2]));
-
-		normal += glm::normalize(glm::cross(top_vertex[2]-top_vertex[3], top_vertex[1]-top_vertex[3]));
-
-		glm::vec3 diag_vertex[3];
-		diag_vertex[0] = glm::vec3(getVertexPoint(x, y));
-		diag_vertex[1] = glm::vec3(getVertexPoint(x - 1, y));
-		diag_vertex[2] = glm::vec3(getVertexPoint(x, y - 1));
-		
-		normal += glm::normalize(glm::cross(diag_vertex[1]-diag_vertex[0], diag_vertex[2]-diag_vertex[0]));
+		glm::vec3 normal = glm::vec3(left-right, 2.0f, down-up);
 
 		return glm::vec4(glm::normalize(normal), 0);
-	}
-
-	glm::vec4 getNormal2(int x, int y){ //not accurate (working on more efficient solution)
-
-		float left = getVertexElevation(x - 1, y);
-		float right = getVertexElevation(x + 1, y);
-		float up = getVertexElevation(x, y + 1);
-		float down = getVertexElevation(x, y - 1);
-
-		glm::vec3 tangent = glm::vec3(2.0 * vert_distance, right - left, 0.0);
-		glm::vec3 bitangent = glm::vec3(0.0, up - down, 2.0 * vert_distance);
-		glm::vec3 normal = glm::vec3(glm::cross(tangent, bitangent));
-
-		return glm::vec4(glm::normalize(normal), 0);
-	}
-
-	void createNormals(std::vector<glm::vec4>& normals){
-		int min_x = std::max((int)ceil(centerX - float(radius)), 0);
-		int max_x = std::min((int)floor(centerX + float(radius)), width-1);
-		int min_y = std::max((int)ceil(centerY - float(radius)), 0);
-		int max_y = std::min((int)floor(centerY + float(radius)), height-1);
-
-		if(min_x == 0)
-			max_x = diameter_x - 1;
-		else if(max_x == width-1)
-			min_x = width - diameter_x;
-		if(min_y == 0)
-			max_y = diameter_y - 1;
-		else if(max_y == height-1)
-			min_y = height - diameter_y;
-
-		for(int y = min_y; y <= max_y; y++){
-			for(int x = min_x; x <= max_x; x++){
-				glm::vec4 n1 = getNormal(x, y);
-				glm::vec4 n2 = getNormal2(x,y);
-				std::cout<<glm::to_string(n1)<<" "<<glm::to_string(n2)<<std::endl;
-				normals.push_back(n1);
-			}
-		}
 	}
 
 	void updateFloor(std::vector<glm::vec4>& vertices, std::vector<glm::vec4>& normals){
