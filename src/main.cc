@@ -118,24 +118,6 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec2> norm_lines;
 	std::vector<glm::vec4> binorm_vertices;
 	std::vector<glm::uvec2> binorm_lines;
-	
-	norm_lines.push_back(glm::uvec2(0, 1));
-	binorm_lines.push_back(glm::uvec2(0, 1));
-
-	cyl_lines.push_back(glm::vec2(0, 2));
-	cyl_lines.push_back(glm::vec2(0, 3));
-	cyl_lines.push_back(glm::vec2(1, 2));
-	cyl_lines.push_back(glm::vec2(1, 3));
-
-	cyl_lines.push_back(glm::vec2(4, 6));
-	cyl_lines.push_back(glm::vec2(4, 7));
-	cyl_lines.push_back(glm::vec2(5, 6));
-	cyl_lines.push_back(glm::vec2(5, 7));
-
-	cyl_lines.push_back(glm::vec2(0, 4));
-	cyl_lines.push_back(glm::vec2(1, 5));
-	cyl_lines.push_back(glm::vec2(2, 6));
-	cyl_lines.push_back(glm::vec2(3, 7));
 
 	/*
 		create perlin map with
@@ -148,7 +130,7 @@ int main(int argc, char* argv[])
 		render radius of 25 vertices
 		non-explicit seed
 	*/
-	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 25);
+	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
 	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
 
 	// FIXME: add code to create bone and cylinder geometry
@@ -166,6 +148,9 @@ int main(int argc, char* argv[])
 
 
 	create_skel(mesh, skel_vertices, skel_lines);
+	create_cyl(cyl_lines);
+	norm_lines.push_back(glm::uvec2(0, 1));
+	binorm_lines.push_back(glm::uvec2(0, 1));
 
 	/*
 	 * GUI object needs the mesh object for bone manipulation.

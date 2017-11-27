@@ -11,10 +11,7 @@ void main() {
 	float dot_nl = dot(normalize(light_direction), normalize(vertex_normal));
 	dot_nl = clamp(dot_nl, 0.0, 1.0);
 
-	if(pos.y < 0)
-		color = vec3(0.26, 0.53, 0.96);
-	else
-		color = vec3(0.26, 0.96, 0.27);
+	color = vec3(0.26, 0.96, 0.27);
 
 	fragment_color = vec4(dot_nl * color, 1.0);
 }

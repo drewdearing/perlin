@@ -37,3 +37,20 @@ void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices,
 		temp_bone = mesh.skeleton.getBone(index);
 	}
 }
+
+void create_cyl(std::vector<glm::uvec2>& cyl_lines){
+	cyl_lines.push_back(glm::vec2(0, 2));
+	cyl_lines.push_back(glm::vec2(0, 3));
+	cyl_lines.push_back(glm::vec2(1, 2));
+	cyl_lines.push_back(glm::vec2(1, 3));
+
+	cyl_lines.push_back(glm::vec2(4, 6));
+	cyl_lines.push_back(glm::vec2(4, 7));
+	cyl_lines.push_back(glm::vec2(5, 6));
+	cyl_lines.push_back(glm::vec2(5, 7));
+
+	cyl_lines.push_back(glm::vec2(0, 4));
+	cyl_lines.push_back(glm::vec2(1, 5));
+	cyl_lines.push_back(glm::vec2(2, 6));
+	cyl_lines.push_back(glm::vec2(3, 7));
+}
