@@ -393,8 +393,10 @@ int main(int argc, char* argv[])
 		if (draw_floor) {
 			if(floorMap.isDirty()){
 				floor_vertices.clear();
-				floorMap.updateFloor(floor_vertices);
+				floor_normals.clear();
+				floorMap.updateFloor(floor_vertices, floor_normals);
 				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
+				floor_pass.updateVBO(1, floor_normals.data(), floor_normals.size());
 			}
 			floor_pass.setup();
 			// Draw our triangles.
