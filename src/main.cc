@@ -109,6 +109,7 @@ int main(int argc, char* argv[])
 
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
+	std::vector<glm::vec4> floor_normals;
 	std::vector<glm::vec4> skel_vertices;
 	std::vector<glm::uvec2> skel_lines;
 	std::vector<glm::vec4> cyl_vertices;
@@ -149,7 +150,7 @@ int main(int argc, char* argv[])
 	*/
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -250, 250, 5, 25);
 	floorMap.createFloor(floor_vertices, floor_faces);
-	floorMap.createNormals(floor_vertices);
+	floorMap.createNormals(floor_normals);
 
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
@@ -321,7 +322,7 @@ int main(int argc, char* argv[])
 
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
-	object_pass_input.assign(1, "normal", floorMap.normals()->data(), floorMap.normals()->size(), 4, GL_FLOAT);
+	floor_pass_input.assign(1, "normal", floor_normals.data(), floor_normals.size(), 4, GL_FLOAT);
 	floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
 	RenderPass floor_pass(-1,
 			floor_pass_input,
