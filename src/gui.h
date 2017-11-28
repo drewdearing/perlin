@@ -74,6 +74,8 @@ private:
 	float zoom_speed_ = 0.1f;
 	float aspect_;
 	float frame = 1000.0f/60.0f;
+	float current_rotation_RL = 0.0f;	//right leg
+	float current_rotation_LL = 0.0f;	//left leg
 
 	std::chrono::high_resolution_clock::time_point current_time;
 	std::chrono::duration<float, std::milli> delta_time;
