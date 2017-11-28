@@ -24,6 +24,8 @@ void main() {
 		color = vec3(153/255.0, 170/255.0, 119/255.0);
   	else if (e < 0.9)
 		color = vec3(221/255.0, 221/255.0, 228/255.0);
+	else
+		color = vec3(1.0, 1.0, 1.0);
 
 	fragment_color = vec4(dot_nl * color, 1.0);
 }
