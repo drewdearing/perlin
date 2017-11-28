@@ -26,6 +26,10 @@ const char* vertex_shader =
 #include "shaders/default.vert"
 ;
 
+const char* obj_vertex_shader =
+#include "shaders/obj.vert"
+;
+
 const char* floor_vertex_shader =
 #include "shaders/floor.vert"
 ;
@@ -232,6 +236,7 @@ int main(int argc, char* argv[])
 	auto look_direction_data = [&gui]() -> const void* {
 		return gui.getLook();
 	};
+
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
@@ -246,6 +251,7 @@ int main(int argc, char* argv[])
 	ShaderUniform cyl_mesh = { "cyl_mesh", bone_matrix_binder, cyl_mesh_data };
 	ShaderUniform norm_mesh = { "norm_mesh", bone_matrix_binder, norm_mesh_data };
 	ShaderUniform binorm_mesh = { "binorm_mesh", bone_matrix_binder, binorm_mesh_data };
+	ShaderUniform look_dir_model = { "look_dir", vector3_binder, look_direction_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -259,13 +265,13 @@ int main(int argc, char* argv[])
 	RenderPass object_pass(-1,
 			object_pass_input,
 			{
-			  vertex_shader,
+			  obj_vertex_shader,
 			  geometry_shader,
 			  fragment_shader
 			},
 			{ std_model, std_view, std_proj,
 			  std_light,
-			  std_camera, object_alpha, height_model },
+			  std_camera, object_alpha, height_model, look_dir_model },
 			{ "fragment_color" }
 			);
 
@@ -276,8 +282,8 @@ int main(int argc, char* argv[])
 	mesh_pass_input.assign_index(skel_lines.data(), skel_lines.size(), 2);
 	RenderPass mesh_pass(-1,
 			mesh_pass_input,
-			{vertex_shader, line_geometry_shader, line_fragment_shader},
-			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model},
+			{obj_vertex_shader, line_geometry_shader, line_fragment_shader},
+			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model, look_dir_model},
 			{ "fragment_color"}
 			);
 
@@ -286,8 +292,8 @@ int main(int argc, char* argv[])
 	cyl_pass_input.assign_index(cyl_lines.data(), cyl_lines.size(), 2);
 	RenderPass cyl_pass(-1,
 			cyl_pass_input,
-			{vertex_shader, line_geometry_shader, cyl_fragment_shader},
-			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model},
+			{obj_vertex_shader, line_geometry_shader, cyl_fragment_shader},
+			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model, look_dir_model},
 			{ "fragment_color"}
 			);
 

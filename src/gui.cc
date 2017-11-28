@@ -116,7 +116,6 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 
 		float r = M_PI/50.0f * (delta_time.count()/frame);
 
-
 		glm::vec3 old_look_ = look_;
 		eye_ = center_ + glm::rotate(eye_-center_, r, axis);
 		look_ = glm::normalize(center_ - eye_);
