@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
 	std::vector<glm::vec4> floor_normals;
+	std::vector<glm::vec4> moisture_vertices;
 	std::vector<glm::vec4> skel_vertices;
 	std::vector<glm::uvec2> skel_lines;
 	std::vector<glm::vec4> cyl_vertices;
@@ -124,14 +125,31 @@ int main(int argc, char* argv[])
 		1000x1000 vertices
 		6 octaves
 		frequency of 8
+		minimum height = -350
+		maximum height = 100
+		vertex distance of 5
+		render radius of 25 vertices
+		non-explicit seed
+	*/
+	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
+
+	/*
+		create moisture map with
+		1000x1000 vertices
+		6 octaves
+		frequency of 8
 		minimum height = -250
 		maximum height = 250
 		vertex distance of 5
 		render radius of 25 vertices
 		non-explicit seed
 	*/
-	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
+	// TODO Create a Mosture Map
+	PerlinMap moistureMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
+
 	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
+
+	moistureMap.createNormHeight(moisture_vertices);
 
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;

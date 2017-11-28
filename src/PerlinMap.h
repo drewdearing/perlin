@@ -83,6 +83,12 @@ public:
 		dirty = true;
 	}
 
+
+	void createNormHeight(std::vector<glm::vec4>& vertices) {
+		// Go between 0 - 1
+
+	}
+
 	void createFloor(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces, std::vector<glm::vec4>& normals){
 		int currentX;
 		int currentY;
