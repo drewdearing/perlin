@@ -236,6 +236,15 @@ int main(int argc, char* argv[])
 	auto look_direction_data = [&gui]() -> const void* {
 		return gui.getLook();
 	};
+	auto min_height_map = [&floorMap]() -> const void* {
+		return floorMap.getMinHeight();
+	};
+	auto max_height_map = [&floorMap]() -> const void* {
+		return floorMap.getMaxHeight();
+	};
+	auto mesh_scale_data = [&gui]() -> const void* {
+		return gui.getScale();
+	};
 
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
@@ -252,6 +261,9 @@ int main(int argc, char* argv[])
 	ShaderUniform norm_mesh = { "norm_mesh", bone_matrix_binder, norm_mesh_data };
 	ShaderUniform binorm_mesh = { "binorm_mesh", bone_matrix_binder, binorm_mesh_data };
 	ShaderUniform look_dir_model = { "look_dir", vector3_binder, look_direction_data };
+	ShaderUniform floor_max_height = { "max_height", float_binder, max_height_map };
+	ShaderUniform floor_min_height = { "min_height", float_binder, min_height_map };
+	ShaderUniform model_scale = { "scale", float_binder, mesh_scale_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -271,7 +283,7 @@ int main(int argc, char* argv[])
 			},
 			{ std_model, std_view, std_proj,
 			  std_light,
-			  std_camera, object_alpha, height_model, look_dir_model },
+			  std_camera, object_alpha, height_model, look_dir_model, model_scale },
 			{ "fragment_color" }
 			);
 
@@ -324,7 +336,7 @@ int main(int argc, char* argv[])
 	RenderPass floor_pass(-1,
 			floor_pass_input,
 			{ floor_vertex_shader, floor_geometry_shader, floor_fragment_shader},
-			{ floor_model, std_view, std_proj, std_light },
+			{ floor_model, std_view, std_proj, std_light, floor_max_height, floor_min_height },
 			{ "fragment_color" }
 			);
 

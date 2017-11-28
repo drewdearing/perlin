@@ -217,6 +217,14 @@ public:
 		dirty = true;
 	}
 
+	float * getMinHeight(){
+		return &min_height;
+	}
+
+	float * getMaxHeight(){
+		return &max_height;
+	}
+
 	bool isDirty(){
 		return dirty;
 	}
