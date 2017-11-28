@@ -226,10 +226,14 @@ int main(int argc, char* argv[])
 	auto binorm_mesh_data = [&mats]() -> const void* {
 		return mats.model;
 	};
+	auto height_offset_data = [&mesh]() -> const void* {
+		return &mesh.height_offset;
+	};
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
+	ShaderUniform height_model = { "height_offset", float_binder, height_offset_data };
 	ShaderUniform std_view = { "view", matrix_binder, std_view_data };
 	ShaderUniform std_camera = { "camera_position", vector3_binder, std_camera_data };
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
@@ -258,7 +262,7 @@ int main(int argc, char* argv[])
 			},
 			{ std_model, std_view, std_proj,
 			  std_light,
-			  std_camera, object_alpha },
+			  std_camera, object_alpha, height_model },
 			{ "fragment_color" }
 			);
 
