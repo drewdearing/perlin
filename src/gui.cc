@@ -67,7 +67,6 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 			center_ = mesh_->getCenter();
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 	} else if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_RELEASE) {
 		current_bone_--;

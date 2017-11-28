@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
 	RenderPass mesh_pass(-1,
 			mesh_pass_input,
 			{vertex_shader, line_geometry_shader, line_fragment_shader},
-			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
+			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model},
 			{ "fragment_color"}
 			);
 
@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
 	RenderPass cyl_pass(-1,
 			cyl_pass_input,
 			{vertex_shader, line_geometry_shader, cyl_fragment_shader},
-			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
+			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model},
 			{ "fragment_color"}
 			);
 
