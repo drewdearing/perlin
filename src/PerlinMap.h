@@ -244,41 +244,44 @@ public:
 		else{
 			int square_x = floor(newX);
 			int square_y = floor(newY);
-			int vertex[4][2];
-			float v_elevation[4];
-			float distance[4];
-			float weight[4];
-			float total_distance = 0;
+			float offsetX = newX - floor(newX);
+			float offsetY = newY - floor(newY);
+			glm::vec3 new_vertex = glm::vec3(newX, 0, newY);
+			glm::vec3 vertex[3];
+			float v_elevation[3];
+			float weight[3];
+			bool triangle1 = offsetX <= 1.0f - offsetY && offsetY <= 1.0f - offsetX;
 
-			vertex[0][0] = square_x;
-			vertex[0][1] = square_y;
+			if(triangle1){
+				vertex[0][0] = square_x;
+				vertex[0][2] = square_y + 1;
 
-			vertex[1][0] = square_x + 1;
-			vertex[1][1] = square_y;
+				vertex[1][0] = square_x;
+				vertex[1][2] = square_y;
 
-			vertex[2][0] = square_x;
-			vertex[2][1] = square_y + 1;
-
-			vertex[3][0] = square_x + 1;
-			vertex[3][1] = square_y + 1;
-
-			for(int i = 0; i < 4; i++){
-				glm::vec2 local_distance;
-				v_elevation[i] = getVertexElevation(vertex[i][0], vertex[i][1]);
-				local_distance[0] = newX - float(vertex[i][0]);
-				local_distance[1] = newY - float(vertex[i][1]);
-				distance[i] = glm::length(local_distance);
-				total_distance += distance[i];
+				vertex[2][0] = square_x + 1;
+				vertex[2][2] = square_y;
 			}
-			weight[0] = distance[3]/total_distance;
-			weight[1] = distance[2]/total_distance;
-			weight[2] = distance[1]/total_distance;
-			weight[3] = distance[0]/total_distance;
+			else{
+				vertex[0][0] = square_x + 1;
+				vertex[0][2] = square_y + 1;
 
-			elevation = weight[0] * v_elevation[0] 
-					  + weight[1] * v_elevation[1]
-					  + weight[2] * v_elevation[2]
-					  + weight[3] * v_elevation[3];
+				vertex[1][0] = square_x;
+				vertex[1][2] = square_y + 1;
+
+				vertex[2][0] = square_x + 1;
+				vertex[2][2] = square_y;
+			}
+
+			v_elevation[0] = getVertexElevation(vertex[0][0], vertex[0][2]);
+			v_elevation[1] = getVertexElevation(vertex[1][0], vertex[1][2]);
+			v_elevation[2] = getVertexElevation(vertex[2][0], vertex[2][2]);
+
+			weight[0] = glm::length(glm::cross(new_vertex-vertex[1], vertex[2]-vertex[1]));
+        	weight[1] = glm::length(glm::cross(new_vertex-vertex[0], vertex[2]-vertex[0]));
+        	weight[2] = glm::length(glm::cross(new_vertex-vertex[0], vertex[1]-vertex[0]));
+			
+			elevation = weight[0] * v_elevation[0] + weight[1] * v_elevation[1] + weight[2] * v_elevation[2];
 
 		}
 
