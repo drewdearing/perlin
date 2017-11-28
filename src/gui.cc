@@ -14,7 +14,7 @@ GUI::GUI(GLFWwindow* window)
 	:window_(window)
 {
 	glfwSetWindowUserPointer(window_, this);
-	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	glfwSetInputMode(window_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetKeyCallback(window_, KeyCallback);
 	glfwSetCursorPosCallback(window_, MousePosCallback);
 	glfwSetMouseButtonCallback(window_, MouseButtonCallback);
@@ -115,32 +115,17 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		glm::vec3 mouse_world = nearPlane-lastPlane;
 		glm::vec3 axis = glm::normalize(glm::cross(look_, mouse_world));
 
-		float r = M_PI/200.0f * (delta_time.count()/frame);
+		float r = M_PI/50.0f * (delta_time.count()/frame);
+
 
 		glm::vec3 old_look_ = look_;
-
-		if(delta_x >= 0) axis[1] = -1;
-		else axis[1] = 1;
-
-		eye_ = center_ + glm::rotate(eye_-center_, r, glm::normalize(axis) * glm::vec3(0, 1, 0));
+		eye_ = center_ + glm::rotate(eye_-center_, r, axis);
 		look_ = glm::normalize(center_ - eye_);
 		tangent_ = glm::rotate(tangent_, r, axis);
 		tangent_.y = 0;
 		tangent_ = glm::normalize(tangent_);
-		//up_ = -glm::normalize(glm::cross(look_, tangent_));
-		up_ = glm::vec3(0, 1, 0);
-		axis.x = 0;
-		axis.z = 0;
+		up_ = -glm::normalize(glm::cross(look_, tangent_));
 
-		std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
-		for(int i=0; i < parentBones->size(); i++){
-			Bone * b = parentBones->at(i);
-			b->rotate(r, glm::normalize(axis) * glm::vec3(0, 1, 0));
-		}
-
-		pose_changed_ = true;
-
-		
 	}
 }
 
@@ -206,16 +191,6 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			center_.y += mesh_->height_offset;
 		}
 		eye_ = center_ - look_ * camera_distance_;
-
-		Bone* root = mesh_->skeleton.getBone(38);
-		root -> rotate(rotation_speed_*4, glm::normalize(root->getBinormal()));
-		root = mesh_->skeleton.getBone(68);
-		root -> rotate(rotation_speed_*4, glm::normalize(root->getBinormal()));
-		current_rotation_RL += rotation_speed_*4;
-		current_rotation_LL += rotation_speed_*4;
-		if(current_rotation_RL >= .7 || current_rotation_RL <= -.7) rotation_speed_ *= -1.0f;
-
-		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_S) {
 		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.z);
@@ -229,48 +204,30 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			center_.y += mesh_->height_offset;
 		}
 		eye_ = center_ - look_ * camera_distance_;
-		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_A) {
-		// floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.z);
-		// if(!fps_mode_){
-		// 	mesh_->height_offset = floorMap->getElevation(0,0);
-		// 	center_ = mesh_->getCenter();
-		// 	center_.y += mesh_->height_offset;
-		// 	eye_ = center_ - look_ * camera_distance_;
-		// 	pose_changed_ = true;
-		// }
-		for(int i = 0; i < mesh_->skeleton.parentBones()->size(); ++i){
-				Bone* root = mesh_->skeleton.getBone(0);
-				root -> rotate(rotation_speed_, glm::vec3(0, 1, 0));
-				root = mesh_->skeleton.getBone(8);
-				root -> rotate(rotation_speed_, glm::vec3(0, 1, 0));
-				pose_changed_ = true;
-			}
+		floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.z);
+		if(!fps_mode_){
+			mesh_->height_offset = floorMap->getElevation(0,0);
+			center_ = mesh_->getCenter();
+			center_.y += mesh_->height_offset;
+			eye_ = center_ - look_ * camera_distance_;
+		}
 		return true;
 	} else if (key == GLFW_KEY_D) {
-		// floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.z);
-		// if(!fps_mode_){
-		// 	mesh_->height_offset = floorMap->getElevation(0,0);
-		// 	center_ = mesh_->getCenter();
-		// 	center_.y += mesh_->height_offset;
-		// 	eye_ = center_ - look_ * camera_distance_;
-		// 	pose_changed_ = true;
-		// }
-		for(int i = 0; i < mesh_->skeleton.parentBones()->size(); ++i){
-				Bone* root = mesh_->skeleton.getBone(0);
-				root -> rotate(-rotation_speed_, glm::vec3(0, 1, 0));
-				root = mesh_->skeleton.getBone(8);
-				root -> rotate(-rotation_speed_, glm::vec3(0, 1, 0));
-				pose_changed_ = true;
-			}
+		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.z);
+		if(!fps_mode_){
+			mesh_->height_offset = floorMap->getElevation(0,0);
+			center_ = mesh_->getCenter();
+			center_.y += mesh_->height_offset;
+			eye_ = center_ - look_ * camera_distance_;
+		}
 		return true;
 	} else if (key == GLFW_KEY_SPACE) {
 		if(fps_mode_){
 			mesh_->height_offset += 1;
 			center_.y += 1;
 			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 		return true;
 	} else if (key == GLFW_KEY_LEFT_SHIFT) {
@@ -278,7 +235,6 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			mesh_->height_offset -= 1;
 			center_.y -= 1;
 			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 		return true;
 	}

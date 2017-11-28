@@ -47,6 +47,7 @@ public:
 
 	glm::vec4 getMouseFar() { return glm::vec4(intersect, 1); }
 
+	glm::vec3 * getLook() { return &look_; }
 
 	bool setCurrentBone(int i);
 

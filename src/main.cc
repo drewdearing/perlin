@@ -229,6 +229,9 @@ int main(int argc, char* argv[])
 	auto height_offset_data = [&mesh]() -> const void* {
 		return &mesh.height_offset;
 	};
+	auto look_direction_data = [&gui]() -> const void* {
+		return gui.getLook();
+	};
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };

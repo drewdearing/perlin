@@ -99,7 +99,7 @@ public:
 	}
 
 	glm::vec3 getNormal(){
-		return originalNormal;
+		return normal;
 	}
 
 	glm::vec3 getBinormal(){
