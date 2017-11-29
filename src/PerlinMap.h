@@ -171,58 +171,46 @@ public:
 		return glm::vec4(glm::normalize(normal), 0);
 	}
 
+	//temporarily use face normals
 	glm::vec4 getNormal(float x, float y){
 		float newX = centerX + x/vert_distance;
 		float newY = centerY + y/vert_distance;
-		glm::vec3 normal;
+		int square_x = floor(newX);
+		int square_y = floor(newY);
+		float offsetX = newX - floor(newX);
+		float offsetY = newY - floor(newY);
+		glm::vec2 vertex[2];
+		glm::vec3 v_points[3];
+		bool triangle1 = offsetX <= 1.0f - offsetY && offsetY <= 1.0f - offsetX;
 
-		if(floor(newX) == newX && floor(newY) == newY){
-			return getVertexNormal(newX, newY);
+		if(triangle1){
+			vertex[0][0] = square_x;
+			vertex[0][1] = square_y + 1;
+
+			vertex[1][0] = square_x;
+			vertex[1][1] = square_y;
+
+			vertex[2][0] = square_x + 1;
+			vertex[2][1] = square_y;
 		}
 		else{
-			int square_x = floor(newX);
-			int square_y = floor(newY);
-			float offsetX = newX - floor(newX);
-			float offsetY = newY - floor(newY);
-			glm::vec3 new_vertex = glm::vec3(newX, 0, newY);
-			glm::vec3 vertex[3];
-			glm::vec3 v_normal[3];
-			float weight[3];
-			bool triangle1 = offsetX <= 1.0f - offsetY && offsetY <= 1.0f - offsetX;
+			vertex[0][0] = square_x + 1;
+			vertex[0][1] = square_y + 1;
 
-			if(triangle1){
-				vertex[0][0] = square_x;
-				vertex[0][2] = square_y + 1;
+			vertex[1][0] = square_x;
+			vertex[1][1] = square_y + 1;
 
-				vertex[1][0] = square_x;
-				vertex[1][2] = square_y;
-
-				vertex[2][0] = square_x + 1;
-				vertex[2][2] = square_y;
-			}
-			else{
-				vertex[0][0] = square_x + 1;
-				vertex[0][2] = square_y + 1;
-
-				vertex[1][0] = square_x;
-				vertex[1][2] = square_y + 1;
-
-				vertex[2][0] = square_x + 1;
-				vertex[2][2] = square_y;
-			}
-
-			v_normal[0] = glm::vec3(getVertexNormal(vertex[0][0], vertex[0][2]));
-			v_normal[1] = glm::vec3(getVertexNormal(vertex[1][0], vertex[1][2]));
-			v_normal[2] = glm::vec3(getVertexNormal(vertex[2][0], vertex[2][2]));
-
-			weight[0] = glm::length(glm::cross(new_vertex-vertex[1], vertex[2]-vertex[1]));
-			weight[1] = glm::length(glm::cross(new_vertex-vertex[0], vertex[2]-vertex[0]));
-			weight[2] = glm::length(glm::cross(new_vertex-vertex[0], vertex[1]-vertex[0]));
-			
-			normal = weight[0] * v_normal[0] + weight[1] * v_normal[1] + weight[2] * v_normal[2];
-
-			return glm::vec4(normal, 0);
+			vertex[2][0] = square_x + 1;
+			vertex[2][1] = square_y;
 		}
+
+		v_points[0] = glm::vec3(getVertexPoint(vertex[0][0], vertex[0][1]));
+		v_points[1] = glm::vec3(getVertexPoint(vertex[1][0], vertex[1][1]));
+		v_points[2] = glm::vec3(getVertexPoint(vertex[2][0], vertex[2][1]));
+		glm::vec3 u = glm::normalize(v_points[1] - v_points[0]);
+		glm::vec3 v = glm::normalize(v_points[2] - v_points[0]);
+
+		return glm::normalize(glm::vec4(glm::normalize(glm::cross(u, v)), 0.0));
 	}
 
 	void updateFloor(std::vector<glm::vec4>& vertices, std::vector<glm::vec4>& normals){
