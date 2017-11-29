@@ -31,7 +31,7 @@ GUI::~GUI()
 void GUI::assignMesh(Mesh* mesh)
 {
 	mesh_ = mesh;
-	center_ = mesh_->getCenter();
+	center_ = mesh_->getCenter() * scale;
 	center_.y += mesh_->height_offset;
 	eye_ = center_ - look_ * camera_distance_;
 }
@@ -64,7 +64,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		fps_mode_ = !fps_mode_;
 		if(!fps_mode_){
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
 		}
@@ -167,14 +167,15 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	glm::vec2 c = floorMap->getCenter();
 	glm::vec3 dir_f;
 	glm::vec3 dir_s;
+	float speed = walk_speed * scale * floorMap->getVertDistance();
 
 	if(fps_mode_){
-		dir_f = floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
-		dir_s = floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
+		dir_f = speed * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
+		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
 	}
 	else{
-		dir_f = floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, 0, look_.x));
-		dir_s = floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
+		dir_f = speed * glm::normalize(glm::vec3(look_.z, 0, look_.x));
+		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
 	}
 
 	if (key == GLFW_KEY_W) {
@@ -185,7 +186,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		else{
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 		}
 		eye_ = center_ - look_ * camera_distance_;
@@ -198,7 +199,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		else{
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 		}
 		eye_ = center_ - look_ * camera_distance_;
@@ -207,7 +208,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.z);
 		if(!fps_mode_){
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
 		}
@@ -216,7 +217,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.z);
 		if(!fps_mode_){
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
 		}
