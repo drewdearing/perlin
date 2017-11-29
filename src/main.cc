@@ -20,7 +20,7 @@
 #include <debuggl.h>
 
 int window_width = 800, window_height = 600;
-const std::string window_title = "Skinning";
+const std::string window_title = "HOLY SHAT";
 
 const char* vertex_shader =
 #include "shaders/default.vert"
@@ -103,11 +103,11 @@ GLFWwindow* init_glefw()
 
 int main(int argc, char* argv[])
 {
-	if (argc < 2) {
-		std::cerr << "Input model file is missing" << std::endl;
-		std::cerr << "Usage: " << argv[0] << " <PMD file>" << std::endl;
-		return -1;
-	}
+	// if (argc < 2) {
+	// 	std::cerr << "Input model file is missing" << std::endl;
+	// 	std::cerr << "Usage: " << argv[0] << " <PMD file>" << std::endl;
+	// 	return -1;
+	// }
 	GLFWwindow *window = init_glefw();
 	GUI gui(window);
 
@@ -139,7 +139,9 @@ int main(int argc, char* argv[])
 
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
-	mesh.loadpmd(argv[1]);
+	std::string model_string = "../assets/pmd/Meiko_Sakine.pmd";
+	// std::string model_string = "../assets/pmd/Miku_Hatsune.pmd";
+	mesh.loadpmd(model_string);
 	std::cout << "Loaded object  with  " << mesh.vertices.size()
 		<< " vertices and " << mesh.faces.size() << " faces.\n";
 
@@ -160,6 +162,7 @@ int main(int argc, char* argv[])
 	 * GUI object needs the mesh object for bone manipulation.
 	 */
 	gui.assignMesh(&mesh);
+	gui.assignModel(model_string);
 	gui.assignFloorMap(&floorMap);
 
 	glm::vec4 light_position = glm::vec4(0.0f, 100.0f, 0.0f, 1.0f);
@@ -236,6 +239,9 @@ int main(int argc, char* argv[])
 	auto look_direction_data = [&gui]() -> const void* {
 		return gui.getLook();
 	};
+	auto model_scale_data = [&gui]() -> const void* {
+		return gui.getScale();
+	};
 
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
@@ -252,6 +258,7 @@ int main(int argc, char* argv[])
 	ShaderUniform norm_mesh = { "norm_mesh", bone_matrix_binder, norm_mesh_data };
 	ShaderUniform binorm_mesh = { "binorm_mesh", bone_matrix_binder, binorm_mesh_data };
 	ShaderUniform look_dir_model = { "look_dir", vector3_binder, look_direction_data };
+	ShaderUniform model_scale = { "scale", float_binder, model_scale_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -271,7 +278,7 @@ int main(int argc, char* argv[])
 			},
 			{ std_model, std_view, std_proj,
 			  std_light,
-			  std_camera, object_alpha, height_model, look_dir_model },
+			  std_camera, object_alpha, height_model, look_dir_model,model_scale },
 			{ "fragment_color" }
 			);
 
@@ -329,7 +336,7 @@ int main(int argc, char* argv[])
 			);
 
 	float aspect = 0.0f;
-	std::cout << "center = " << mesh.getCenter() << "\n";
+	//std::cout << "center = " << mesh.getCenter() << "\n";
 
 	bool draw_floor = true;
 	bool draw_skeleton = true;
