@@ -122,7 +122,7 @@ public:
 				distanceY = (float(currentY) - centerY) * vert_distance;
 				elevation = getVertexElevation(currentX, currentY);
 				vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
-				normals.push_back(getNormal(currentX, currentY));
+				normals.push_back(getVertexNormal(currentX, currentY));
 
 				
 				if(x == current_width - 1){
@@ -130,7 +130,7 @@ public:
 					distanceX = (float(currentX) - centerX) * vert_distance;
 					elevation = getVertexElevation(currentX, currentY);
 					vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
-					normals.push_back(getNormal(currentX, currentY));
+					normals.push_back(getVertexNormal(currentX, currentY));
 				}
 
 				vertex[0] = index;
@@ -152,13 +152,13 @@ public:
 			distanceX = (float(currentX) - centerX) * vert_distance;
 			elevation = getVertexElevation(currentX, currentY);
 			vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
-			normals.push_back(getNormal(currentX, currentY));
+			normals.push_back(getVertexNormal(currentX, currentY));
 		}
 
 		dirty = false;
 	}
 
-	glm::vec4 getNormal(int x, int y){ //not accurate (working on more efficient solution)
+	glm::vec4 getVertexNormal(int x, int y){ //not accurate (working on more efficient solution)
 
 		float left = perlin.octaveNoise0_1(float(x - 1) / fx, float(y) / fy, fz, octaves);
 		float right = perlin.octaveNoise0_1(float(x + 1) / fx, float(y) / fy, fz, octaves);
@@ -169,6 +169,60 @@ public:
 		glm::vec3 normal = glm::vec3(left-right, 2.0f, down-up);
 
 		return glm::vec4(glm::normalize(normal), 0);
+	}
+
+	glm::vec4 getNormal(float x, float y){
+		float newX = centerX + x/vert_distance;
+		float newY = centerY + y/vert_distance;
+		glm::vec3 normal;
+
+		if(floor(newX) == newX && floor(newY) == newY){
+			return getVertexNormal(newX, newY);
+		}
+		else{
+			int square_x = floor(newX);
+			int square_y = floor(newY);
+			float offsetX = newX - floor(newX);
+			float offsetY = newY - floor(newY);
+			glm::vec3 new_vertex = glm::vec3(newX, 0, newY);
+			glm::vec3 vertex[3];
+			glm::vec3 v_normal[3];
+			float weight[3];
+			bool triangle1 = offsetX <= 1.0f - offsetY && offsetY <= 1.0f - offsetX;
+
+			if(triangle1){
+				vertex[0][0] = square_x;
+				vertex[0][2] = square_y + 1;
+
+				vertex[1][0] = square_x;
+				vertex[1][2] = square_y;
+
+				vertex[2][0] = square_x + 1;
+				vertex[2][2] = square_y;
+			}
+			else{
+				vertex[0][0] = square_x + 1;
+				vertex[0][2] = square_y + 1;
+
+				vertex[1][0] = square_x;
+				vertex[1][2] = square_y + 1;
+
+				vertex[2][0] = square_x + 1;
+				vertex[2][2] = square_y;
+			}
+
+			v_normal[0] = glm::vec3(getVertexNormal(vertex[0][0], vertex[0][2]));
+			v_normal[1] = glm::vec3(getVertexNormal(vertex[1][0], vertex[1][2]));
+			v_normal[2] = glm::vec3(getVertexNormal(vertex[2][0], vertex[2][2]));
+
+			weight[0] = glm::length(glm::cross(new_vertex-vertex[1], vertex[2]-vertex[1]));
+			weight[1] = glm::length(glm::cross(new_vertex-vertex[0], vertex[2]-vertex[0]));
+			weight[2] = glm::length(glm::cross(new_vertex-vertex[0], vertex[1]-vertex[0]));
+			
+			normal = weight[0] * v_normal[0] + weight[1] * v_normal[1] + weight[2] * v_normal[2];
+
+			return glm::vec4(normal, 0);
+		}
 	}
 
 	void updateFloor(std::vector<glm::vec4>& vertices, std::vector<glm::vec4>& normals){
@@ -198,7 +252,7 @@ public:
 				distanceX = (float(x) - centerX) * vert_distance;
 				elevation = getVertexElevation(x, y);
 				vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
-				normals.push_back(getNormal(x, y));
+				normals.push_back(getVertexNormal(x, y));
 			}
 		}
 
