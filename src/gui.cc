@@ -186,7 +186,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		else{
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			mesh_->tilt_normal = glm::vec3(floorMap->getNormal(0,0));
+			mesh_->tilt_normal = floorMap->getNormal(0,0);
 			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 		}
@@ -200,6 +200,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		else{
 			mesh_->height_offset = floorMap->getElevation(0,0);
+			mesh_->tilt_normal = floorMap->getNormal(0,0);
 			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 		}
@@ -209,6 +210,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.z);
 		if(!fps_mode_){
 			mesh_->height_offset = floorMap->getElevation(0,0);
+			mesh_->tilt_normal = floorMap->getNormal(0,0);
 			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
@@ -218,6 +220,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.z);
 		if(!fps_mode_){
 			mesh_->height_offset = floorMap->getElevation(0,0);
+			mesh_->tilt_normal = floorMap->getNormal(0,0);
 			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;

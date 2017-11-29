@@ -158,24 +158,24 @@ public:
 		dirty = false;
 	}
 
-	glm::vec4 getVertexNormal(int x, int y){ //not accurate (working on more efficient solution)
+	glm::vec4 getVertexNormal(int x, int y){
+		glm::vec3 left = glm::vec3(getVertexPoint(x - 1, y));
+		glm::vec3 right = glm::vec3(getVertexPoint(x + 1, y));
+		glm::vec3 up = glm::vec3(getVertexPoint(x, y - 1));
+		glm::vec3 down = glm::vec3(getVertexPoint(x, y + 1));
 
-		float left = perlin.octaveNoise0_1(float(x - 1) / fx, float(y) / fy, fz, octaves);
-		float right = perlin.octaveNoise0_1(float(x + 1) / fx, float(y) / fy, fz, octaves);
-		float up = perlin.octaveNoise0_1(float(x) / fx, float(y + 1) / fy, fz, octaves);
-		float down = perlin.octaveNoise0_1(float(x) / fx, float(y - 1) / fy, fz, octaves);
+		glm::vec3 v1 = right - left;
+		glm::vec3 v2 = down - up;
 
 		
-		glm::vec3 normal = glm::vec3(left-right, 2.0f, down-up);
+		glm::vec3 normal = glm::cross(v1, v2);
 
 		return glm::vec4(glm::normalize(normal), 0);
 	}
 
-	//normals are not RIGHT!!!!!
 	glm::vec4 getNormal(float x, float y){
 		float newX = centerX + x/vert_distance;
 		float newY = centerY + y/vert_distance;
-		glm::vec3 normal;
 
 		if(floor(newX) == newX && floor(newY) == newY){
 			return getVertexNormal(newX, newY);
@@ -188,6 +188,7 @@ public:
 			glm::vec3 new_vertex = glm::vec3(newX, 0, newY);
 			glm::vec3 vertex[3];
 			glm::vec3 v_normal[3];
+			glm::vec3 normal;
 			float weight[3];
 			bool triangle1 = offsetX <= 1.0f - offsetY && offsetY <= 1.0f - offsetX;
 

@@ -12,7 +12,7 @@ void main() {
 	float distance = max_height - min_height;
 	float e = (pos.y - (min_height))/(distance);
 	vec3 color;
-	float dot_nl = dot(normalize(light_direction), normalize(face_normal));
+	float dot_nl = dot(normalize(light_direction), normalize(vertex_normal));
 	dot_nl = clamp(dot_nl, 0.0, 1.0);
 
 	vec3 min_color;
