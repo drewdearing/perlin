@@ -149,6 +149,7 @@ int main(int argc, char* argv[])
 	}
 	mesh_center /= mesh.vertices.size();
 	mesh.height_offset = floorMap.getElevation(0,0);
+	mesh.tilt_normal = glm::vec3(floorMap.getNormal(0,0));
 
 
 	create_skel(mesh, skel_vertices, skel_lines);
@@ -233,6 +234,10 @@ int main(int argc, char* argv[])
 	auto height_offset_data = [&mesh]() -> const void* {
 		return &mesh.height_offset;
 	};
+	auto tilt_normal_data = [&mesh]() -> const void* {
+		std::cout<<"tilt_normal: "<<glm::to_string(mesh.tilt_normal)<<std::endl;
+		return &mesh.tilt_normal;
+	};
 	auto look_direction_data = [&gui]() -> const void* {
 		return gui.getLook();
 	};
@@ -261,6 +266,7 @@ int main(int argc, char* argv[])
 	ShaderUniform norm_mesh = { "norm_mesh", bone_matrix_binder, norm_mesh_data };
 	ShaderUniform binorm_mesh = { "binorm_mesh", bone_matrix_binder, binorm_mesh_data };
 	ShaderUniform look_dir_model = { "look_dir", vector3_binder, look_direction_data };
+	ShaderUniform tilt_normal_model = { "tilt_normal", vector3_binder, tilt_normal_data };
 	ShaderUniform floor_max_height = { "max_height", float_binder, max_height_map };
 	ShaderUniform floor_min_height = { "min_height", float_binder, min_height_map };
 	ShaderUniform model_scale = { "scale", float_binder, model_scale_data };
@@ -283,7 +289,7 @@ int main(int argc, char* argv[])
 			},
 			{ std_model, std_view, std_proj,
 			  std_light,
-			  std_camera, object_alpha, height_model, look_dir_model, model_scale },
+			  std_camera, object_alpha, height_model, look_dir_model, model_scale, tilt_normal_model },
 			{ "fragment_color" }
 			);
 
