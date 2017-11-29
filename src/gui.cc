@@ -50,19 +50,24 @@ void GUI::assignModel(const std::string& model){
 		root_top = mesh_->skeleton.getBone(0);
 		root_bottom = mesh_->skeleton.getBone(8);
 
+		right_arm_upper->rotate(-arm_fix, glm::normalize(right_arm_upper->getNormal()));
+		left_arm_upper->rotate(arm_fix, glm::normalize(left_arm_upper->getNormal()));
+
 	}
 	if(model == "../assets/pmd/Meiko_Sakine.pmd"){
-		right_arm_upper = mesh_->skeleton.getBone(14);
-		left_arm_upper = mesh_->skeleton.getBone(32);
+		right_arm_upper = mesh_->skeleton.getBone(32);
+		left_arm_upper = mesh_->skeleton.getBone(14);
 		right_leg_upper = mesh_->skeleton.getBone(53);
 		left_leg_upper = mesh_->skeleton.getBone(56);
 
 		root_top = mesh_->skeleton.getBone(0);
 		root_bottom = mesh_->skeleton.getBone(5);
 
+		waifuMiku = false;
+
+		right_arm_upper->rotate(arm_fix, glm::normalize(right_arm_upper->getNormal()));
+		left_arm_upper->rotate(-arm_fix, glm::normalize(left_arm_upper->getNormal()));
 	}
-	right_arm_upper->rotate(-arm_fix, glm::normalize(right_arm_upper->getNormal()));
-	left_arm_upper->rotate(arm_fix, glm::normalize(left_arm_upper->getNormal()));
 }
 
 void GUI::assignFloorMap(PerlinMap * map){
@@ -110,8 +115,8 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		transparent_ = !transparent_;
 	} else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
 		walking_animation = !walking_animation;
-		if(walking_animation) walking_speed = 0.4f;
-		else walking_speed = 0.8f;
+		if(walking_animation) walking_speed = 0.3f;
+		else walking_speed = 0.6f;
 	} else if (key == GLFW_KEY_M && action != GLFW_RELEASE) {
 		
 	}

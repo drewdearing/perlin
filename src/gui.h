@@ -81,7 +81,7 @@ private:
 	float aspect_;
 	float frame = 1000.0f/60.0f;
 	bool walking_animation = true;
-	float walking_speed = 0.4f;
+	float walking_speed = 0.3f;
 	float current_rotation_RL = 0.0f;	//right leg
 	float current_rotation_LL = 0.0f;	//left leg
 	float current_rotation_RA = 0.0f;	//right arm
