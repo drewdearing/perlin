@@ -278,8 +278,8 @@ public:
 			v_elevation[2] = getVertexElevation(vertex[2][0], vertex[2][2]);
 
 			weight[0] = glm::length(glm::cross(new_vertex-vertex[1], vertex[2]-vertex[1]));
-        	weight[1] = glm::length(glm::cross(new_vertex-vertex[0], vertex[2]-vertex[0]));
-        	weight[2] = glm::length(glm::cross(new_vertex-vertex[0], vertex[1]-vertex[0]));
+			weight[1] = glm::length(glm::cross(new_vertex-vertex[0], vertex[2]-vertex[0]));
+			weight[2] = glm::length(glm::cross(new_vertex-vertex[0], vertex[1]-vertex[0]));
 			
 			elevation = weight[0] * v_elevation[0] + weight[1] * v_elevation[1] + weight[2] * v_elevation[2];
 
