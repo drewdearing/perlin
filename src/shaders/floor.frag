@@ -18,8 +18,7 @@ void main() {
 	vec3 min_color;
 	vec3 max_color;
 	float t;
-	
-
+  
 	vec3 water = vec3(68/255.0, 68/255.0, 122/255.0);
 	vec3 beach = vec3(148/255.0, 134/255.0, 119/255.0);
 	vec3 forest = vec3(51/255.0, 119/255.0, 85/255.0);
