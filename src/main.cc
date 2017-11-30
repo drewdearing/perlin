@@ -20,7 +20,7 @@
 #include <debuggl.h>
 
 int window_width = 800, window_height = 600;
-const std::string window_title = "Skinning";
+const std::string window_title = "HOLY SHAT";
 
 const char* vertex_shader =
 #include "shaders/default.vert"
@@ -103,11 +103,11 @@ GLFWwindow* init_glefw()
 
 int main(int argc, char* argv[])
 {
-	if (argc < 2) {
-		std::cerr << "Input model file is missing" << std::endl;
-		std::cerr << "Usage: " << argv[0] << " <PMD file>" << std::endl;
-		return -1;
-	}
+	// if (argc < 2) {
+	// 	std::cerr << "Input model file is missing" << std::endl;
+	// 	std::cerr << "Usage: " << argv[0] << " <PMD file>" << std::endl;
+	// 	return -1;
+	// }
 	GLFWwindow *window = init_glefw();
 	GUI gui(window);
 
@@ -143,7 +143,9 @@ int main(int argc, char* argv[])
 	
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
-	mesh.loadpmd(argv[1]);
+	//std::string model_string = "../assets/pmd/Meiko_Sakine.pmd";
+	std::string model_string = "../assets/pmd/Miku_Hatsune.pmd";
+	mesh.loadpmd(model_string);
 	std::cout << "Loaded object  with  " << mesh.vertices.size()
 		<< " vertices and " << mesh.faces.size() << " faces.\n";
 
@@ -165,6 +167,7 @@ int main(int argc, char* argv[])
 	 * GUI object needs the mesh object for bone manipulation.
 	 */
 	gui.assignMesh(&mesh);
+	gui.assignModel(model_string);
 	gui.assignFloorMap(&floorMap);
 
 	glm::vec4 light_position = glm::vec4(0.0f, 100.0f, 0.0f, 1.0f);
@@ -351,7 +354,7 @@ int main(int argc, char* argv[])
 			);
 
 	float aspect = 0.0f;
-	std::cout << "center = " << mesh.getCenter() << "\n";
+	//std::cout << "center = " << mesh.getCenter() << "\n";
 
 	bool draw_floor = true;
 	bool draw_skeleton = true;

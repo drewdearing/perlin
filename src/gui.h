@@ -18,9 +18,11 @@ struct MatrixPointers {
 
 class GUI {
 public:
+	GUI();
 	GUI(GLFWwindow*);
 	~GUI();
 	void assignMesh(Mesh*);
+	void assignModel(const std::string& model);
 	void assignFloorMap(PerlinMap *);
 	void updateTime();
 	void updateFrameRate();
@@ -54,6 +56,8 @@ public:
 	bool setCurrentBone(int i);
 
 	bool isTransparent() const { return transparent_; }
+
+	float* getScale() {return &scale;}
 private:
 	GLFWwindow* window_;
 	Mesh* mesh_;
@@ -73,12 +77,35 @@ private:
 	float scale = 0.5f;
 	float last_x_ = 0.0f, last_y_ = 0.0f, current_x_ = 0.0f, current_y_ = 0.0f;
 	float camera_distance_ = 35.0 * scale;
-	float pan_speed_ = 0.1f;
+	float pan_speed_ = 0.1f * scale;
 	float rotation_speed_ = 0.02f;
 	float zoom_speed_ = 0.1f;
 	float aspect_;
 	float frame = 1000.0f/60.0f;
-	float walk_speed = 0.4f;
+	bool running_animation = false;
+	bool is_running = false;
+	float walking_speed = 0.3f;
+	float current_rotation_RL = 0.0f;	//right leg
+	float current_rotation_LL = 0.0f;	//left leg
+	float current_rotation_RA = 0.0f;	//right arm
+	float current_rotation_LA = 0.0f;	//left arm
+
+	bool waifuMiku = true;
+	//std::string model_;
+
+	//BONES FOR MODEL//
+	Bone* right_arm_upper;
+	Bone* right_arm_lower;
+	Bone* right_leg_upper;
+	Bone* right_leg_lower;
+	Bone* left_arm_upper;
+	Bone* left_arm_lower;
+	Bone* left_leg_upper;
+	Bone* left_leg_lower;
+	Bone* right_foot;
+	Bone* left_foot;
+	Bone* root_top;
+	Bone* root_bottom;
 
 	std::chrono::high_resolution_clock::time_point current_time;
 	std::chrono::duration<float, std::milli> delta_time;

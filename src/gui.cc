@@ -27,6 +27,9 @@ GUI::GUI(GLFWwindow* window)
 GUI::~GUI()
 {
 }
+GUI::GUI()
+{
+}
 
 void GUI::assignMesh(Mesh* mesh)
 {
@@ -34,6 +37,37 @@ void GUI::assignMesh(Mesh* mesh)
 	center_ = mesh_->getCenter() * scale;
 	center_.y += mesh_->height_offset;
 	eye_ = center_ - look_ * camera_distance_;
+}
+
+void GUI::assignModel(const std::string& model){
+	float arm_fix = 0.7f;
+	if(model == "../assets/pmd/Miku_Hatsune.pmd"){
+		right_arm_upper = mesh_->skeleton.getBone(18);
+		left_arm_upper = mesh_->skeleton.getBone(48);
+		right_leg_upper = mesh_->skeleton.getBone(38);
+		left_leg_upper = mesh_->skeleton.getBone(68);
+
+		root_top = mesh_->skeleton.getBone(0);
+		root_bottom = mesh_->skeleton.getBone(8);
+
+		right_arm_upper->rotate(-arm_fix, glm::normalize(right_arm_upper->getNormal()));
+		left_arm_upper->rotate(arm_fix, glm::normalize(left_arm_upper->getNormal()));
+
+	}
+	if(model == "../assets/pmd/Meiko_Sakine.pmd"){
+		right_arm_upper = mesh_->skeleton.getBone(32);
+		left_arm_upper = mesh_->skeleton.getBone(14);
+		right_leg_upper = mesh_->skeleton.getBone(53);
+		left_leg_upper = mesh_->skeleton.getBone(56);
+
+		root_top = mesh_->skeleton.getBone(0);
+		root_bottom = mesh_->skeleton.getBone(5);
+
+		waifuMiku = false;
+
+		right_arm_upper->rotate(arm_fix, glm::normalize(right_arm_upper->getNormal()));
+		left_arm_upper->rotate(-arm_fix, glm::normalize(left_arm_upper->getNormal()));
+	}
 }
 
 void GUI::assignFloorMap(PerlinMap * map){
@@ -68,6 +102,7 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
 		}
+
 	} else if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_RELEASE) {
 		current_bone_--;
 		current_bone_ += mesh_->getNumberOfBones();
@@ -79,7 +114,11 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	} else if (key == GLFW_KEY_T && action != GLFW_RELEASE) {
 		transparent_ = !transparent_;
 	} else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
-		display_fr = !display_fr;
+		running_animation = !running_animation;
+		if(running_animation) walking_speed = 0.6f;
+		else walking_speed = 0.3f;
+	} else if (key == GLFW_KEY_M && action != GLFW_RELEASE) {
+		
 	}
 }
 
@@ -114,15 +153,19 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		glm::vec3 mouse_world = nearPlane-lastPlane;
 		glm::vec3 axis = glm::normalize(glm::cross(look_, mouse_world));
 
-		float r = M_PI/50.0f * (delta_time.count()/frame);
+		float r = M_PI/20.0f * (delta_time.count()/frame);
 
 		glm::vec3 old_look_ = look_;
-		eye_ = center_ + glm::rotate(eye_-center_, r, axis);
+		if(delta_x >= 0) axis[1] = -1;
+		else axis[1] = 1;
+
+		eye_ = center_ + glm::rotate(eye_-center_, r, glm::normalize(axis) * glm::vec3(0, 1, 0));
 		look_ = glm::normalize(center_ - eye_);
 		tangent_ = glm::rotate(tangent_, r, axis);
 		tangent_.y = 0;
 		tangent_ = glm::normalize(tangent_);
-		up_ = -glm::normalize(glm::cross(look_, tangent_));
+		//up_ = -glm::normalize(glm::cross(look_, tangent_));
+		up_ = glm::vec3(0, 1, 0);
 
 	}
 }
@@ -136,7 +179,7 @@ void GUI::mouseButtonCallback(int button, int action, int mods)
 void GUI::updateMatrices()
 {
 
-	view_matrix_ = glm::lookAt(eye_, center_, up_);
+	view_matrix_ = glm::lookAt(glm::vec3(eye_.x, eye_.y+10, eye_.z), center_, up_);
 	light_position_ = glm::vec4(eye_, 1.0f);
 
 	aspect_ = static_cast<float>(window_width_) / window_height_;
@@ -170,28 +213,88 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	float speed = walk_speed * scale * floorMap->getVertDistance();
 
 	if(fps_mode_){
-		dir_f = speed * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
-		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
+		dir_f = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
+		dir_s = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
 	}
 	else{
-		dir_f = speed * glm::normalize(glm::vec3(look_.z, 0, look_.x));
-		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
+		dir_f = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, 0, look_.x));
+		dir_s = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
 	}
 
 	if (key == GLFW_KEY_W) {
-		floorMap->setCenter(c.x+dir_f.x, c.y+dir_f.z);
-		if(fps_mode_){
-			mesh_->height_offset += dir_f.y;
-			center_.y += dir_f.y;
+		if(action != GLFW_RELEASE){
+			floorMap->setCenter(c.x+dir_f.x, c.y+dir_f.z);
+			if(fps_mode_){
+				mesh_->height_offset += dir_f.y;
+				center_.y += dir_f.y;
+			}
+			else{
+				mesh_->height_offset = floorMap->getElevation(0,0);
+				center_ = mesh_->getCenter()* scale;
+				center_.y += mesh_->height_offset;
+			}
+			eye_ = center_ - look_ * camera_distance_;
+
+			//LEGS
+			right_leg_upper -> rotate(rotation_speed_*4, glm::normalize(right_leg_upper->getBinormal()));
+			left_leg_upper -> rotate(rotation_speed_*4, glm::normalize(left_leg_upper->getBinormal()));
+			
+			current_rotation_RL += rotation_speed_*4;
+			current_rotation_LL += rotation_speed_*4;
+
+			//ARMS
+			float running_arms = -1.0f;
+			if(!running_animation){
+				right_arm_upper -> rotate(rotation_speed_*4, glm::normalize(right_arm_upper->getBinormal()));
+				left_arm_upper -> rotate(-rotation_speed_*4, glm::normalize(left_arm_upper->getBinormal()));
+				
+				current_rotation_RA += rotation_speed_*4;
+				current_rotation_LA += rotation_speed_*4;
+			}
+			else if(!is_running){
+				right_arm_upper -> rotate(-running_arms, glm::normalize(right_arm_upper->getBinormal()));
+				left_arm_upper -> rotate(-running_arms, glm::normalize(left_arm_upper->getBinormal()));
+				root_top -> rotate(-0.8f, glm::normalize(root_top->getNormal()));
+				current_rotation_RA += running_arms;
+				current_rotation_LA += running_arms;
+				is_running = true;
+			}
+			if(current_rotation_RL >= walking_speed || current_rotation_RL <= -walking_speed) rotation_speed_ *= -1.0f;
 		}
-		else{
-			mesh_->height_offset = floorMap->getElevation(0,0);
-			mesh_->tilt_normal = floorMap->getNormal(0,0);
-			center_ = mesh_->getCenter() * scale;
-			center_.y += mesh_->height_offset;
+		//YOUR OLD TRANSITIONING CODE
+		// else{
+		// 	mesh_->height_offset = floorMap->getElevation(0,0);
+		// 	mesh_->tilt_normal = floorMap->getNormal(0,0);
+		// 	center_ = mesh_->getCenter() * scale;
+		// 	center_.y += mesh_->height_offset;
+		else {
+			right_leg_upper -> rotate(-current_rotation_RL, glm::normalize(right_leg_upper->getBinormal()));
+			left_leg_upper -> rotate(-current_rotation_LL, glm::normalize(left_leg_upper->getBinormal()));
+			if(!running_animation){
+				right_arm_upper -> rotate(-current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
+			}
+			else{
+				right_arm_upper -> rotate(current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
+				root_top -> rotate(0.8f, glm::normalize(root_top->getNormal()));
+			}
+			left_arm_upper -> rotate(current_rotation_LA, glm::normalize(left_arm_upper->getBinormal()));
+			current_rotation_RL = 0;
+			current_rotation_LL = 0;
+			current_rotation_RA = 0;
+			current_rotation_LA = 0;
+			is_running = false;
 		}
-		eye_ = center_ - look_ * camera_distance_;
-		return true;
+		
+		// glm::vec3 floor_normal = glm::vec3(floorMap->getNormal(mesh_->getCenter().x, mesh_->getCenter().y));
+		// glm::vec3 mesh_normal = mesh_->skeleton.getBone(0)->getTangent();
+		// glm::vec3 axis_temp = glm::cross(mesh_normal, floor_normal);
+		// float theta = glm::dot(mesh_normal, floor_normal)/(glm::length(mesh_normal) * glm::length(floor_normal));
+		// if(theta > 1.0f) theta = 1.0f;
+		// float angle = acos(theta);
+		// mesh_->skeleton.getBone(0)->rotate(angle*2, glm::normalize(axis_temp));
+		// mesh_->skeleton.getBone(8)->rotate(angle*2, glm::normalize(axis_temp));
+
+		pose_changed_ = true;
 	} else if (key == GLFW_KEY_S) {
 		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.z);
 		if(fps_mode_){
@@ -233,7 +336,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			eye_ = center_ - look_ * camera_distance_;
 		}
 		return true;
-	} else if (key == GLFW_KEY_LEFT_SHIFT) {
+	} else if (key == GLFW_KEY_X) {
 		if(fps_mode_){
 			mesh_->height_offset -= 1;
 			center_.y -= 1;
