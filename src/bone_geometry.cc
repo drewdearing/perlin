@@ -38,6 +38,8 @@ Mesh::~Mesh()
 
 void Mesh::loadpmd(const std::string& fn)
 {
+	resetData();
+	skeleton.resetData();
 	MMDReader mr;
 	mr.open(fn);
 	mr.getMesh(vertices, faces, vertex_normals, uv_coordinates);
@@ -70,6 +72,17 @@ void Mesh::loadpmd(const std::string& fn)
 			j->bones.at(b)->addWeight(current.vid, current.weight/(j->bones).size());
 		}
 	}
+}
+
+void Mesh::resetData(){
+	vertices.clear();
+	vst.clear();
+	animated_vertices.clear();
+	faces.clear();
+	vertex_normals.clear();
+	face_normals.clear();
+	uv_coordinates.clear();
+	materials.clear();
 }
 
 void Mesh::updateAnimation()

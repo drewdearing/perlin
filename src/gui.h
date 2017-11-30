@@ -24,6 +24,8 @@ public:
 	void assignMesh(Mesh*);
 	void assignModel(const std::string& model);
 	void assignFloorMap(PerlinMap *);
+	bool changeModel();
+	void resetSwap();
 	void updateTime();
 	void updateFrameRate();
 
@@ -87,6 +89,7 @@ private:
 	float current_rotation = 0.0f;
 
 	bool waifuMiku = true;
+	bool swap_model = true;
 	//std::string model_;
 
 	//BONES FOR MODEL//

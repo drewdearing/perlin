@@ -101,6 +101,7 @@ public:
 	int getNBuffers() const { return int(meta_.size()); }
 	RenderInputMeta getBufferMeta(int i) const { return meta_[i]; }
 	bool hasIndex() const { return has_index_; }
+	void resetData();
 	RenderInputMeta getIndexMeta() const { return index_meta_; }
 
 	bool hasMaterial() const { return !materials_.empty(); }
@@ -126,7 +127,14 @@ public:
 	 * RenderPass does not support render-to-texture or multi-target
 	 * rendering for now (and you also don't need it).
 	 */
+	RenderPass();
 	RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
+	           const RenderDataInput& input,
+	           const std::vector<const char*> shaders, // Order: VS, GS, FS 
+	           const std::vector<ShaderUniform> uniforms,
+	           const std::vector<const char*> output // Order: 0, 1, 2...
+		  );
+	void assign(int vao, // -1: create new VAO, otherwise use given VAO
 	           const RenderDataInput& input,
 	           const std::vector<const char*> shaders, // Order: VS, GS, FS 
 	           const std::vector<ShaderUniform> uniforms,

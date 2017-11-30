@@ -394,6 +394,13 @@ public:
 		return root;
 	}
 
+	void resetData(){
+		roots.clear();
+		joints.clear();
+		parent_bones.clear();
+		bones.clear();
+	}
+
 	unsigned numBones () const{
 		return bones.size();
 	}
@@ -483,6 +490,7 @@ struct Mesh {
 	float height_offset;
 
 	void loadpmd(const std::string& fn);
+	void resetData();
 	void updateAnimation();
 	int getNumberOfBones() const { return skeleton.numBones(); }
 	glm::vec3 getCenter();

@@ -104,6 +104,80 @@ RenderPass::RenderPass(int vao, // -1: create new VAO, otherwise use given VAO
 	}
 }
 
+void RenderPass::assign(int vao, // -1: create new VAO, otherwise use given VAO
+	   const RenderDataInput& input,
+	   const std::vector<const char*> shaders, // Order: VS, GS, FS 
+	   const std::vector<ShaderUniform> uniforms,
+	   const std::vector<const char*> output // Order: 0, 1, 2...
+	  )
+{
+	vao_ = vao;
+	input_ = input;
+	uniforms_ = uniforms;
+	if (vao_ < 0) {
+		CHECK_GL_ERROR(glGenVertexArrays(1, (GLuint*)&vao_));
+	}
+	CHECK_GL_ERROR(glBindVertexArray(vao_));
+
+	// Program first
+	vs_ = compileShader(shaders[0], GL_VERTEX_SHADER);
+	gs_ = compileShader(shaders[1], GL_GEOMETRY_SHADER);
+	fs_ = compileShader(shaders[2], GL_FRAGMENT_SHADER);
+	CHECK_GL_ERROR(sp_ = glCreateProgram());
+	glAttachShader(sp_, vs_);
+	glAttachShader(sp_, fs_);
+	if (shaders[1])
+		glAttachShader(sp_, gs_);
+
+	// ... and then buffers
+	size_t nbuffer = input.getNBuffers();
+	if (input.hasIndex())
+		nbuffer++;
+	glbuffers_.resize(nbuffer);
+	CHECK_GL_ERROR(glGenBuffers(nbuffer, glbuffers_.data()));
+	for (int i = 0; i < input.getNBuffers(); i++) {
+		auto meta = input.getBufferMeta(i);
+		CHECK_GL_ERROR(glBindBuffer(GL_ARRAY_BUFFER, glbuffers_[i]));
+		CHECK_GL_ERROR(glBufferData(GL_ARRAY_BUFFER,
+				meta.getElementSize() * meta.nelements,
+				meta.data,
+				GL_STATIC_DRAW));
+		CHECK_GL_ERROR(glVertexAttribPointer(meta.position,
+					meta.element_length,
+					meta.element_type,
+					GL_FALSE, 0, 0));
+		CHECK_GL_ERROR(glEnableVertexAttribArray(meta.position));
+		// ... because we need program to bind location
+		CHECK_GL_ERROR(glBindAttribLocation(sp_, meta.position, meta.name.c_str()));
+	}
+	// .. bind output position
+	for (size_t i = 0; i < output.size(); i++) {
+		CHECK_GL_ERROR(glBindFragDataLocation(sp_, i, output[i]));
+	}
+	// ... then we can link
+	glLinkProgram(sp_);
+	CHECK_GL_PROGRAM_ERROR(sp_);
+
+	if (input.hasIndex()) {
+		auto meta = input.getIndexMeta();
+		CHECK_GL_ERROR(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
+					glbuffers_.back()
+					));
+		CHECK_GL_ERROR(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+					meta.getElementSize() * meta.nelements,
+					meta.data, GL_STATIC_DRAW));
+	}
+	// after linking uniform locations can be determined
+	unilocs_.resize(uniforms.size());
+	for (size_t i = 0; i < uniforms.size(); i++) {
+		CHECK_GL_ERROR(unilocs_[i] = glGetUniformLocation(sp_, uniforms[i].name.c_str()));
+	}
+	if (input_.hasMaterial()) {
+		createMaterialTexture();
+		initMaterialUniform();
+	}
+}
+
 void RenderPass::initMaterialUniform()
 {
 	auto float_binder = [](int loc, const void* data) {
@@ -234,6 +308,11 @@ RenderPass::~RenderPass()
 	// TODO: Free resources
 }
 
+RenderPass::RenderPass()
+{
+	// TODO: Free resources
+}
+
 void RenderPass::updateVBO(int position, const void* data, size_t size)
 {
 	int bufferid = -1;
@@ -335,6 +414,11 @@ void RenderDataInput::useMaterials(const std::vector<Material>& ms)
 	}
 }
 
+void RenderDataInput::resetData(){
+	has_index_ = false;
+	meta_.clear();
+}
+
 size_t RenderInputMeta::getElementSize() const
 {
 	size_t element_size = 4;
@@ -344,5 +428,6 @@ size_t RenderInputMeta::getElementSize() const
 		element_size = 4;
 	return element_size * element_length;
 }
+
 
 std::map<const char*, unsigned> RenderPass::shader_cache_;

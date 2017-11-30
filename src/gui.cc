@@ -115,8 +115,17 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		if(running_animation) walking_speed = 0.6f;
 		else walking_speed = 0.3f;
 	} else if (key == GLFW_KEY_M && action != GLFW_RELEASE) {
-		
+		swap_model = true;
+		pose_changed_ = true;
 	}
+}
+
+bool GUI::changeModel(){
+	return swap_model;
+}
+
+void GUI::resetSwap(){
+	swap_model = false;;
 }
 
 void GUI::updateTime(){
@@ -263,7 +272,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			}
 			if(current_rotation >= walking_speed || current_rotation <= -walking_speed) rotation_speed_ *= -1.0f;
 		}
-		else {
+		else { //W is let go. revert to default position
 			revertBoneRotation(right_leg_upper);
 			revertBoneRotation(left_leg_upper);
 			revertBoneRotation(right_arm_upper);
@@ -271,7 +280,13 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			if(is_running)
 				revertBoneRotation(root_top);
 			is_running = false;
+			current_rotation = 0;
 		}
+
+		mesh_->height_offset = floorMap->getElevation(0,0);
+		mesh_->tilt_normal = floorMap->getNormal(0,0);
+		center_ = mesh_->getCenter() * scale;
+		center_.y += mesh_->height_offset;
 		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_S) {
