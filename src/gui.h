@@ -57,7 +57,6 @@ public:
 
 	bool isTransparent() const { return transparent_; }
 
-	float* getScale() {return &scale;}
 private:
 	GLFWwindow* window_;
 	Mesh* mesh_;

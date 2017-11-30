@@ -210,7 +210,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	glm::vec2 c = floorMap->getCenter();
 	glm::vec3 dir_f;
 	glm::vec3 dir_s;
-	float speed = walk_speed * scale * floorMap->getVertDistance();
+	//float speed = walk_speed * scale * floorMap->getVertDistance();
 
 	if(fps_mode_){
 		dir_f = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
