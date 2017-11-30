@@ -27,9 +27,6 @@ GUI::GUI(GLFWwindow* window)
 GUI::~GUI()
 {
 }
-GUI::GUI()
-{
-}
 
 void GUI::assignMesh(Mesh* mesh)
 {
@@ -153,19 +150,14 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		glm::vec3 mouse_world = nearPlane-lastPlane;
 		glm::vec3 axis = glm::normalize(glm::cross(look_, mouse_world));
 
-		float r = M_PI/20.0f * (delta_time.count()/frame);
+		float r = M_PI/50.0f * (delta_time.count()/frame);
 
-		glm::vec3 old_look_ = look_;
-		if(delta_x >= 0) axis[1] = -1;
-		else axis[1] = 1;
-
-		eye_ = center_ + glm::rotate(eye_-center_, r, glm::normalize(axis) * glm::vec3(0, 1, 0));
+		eye_ = center_ + glm::rotate(eye_-center_, r, axis);
 		look_ = glm::normalize(center_ - eye_);
 		tangent_ = glm::rotate(tangent_, r, axis);
 		tangent_.y = 0;
 		tangent_ = glm::normalize(tangent_);
-		//up_ = -glm::normalize(glm::cross(look_, tangent_));
-		up_ = glm::vec3(0, 1, 0);
+		up_ = -glm::normalize(glm::cross(look_, tangent_));
 
 	}
 }
@@ -179,7 +171,7 @@ void GUI::mouseButtonCallback(int button, int action, int mods)
 void GUI::updateMatrices()
 {
 
-	view_matrix_ = glm::lookAt(glm::vec3(eye_.x, eye_.y+10, eye_.z), center_, up_);
+	view_matrix_ = glm::lookAt(eye_, center_, up_);
 	light_position_ = glm::vec4(eye_, 1.0f);
 
 	aspect_ = static_cast<float>(window_width_) / window_height_;
@@ -226,15 +218,15 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	glm::vec2 c = floorMap->getCenter();
 	glm::vec3 dir_f;
 	glm::vec3 dir_s;
-	//float speed = walk_speed * scale * floorMap->getVertDistance();
+	float speed = walking_speed * scale * floorMap->getVertDistance();
 
 	if(fps_mode_){
-		dir_f = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
-		dir_s = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
+		dir_f = speed * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
+		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
 	}
 	else{
-		dir_f = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, 0, look_.x));
-		dir_s = walking_speed * scale * floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
+		dir_f = speed * glm::normalize(glm::vec3(look_.z, 0, look_.x));
+		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
 	}
 
 	if (key == GLFW_KEY_W) {
@@ -280,11 +272,8 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 				revertBoneRotation(root_top);
 			is_running = false;
 		}
-		mesh_->height_offset = floorMap->getElevation(0,0);
-		mesh_->tilt_normal = floorMap->getNormal(0,0);
-		center_ = mesh_->getCenter() * scale;
-		center_.y += mesh_->height_offset;
 		pose_changed_ = true;
+		return true;
 	} else if (key == GLFW_KEY_S) {
 		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.z);
 		if(fps_mode_){
