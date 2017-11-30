@@ -106,6 +106,18 @@ public:
 		return binormal;
 	}
 
+	glm::vec3 getOriginalTangent(){
+		return originalTangent;
+	}
+
+	glm::vec3 getOriginalNormal(){
+		return originalNormal;
+	}
+
+	glm::vec3 getOriginalBinormal(){
+		return originalBinormal;
+	}
+
 	bool isDirty(){
 		return dirty;
 	}

@@ -124,6 +124,7 @@ private:
 	glm::mat4 projection_matrix_;
 	glm::mat4 model_matrix_ = glm::mat4(1.0f);
 
+	void revertBoneRotation(Bone* rotated_bone);
 	bool captureWASDUPDOWN(int key, int action);
 
 };

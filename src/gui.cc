@@ -205,6 +205,22 @@ bool GUI::setCurrentBone(int i)
 	return true;
 }
 
+void GUI::revertBoneRotation(Bone* rotated_bone){
+
+	glm::vec3 original_state = rotated_bone->getOriginalTangent();
+	glm::vec3 rotated_state = rotated_bone->getTangent();
+
+	glm::vec3 axis_temp = glm::cross(rotated_state, original_state);
+	float theta = glm::dot(rotated_state, original_state)/(glm::length(rotated_state) * glm::length(original_state));
+	if(theta > 1.0f) theta = 1.0f;
+	float angle = acos(theta);
+	std::cout << "\noriginal_state: " << glm::to_string(original_state);
+	std::cout << "\nrotated_state : " << glm::to_string(rotated_state);
+	std::cout << "\nangle         : " << angle << std::endl;
+	rotated_bone->rotate(angle, (axis_temp));
+
+}
+
 bool GUI::captureWASDUPDOWN(int key, int action)
 {
 	glm::vec2 c = floorMap->getCenter();
@@ -254,7 +270,7 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			else if(!is_running){
 				right_arm_upper -> rotate(-running_arms, glm::normalize(right_arm_upper->getBinormal()));
 				left_arm_upper -> rotate(-running_arms, glm::normalize(left_arm_upper->getBinormal()));
-				root_top -> rotate(-0.8f, glm::normalize(root_top->getNormal()));
+				root_top -> rotate(-0.6f, glm::normalize(root_top->getNormal()));
 				current_rotation_RA += running_arms;
 				current_rotation_LA += running_arms;
 				is_running = true;
@@ -262,16 +278,22 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			if(current_rotation_RL >= walking_speed || current_rotation_RL <= -walking_speed) rotation_speed_ *= -1.0f;
 		}
 		else {
-			right_leg_upper -> rotate(-current_rotation_RL, glm::normalize(right_leg_upper->getBinormal()));
-			left_leg_upper -> rotate(-current_rotation_LL, glm::normalize(left_leg_upper->getBinormal()));
-			if(!running_animation){
-				right_arm_upper -> rotate(-current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
-			}
-			else{
-				right_arm_upper -> rotate(current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
-				root_top -> rotate(0.8f, glm::normalize(root_top->getNormal()));
-			}
-			left_arm_upper -> rotate(current_rotation_LA, glm::normalize(left_arm_upper->getBinormal()));
+			//right_leg_upper -> rotate(-current_rotation_RL, glm::normalize(right_leg_upper->getBinormal()));
+			//left_leg_upper -> rotate(-current_rotation_LL, glm::normalize(left_leg_upper->getBinormal()));
+			revertBoneRotation(right_leg_upper);
+			revertBoneRotation(left_leg_upper);
+			revertBoneRotation(right_arm_upper);
+			revertBoneRotation(left_arm_upper);
+			if(is_running)
+				revertBoneRotation(root_top);
+			// if(!is_running){
+			// 	right_arm_upper -> rotate(-current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
+			// }
+			// else{
+			// 	right_arm_upper -> rotate(current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
+			// 	root_top -> rotate(0.8f, glm::normalize(root_top->getNormal()));
+			// }
+			// left_arm_upper -> rotate(current_rotation_LA, glm::normalize(left_arm_upper->getBinormal()));
 			current_rotation_RL = 0;
 			current_rotation_LL = 0;
 			current_rotation_RA = 0;
@@ -282,15 +304,6 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		mesh_->tilt_normal = floorMap->getNormal(0,0);
 		center_ = mesh_->getCenter() * scale;
 		center_.y += mesh_->height_offset;
-		// glm::vec3 floor_normal = glm::vec3(floorMap->getNormal(mesh_->getCenter().x, mesh_->getCenter().y));
-		// glm::vec3 mesh_normal = mesh_->skeleton.getBone(0)->getTangent();
-		// glm::vec3 axis_temp = glm::cross(mesh_normal, floor_normal);
-		// float theta = glm::dot(mesh_normal, floor_normal)/(glm::length(mesh_normal) * glm::length(floor_normal));
-		// if(theta > 1.0f) theta = 1.0f;
-		// float angle = acos(theta);
-		// mesh_->skeleton.getBone(0)->rotate(angle*2, glm::normalize(axis_temp));
-		// mesh_->skeleton.getBone(8)->rotate(angle*2, glm::normalize(axis_temp));
-
 		pose_changed_ = true;
 	} else if (key == GLFW_KEY_S) {
 		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.z);
