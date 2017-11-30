@@ -20,113 +20,69 @@ void main() {
 	vec3 max_color;
 	float t;
   
-	vec3 water;
-	vec3 beach;
-	vec3 forest;
-	vec3 jungle;
-	vec3 savannah;
-	vec3 desert;
-	vec3 snow;
+	vec3 ocean = vec3(68, 68, 122);
+	vec3 beach = vec3(160, 144, 119);
 
-	water = vec3(68/255.0, 68/255.0, 122/255.0);
-	beach = vec3(148/255.0, 134/255.0, 119/255.0);
+	vec3 scorched = vec3(85, 85, 85);
+	vec3 bare = vec3(136, 136, 136);
+	vec3 tundra = vec3(187, 187, 170);
+  vec3 snow = vec3(221, 221, 228);
 
-	// Forest Moisture
-	if (m < .165) {
-		forest = vec3(210/255.0, 185/255.0, 139/255.0);
-	}
-	else if (m < .33) {
-		forest = vec3(136/255.0, 170/255.0, 85/255.0); 
-	}
-	else if (m < .66) {
-		forest = vec3(85/255.0, 153/255.0, 68/255.0); 
-	}
-	else {
-		forest = vec3(210/255.0, 185/255.0, 139/255.0); 
-	}
+	vec3 temperate_desert = vec3(201, 210, 155);
+	vec3 shrubland = vec3(136, 153, 119);
+  vec3 taiga = vec3(153, 170, 119);
 
+  vec3 grassland = vec3(136, 170, 85);
+  vec3 temperate_deciduous_forest = vec3(103, 148, 89);
+  vec3 temperate_rain_forest = vec3(68, 136, 85);
 
-	// Jungle Moisture
-	if (m < .2) {
-		jungle = vec3(68/255.0, 136/255.0, 85/255.0);
-	}
-	else if (m < .5) {
-		jungle = vec3(103/255.0, 148/255.0, 89/255.0);
-	}
-	else if (m < .8) {
-		jungle = vec3(103/255.0, 148/255.0, 89/255.0);
-	}
-	else {
-		jungle = vec3(68/255.0, 136/255.0, 85/255.0); 
-	}
+  vec3 subtropical_desert = vec3(210, 185, 139);
+  vec3 tropical_seasonal_forest = vec3(85, 153, 68);
+  vec3 tropical_rain_forest = vec3(51, 119, 85);
 
+  if (e < 0.1)
+    color = ocean;
+  else if (e < 0.12)
+    color = beach;
+  else if (e > 0.8) {
+    if (m < 0.1)
+      color = scorched;
+    else if (m < 0.2)
+      color = bare;
+    else if (m < 0.5)
+      color = tundra;
+    else
+      color = snow;
+  }
+  else if (e > 0.6) {
+    if (m < 0.33)
+      color = temperate_desert;
+    else if (m < 0.66)
+      color = shrubland;
+    else
+      color = taiga;
+  }
+  else if (e > 0.3) {
+    if (m < 0.16)
+      color = temperate_desert;
+    else if (m < 0.50)
+      color = grassland;
+    else if (m < 0.83)
+      color = temperate_deciduous_forest;
+    else
+      color = temperate_rain_forest;
+  }
+  else if (m < 0.16)
+    color = subtropical_desert;
+  else if (m < 0.33)
+    color = grassland;
+  else if (m < 0.66)
+    color = tropical_seasonal_forest;
+  else
+    color = tropical_rain_forest;
 
-	// Savannah Moisture
-	if (m < .33) {
-		savannah = vec3(201/255.0, 210/255.0, 155/255.0); 
-	}
-	else if (m < .66) {
-		savannah = vec3(136/255.0, 153/255.0, 119/255.0); 
-	}
-	else {
-		savannah = vec3(153/255.0, 170/255.0, 119/255.0); 
-	}
+  color /= 255.0;
 
-	// Desert Moisture
-	if (m < .1) {
-		desert = vec3(85/255.0, 85/255.0, 85/255.0);
-	}
-	else if (m < .2) {
-		desert = vec3(136/255.0, 136/255.0, 136/255.0);
-	}
-	else if (m < .5) {
-		desert = vec3(187/255.0, 187/255.0, 170/255.0);
-	}
-	else {
-		desert = vec3(221/255.0, 221/255.0, 228/255.0); 
-	}
-
-	if (e < 0.1){
-		color = water;
-	}
-  	else if (e < 0.2){
-  		color = beach;
-  	}
-  	else if (e < 0.3){
-  		float t = (e-0.2)/(0.3 - 0.2);
-  		min_color = beach;
-  		max_color = forest;
-  		color.x = min_color.x + (max_color.x - min_color.x) * t;
-  		color.y = min_color.y + (max_color.y - min_color.y) * t;
-  		color.z = min_color.z + (max_color.z - min_color.z) * t;
-  	}
-  	else if (e < 0.5){
-		float t = (e-0.3)/(0.5 - 0.3);
-  		min_color = forest;
-  		max_color = jungle;
-  		color.x = min_color.x + (max_color.x - min_color.x) * t;
-  		color.y = min_color.y + (max_color.y - min_color.y) * t;
-  		color.z = min_color.z + (max_color.z - min_color.z) * t;
-  	}
-  	else if (e < 0.7){
-		float t = (e-0.5)/(0.7 - 0.5);
-  		min_color = jungle;
-  		max_color = savannah;
-  		color.x = min_color.x + (max_color.x - min_color.x) * t;
-  		color.y = min_color.y + (max_color.y - min_color.y) * t;
-  		color.z = min_color.z + (max_color.z - min_color.z) * t;
-  	}
-  	else if (e < 0.9){
-		float t = (e-0.7)/(0.9 - 0.7);
-  		min_color = savannah;
-  		max_color = snow;
-  		color.x = min_color.x + (max_color.x - min_color.x) * t;
-  		color.y = min_color.y + (max_color.y - min_color.y) * t;
-  		color.z = min_color.z + (max_color.z - min_color.z) * t;
-	}
-	else{
-		color = snow;
-	}
 	fragment_color = vec4(dot_nl * color, 1.0);
 }
 )zzz"

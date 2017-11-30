@@ -136,8 +136,10 @@ int main(int argc, char* argv[])
 		non-explicit seed
 	*/
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
+	PerlinMap moistureMap = PerlinMap(1000, 1000, 4, 5.0, 0, 1, 5, 25);
 
-	floorMap.createFloor(floor_vertices, floor_faces, floor_normals, moisture_values);
+	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
+	moistureMap.createHeights(moisture_values);
 	
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
@@ -412,7 +414,10 @@ int main(int argc, char* argv[])
 				floor_vertices.clear();
 				floor_normals.clear();
 				moisture_values.clear();
-				floorMap.updateFloor(floor_vertices, floor_normals, moisture_values);
+				floorMap.updateFloor(floor_vertices, floor_normals);
+				glm::vec2 floorCenter = floorMap.getCenter();
+				moistureMap.setCenter(floorCenter.x, floorCenter.y);
+				moistureMap.createHeights(moisture_values);
 				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
 				floor_pass.updateVBO(1, floor_normals.data(), floor_normals.size());
 				floor_pass.updateVBO(2, moisture_values.data(), moisture_values.size());

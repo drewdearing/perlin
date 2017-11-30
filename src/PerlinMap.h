@@ -83,13 +83,12 @@ public:
 		dirty = true;
 	}
 
-	void createFloor(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces, std::vector<glm::vec4>& normals, std::vector<float>& moisture_values){
+	void createFloor(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces, std::vector<glm::vec4>& normals){
 		int currentX;
 		int currentY;
 		float distanceX;
 		float distanceY;
 		float elevation;
-		float moisture;
 
 		int min_x = std::max((int)ceil(centerX - float(radius)), 0);
 		int max_x = std::min((int)floor(centerX + float(radius)), width-1);
@@ -123,7 +122,6 @@ public:
 				distanceY = (float(currentY) - centerY) * vert_distance;
 				elevation = getVertexElevation(currentX, currentY);
 				vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
-				moisture_values.push_back(getMoistureValue(currentX, currentY));
 				normals.push_back(getVertexNormal(currentX, currentY));
 
 				
@@ -132,7 +130,6 @@ public:
 					distanceX = (float(currentX) - centerX) * vert_distance;
 					elevation = getVertexElevation(currentX, currentY);
 					vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
-					moisture_values.push_back(getMoistureValue(currentX, currentY));
 					normals.push_back(getVertexNormal(currentX, currentY));
 				}
 
@@ -155,15 +152,39 @@ public:
 			distanceX = (float(currentX) - centerX) * vert_distance;
 			elevation = getVertexElevation(currentX, currentY);
 			vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
-			moisture_values.push_back(getMoistureValue(currentX, currentY));
 			normals.push_back(getVertexNormal(currentX, currentY));
 		}
 
 		dirty = false;
 	}
 
-	glm::vec4 getVertexNormal(int x, int y){
+	void createHeights(std::vector<float>& heights){
+		float elevation;
 
+		int min_x = std::max((int)ceil(centerX - float(radius)), 0);
+		int max_x = std::min((int)floor(centerX + float(radius)), width-1);
+		int min_y = std::max((int)ceil(centerY - float(radius)), 0);
+		int max_y = std::min((int)floor(centerY + float(radius)), height-1);
+
+		if(min_x == 0)
+			max_x = diameter_x - 1;
+		else if(max_x == width-1)
+			min_x = width - diameter_x;
+		if(min_y == 0)
+			max_y = diameter_y - 1;
+		else if(max_y == height-1)
+			min_y = height - diameter_y;
+
+		for(int y = min_y; y <= max_y; y++){
+			for(int x = min_x; x <= max_x; x++){
+				heights.push_back(getVertexElevation(x, y));
+			}
+		}
+
+		dirty = false;
+	}
+
+	glm::vec4 getVertexNormal(int x, int y){
 		glm::vec3 left = glm::vec3(getVertexPoint(x - 1, y));
 		glm::vec3 right = glm::vec3(getVertexPoint(x + 1, y));
 		glm::vec3 up = glm::vec3(getVertexPoint(x, y - 1));
@@ -172,6 +193,7 @@ public:
 		glm::vec3 v1 = right - left;
 		glm::vec3 v2 = down - up;
 
+		
 		glm::vec3 normal = glm::cross(v1, v2);
 
 		return glm::vec4(glm::normalize(normal), 0);
@@ -231,11 +253,7 @@ public:
 		}
 	}
 
-	float getMoistureValue(int x, int y){
-		return perlin.octaveNoise0_1(float(x) / fx, float(y) / fy, fz, octaves);
-	}
-
-	void updateFloor(std::vector<glm::vec4>& vertices, std::vector<glm::vec4>& normals, std::vector<float>& moisture_values){
+	void updateFloor(std::vector<glm::vec4>& vertices, std::vector<glm::vec4>& normals){
 		int currentX;
 		int currentY;
 		float distanceX;
@@ -262,7 +280,6 @@ public:
 				distanceX = (float(x) - centerX) * vert_distance;
 				elevation = getVertexElevation(x, y);
 				vertices.push_back(glm::vec4(distanceY, elevation, distanceX, 1));
-				moisture_values.push_back(getMoistureValue(x, y));
 				normals.push_back(getVertexNormal(x, y));
 			}
 		}
