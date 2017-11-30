@@ -84,10 +84,7 @@ private:
 	bool running_animation = false;
 	bool is_running = false;
 	float walking_speed = 0.3f;
-	float current_rotation_RL = 0.0f;	//right leg
-	float current_rotation_LL = 0.0f;	//left leg
-	float current_rotation_RA = 0.0f;	//right arm
-	float current_rotation_LA = 0.0f;	//left arm
+	float current_rotation = 0.0f;
 
 	bool waifuMiku = true;
 	//std::string model_;

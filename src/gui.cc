@@ -255,49 +255,29 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			right_leg_upper -> rotate(rotation_speed_*4, glm::normalize(right_leg_upper->getBinormal()));
 			left_leg_upper -> rotate(rotation_speed_*4, glm::normalize(left_leg_upper->getBinormal()));
 			
-			current_rotation_RL += rotation_speed_*4;
-			current_rotation_LL += rotation_speed_*4;
+			current_rotation += rotation_speed_*4;
 
 			//ARMS
 			float running_arms = -1.0f;
 			if(!running_animation){
 				right_arm_upper -> rotate(rotation_speed_*4, glm::normalize(right_arm_upper->getBinormal()));
 				left_arm_upper -> rotate(-rotation_speed_*4, glm::normalize(left_arm_upper->getBinormal()));
-				
-				current_rotation_RA += rotation_speed_*4;
-				current_rotation_LA += rotation_speed_*4;
 			}
 			else if(!is_running){
 				right_arm_upper -> rotate(-running_arms, glm::normalize(right_arm_upper->getBinormal()));
 				left_arm_upper -> rotate(-running_arms, glm::normalize(left_arm_upper->getBinormal()));
 				root_top -> rotate(-0.6f, glm::normalize(root_top->getNormal()));
-				current_rotation_RA += running_arms;
-				current_rotation_LA += running_arms;
 				is_running = true;
 			}
-			if(current_rotation_RL >= walking_speed || current_rotation_RL <= -walking_speed) rotation_speed_ *= -1.0f;
+			if(current_rotation >= walking_speed || current_rotation <= -walking_speed) rotation_speed_ *= -1.0f;
 		}
 		else {
-			//right_leg_upper -> rotate(-current_rotation_RL, glm::normalize(right_leg_upper->getBinormal()));
-			//left_leg_upper -> rotate(-current_rotation_LL, glm::normalize(left_leg_upper->getBinormal()));
 			revertBoneRotation(right_leg_upper);
 			revertBoneRotation(left_leg_upper);
 			revertBoneRotation(right_arm_upper);
 			revertBoneRotation(left_arm_upper);
 			if(is_running)
 				revertBoneRotation(root_top);
-			// if(!is_running){
-			// 	right_arm_upper -> rotate(-current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
-			// }
-			// else{
-			// 	right_arm_upper -> rotate(current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
-			// 	root_top -> rotate(0.8f, glm::normalize(root_top->getNormal()));
-			// }
-			// left_arm_upper -> rotate(current_rotation_LA, glm::normalize(left_arm_upper->getBinormal()));
-			current_rotation_RL = 0;
-			current_rotation_LL = 0;
-			current_rotation_RA = 0;
-			current_rotation_LA = 0;
 			is_running = false;
 		}
 		mesh_->height_offset = floorMap->getElevation(0,0);
