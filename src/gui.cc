@@ -261,12 +261,6 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			}
 			if(current_rotation_RL >= walking_speed || current_rotation_RL <= -walking_speed) rotation_speed_ *= -1.0f;
 		}
-		//YOUR OLD TRANSITIONING CODE
-		// else{
-		// 	mesh_->height_offset = floorMap->getElevation(0,0);
-		// 	mesh_->tilt_normal = floorMap->getNormal(0,0);
-		// 	center_ = mesh_->getCenter() * scale;
-		// 	center_.y += mesh_->height_offset;
 		else {
 			right_leg_upper -> rotate(-current_rotation_RL, glm::normalize(right_leg_upper->getBinormal()));
 			left_leg_upper -> rotate(-current_rotation_LL, glm::normalize(left_leg_upper->getBinormal()));
@@ -284,7 +278,10 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			current_rotation_LA = 0;
 			is_running = false;
 		}
-		
+		mesh_->height_offset = floorMap->getElevation(0,0);
+		mesh_->tilt_normal = floorMap->getNormal(0,0);
+		center_ = mesh_->getCenter() * scale;
+		center_.y += mesh_->height_offset;
 		// glm::vec3 floor_normal = glm::vec3(floorMap->getNormal(mesh_->getCenter().x, mesh_->getCenter().y));
 		// glm::vec3 mesh_normal = mesh_->skeleton.getBone(0)->getTangent();
 		// glm::vec3 axis_temp = glm::cross(mesh_normal, floor_normal);
