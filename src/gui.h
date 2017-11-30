@@ -80,7 +80,8 @@ private:
 	float zoom_speed_ = 0.1f;
 	float aspect_;
 	float frame = 1000.0f/60.0f;
-	bool walking_animation = true;
+	bool running_animation = false;
+	bool is_running = false;
 	float walking_speed = 0.3f;
 	float current_rotation_RL = 0.0f;	//right leg
 	float current_rotation_LL = 0.0f;	//left leg

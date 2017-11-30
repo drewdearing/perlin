@@ -114,9 +114,9 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 	} else if (key == GLFW_KEY_T && action != GLFW_RELEASE) {
 		transparent_ = !transparent_;
 	} else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {
-		walking_animation = !walking_animation;
-		if(walking_animation) walking_speed = 0.3f;
-		else walking_speed = 0.6f;
+		running_animation = !running_animation;
+		if(running_animation) walking_speed = 0.6f;
+		else walking_speed = 0.3f;
 	} else if (key == GLFW_KEY_M && action != GLFW_RELEASE) {
 		
 	}
@@ -237,26 +237,45 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			//LEGS
 			right_leg_upper -> rotate(rotation_speed_*4, glm::normalize(right_leg_upper->getBinormal()));
 			left_leg_upper -> rotate(rotation_speed_*4, glm::normalize(left_leg_upper->getBinormal()));
-			//ARMS
-			right_arm_upper -> rotate(rotation_speed_*4, glm::normalize(right_arm_upper->getBinormal()));
-			left_arm_upper -> rotate(-rotation_speed_*4, glm::normalize(left_arm_upper->getBinormal()));
 			
 			current_rotation_RL += rotation_speed_*4;
 			current_rotation_LL += rotation_speed_*4;
-			current_rotation_RA += rotation_speed_*4;
-			current_rotation_LA += rotation_speed_*4;
-			
+
+			//ARMS
+			float running_arms = -1.0f;
+			if(!running_animation){
+				right_arm_upper -> rotate(rotation_speed_*4, glm::normalize(right_arm_upper->getBinormal()));
+				left_arm_upper -> rotate(-rotation_speed_*4, glm::normalize(left_arm_upper->getBinormal()));
+				
+				current_rotation_RA += rotation_speed_*4;
+				current_rotation_LA += rotation_speed_*4;
+			}
+			else if(!is_running){
+				right_arm_upper -> rotate(-running_arms, glm::normalize(right_arm_upper->getBinormal()));
+				left_arm_upper -> rotate(-running_arms, glm::normalize(left_arm_upper->getBinormal()));
+				root_top -> rotate(-0.8f, glm::normalize(root_top->getNormal()));
+				current_rotation_RA += running_arms;
+				current_rotation_LA += running_arms;
+				is_running = true;
+			}
 			if(current_rotation_RL >= walking_speed || current_rotation_RL <= -walking_speed) rotation_speed_ *= -1.0f;
 		}
 		else {
 			right_leg_upper -> rotate(-current_rotation_RL, glm::normalize(right_leg_upper->getBinormal()));
 			left_leg_upper -> rotate(-current_rotation_LL, glm::normalize(left_leg_upper->getBinormal()));
-			right_arm_upper -> rotate(-current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
+			if(!running_animation){
+				right_arm_upper -> rotate(-current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
+			}
+			else{
+				right_arm_upper -> rotate(current_rotation_RA, glm::normalize(right_arm_upper->getBinormal()));
+				root_top -> rotate(0.8f, glm::normalize(root_top->getNormal()));
+			}
 			left_arm_upper -> rotate(current_rotation_LA, glm::normalize(left_arm_upper->getBinormal()));
 			current_rotation_RL = 0;
 			current_rotation_LL = 0;
 			current_rotation_RA = 0;
 			current_rotation_LA = 0;
+			is_running = false;
 		}
 		
 		// glm::vec3 floor_normal = glm::vec3(floorMap->getNormal(mesh_->getCenter().x, mesh_->getCenter().y));

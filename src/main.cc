@@ -139,8 +139,8 @@ int main(int argc, char* argv[])
 
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
-	std::string model_string = "../assets/pmd/Meiko_Sakine.pmd";
-	// std::string model_string = "../assets/pmd/Miku_Hatsune.pmd";
+	//std::string model_string = "../assets/pmd/Meiko_Sakine.pmd";
+	std::string model_string = "../assets/pmd/Miku_Hatsune.pmd";
 	mesh.loadpmd(model_string);
 	std::cout << "Loaded object  with  " << mesh.vertices.size()
 		<< " vertices and " << mesh.faces.size() << " faces.\n";
