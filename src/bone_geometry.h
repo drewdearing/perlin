@@ -465,6 +465,7 @@ struct Mesh {
 	std::vector<glm::vec4> face_normals;
 	std::vector<glm::vec2> uv_coordinates;
 	std::vector<Material> materials;
+	glm::vec4 tilt_normal;
 	BoundingBox bounds;
 	Skeleton skeleton;
 	float height_offset;
@@ -472,7 +473,7 @@ struct Mesh {
 	void loadpmd(const std::string& fn);
 	void updateAnimation();
 	int getNumberOfBones() const { return skeleton.numBones(); }
-	glm::vec3 getCenter() const { return 0.5f * glm::vec3(bounds.min + bounds.max); }
+	glm::vec3 getCenter() const { return 0.7f * glm::vec3(bounds.min + bounds.max); }
 private:
 	void computeBounds();
 	void computeNormals();

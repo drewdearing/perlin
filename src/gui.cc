@@ -31,7 +31,7 @@ GUI::~GUI()
 void GUI::assignMesh(Mesh* mesh)
 {
 	mesh_ = mesh;
-	center_ = mesh_->getCenter();
+	center_ = mesh_->getCenter() * scale;
 	center_.y += mesh_->height_offset;
 	eye_ = center_ - look_ * camera_distance_;
 }
@@ -60,26 +60,13 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 
 	if (captureWASDUPDOWN(key, action))
 		return ;
-	if (key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT) {
-		float roll_speed;
-		if (key == GLFW_KEY_RIGHT)
-			roll_speed = -roll_speed_;
-		else
-			roll_speed = roll_speed_;
-		// FIXME: actually roll the bone here
-		if(current_bone_ != -1){
-			Bone * b = mesh_->skeleton.getBone(current_bone_);
-			b->rotate(roll_speed, b->getTangent());
-			pose_changed_ = true;
-		}
-	} else if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
+	if (key == GLFW_KEY_C && action != GLFW_RELEASE) {
 		fps_mode_ = !fps_mode_;
 		if(!fps_mode_){
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 	} else if (key == GLFW_KEY_LEFT_BRACKET && action == GLFW_RELEASE) {
 		current_bone_--;
@@ -129,7 +116,6 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 
 		float r = M_PI/50.0f * (delta_time.count()/frame);
 
-
 		glm::vec3 old_look_ = look_;
 		eye_ = center_ + glm::rotate(eye_-center_, r, axis);
 		look_ = glm::normalize(center_ - eye_);
@@ -137,18 +123,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 		tangent_.y = 0;
 		tangent_ = glm::normalize(tangent_);
 		up_ = -glm::normalize(glm::cross(look_, tangent_));
-		axis.x = 0;
-		axis.z = 0;
 
-		/*std::vector<Bone *> * parentBones = mesh_->skeleton.parentBones();
-		for(int i=0; i < parentBones->size(); i++){
-			Bone * b = parentBones->at(i);
-			b->rotate(r, axis);
-		}
-
-		pose_changed_ = true;*/
-
-		
 	}
 }
 
@@ -192,14 +167,15 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	glm::vec2 c = floorMap->getCenter();
 	glm::vec3 dir_f;
 	glm::vec3 dir_s;
+	float speed = walk_speed * scale * floorMap->getVertDistance();
 
 	if(fps_mode_){
-		dir_f = floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
-		dir_s = floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
+		dir_f = speed * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
+		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
 	}
 	else{
-		dir_f = floorMap->getVertDistance() * glm::normalize(glm::vec3(look_.z, 0, look_.x));
-		dir_s = floorMap->getVertDistance() * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
+		dir_f = speed * glm::normalize(glm::vec3(look_.z, 0, look_.x));
+		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
 	}
 
 	if (key == GLFW_KEY_W) {
@@ -210,11 +186,11 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		else{
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			mesh_->tilt_normal = floorMap->getNormal(0,0);
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 		}
 		eye_ = center_ - look_ * camera_distance_;
-		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_S) {
 		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.z);
@@ -224,30 +200,30 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		else{
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			mesh_->tilt_normal = floorMap->getNormal(0,0);
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 		}
 		eye_ = center_ - look_ * camera_distance_;
-		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_A) {
 		floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.z);
 		if(!fps_mode_){
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			mesh_->tilt_normal = floorMap->getNormal(0,0);
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 		return true;
 	} else if (key == GLFW_KEY_D) {
 		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.z);
 		if(!fps_mode_){
 			mesh_->height_offset = floorMap->getElevation(0,0);
-			center_ = mesh_->getCenter();
+			mesh_->tilt_normal = floorMap->getNormal(0,0);
+			center_ = mesh_->getCenter() * scale;
 			center_.y += mesh_->height_offset;
 			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 		return true;
 	} else if (key == GLFW_KEY_SPACE) {
@@ -255,7 +231,6 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			mesh_->height_offset += 1;
 			center_.y += 1;
 			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 		return true;
 	} else if (key == GLFW_KEY_LEFT_SHIFT) {
@@ -263,7 +238,6 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			mesh_->height_offset -= 1;
 			center_.y -= 1;
 			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 		return true;
 	}

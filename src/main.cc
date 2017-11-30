@@ -26,6 +26,10 @@ const char* vertex_shader =
 #include "shaders/default.vert"
 ;
 
+const char* obj_vertex_shader =
+#include "shaders/obj.vert"
+;
+
 const char* floor_vertex_shader =
 #include "shaders/floor.vert"
 ;
@@ -110,7 +114,6 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
 	std::vector<glm::vec4> floor_normals;
-	std::vector<glm::vec4> moisture_vertices;
 	std::vector<glm::vec4> skel_vertices;
 	std::vector<glm::uvec2> skel_lines;
 	std::vector<glm::vec4> cyl_vertices;
@@ -119,6 +122,7 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec2> norm_lines;
 	std::vector<glm::vec4> binorm_vertices;
 	std::vector<glm::uvec2> binorm_lines;
+	std::vector<float> moisture_values;
 
 	/*
 		create perlin map with
@@ -133,24 +137,8 @@ int main(int argc, char* argv[])
 	*/
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
 
-	/*
-		create moisture map with
-		1000x1000 vertices
-		6 octaves
-		frequency of 8
-		minimum height = -250
-		maximum height = 250
-		vertex distance of 5
-		render radius of 25 vertices
-		non-explicit seed
-	*/
-	// TODO Create a Mosture Map
-	PerlinMap moistureMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
-
-	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
-
-	moistureMap.createNormHeight(moisture_vertices);
-
+	floorMap.createFloor(floor_vertices, floor_faces, floor_normals, moisture_values);
+	
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
 	mesh.loadpmd(argv[1]);
@@ -163,6 +151,7 @@ int main(int argc, char* argv[])
 	}
 	mesh_center /= mesh.vertices.size();
 	mesh.height_offset = floorMap.getElevation(0,0);
+	mesh.tilt_normal = floorMap.getNormal(0,0);
 
 
 	create_skel(mesh, skel_vertices, skel_lines);
@@ -244,10 +233,30 @@ int main(int argc, char* argv[])
 	auto binorm_mesh_data = [&mats]() -> const void* {
 		return mats.model;
 	};
+	auto height_offset_data = [&mesh]() -> const void* {
+		return &mesh.height_offset;
+	};
+	auto tilt_normal_data = [&mesh]() -> const void* {
+		return &mesh.tilt_normal;
+	};
+	auto look_direction_data = [&gui]() -> const void* {
+		return gui.getLook();
+	};
+	auto min_height_map = [&floorMap]() -> const void* {
+		return floorMap.getMinHeight();
+	};
+	auto max_height_map = [&floorMap]() -> const void* {
+		return floorMap.getMaxHeight();
+	};
+	auto model_scale_data = [&gui]() -> const void* {
+		return gui.getScale();
+	};
+
 	// FIXME: add more lambdas for data_source if you want to use RenderPass.
 	//        Otherwise, do whatever you like here
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
+	ShaderUniform height_model = { "height_offset", float_binder, height_offset_data };
 	ShaderUniform std_view = { "view", matrix_binder, std_view_data };
 	ShaderUniform std_camera = { "camera_position", vector3_binder, std_camera_data };
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
@@ -257,6 +266,11 @@ int main(int argc, char* argv[])
 	ShaderUniform cyl_mesh = { "cyl_mesh", bone_matrix_binder, cyl_mesh_data };
 	ShaderUniform norm_mesh = { "norm_mesh", bone_matrix_binder, norm_mesh_data };
 	ShaderUniform binorm_mesh = { "binorm_mesh", bone_matrix_binder, binorm_mesh_data };
+	ShaderUniform look_dir_model = { "look_dir", vector3_binder, look_direction_data };
+	ShaderUniform tilt_normal_model = { "tilt_normal", vector_binder, tilt_normal_data };
+	ShaderUniform floor_max_height = { "max_height", float_binder, max_height_map };
+	ShaderUniform floor_min_height = { "min_height", float_binder, min_height_map };
+	ShaderUniform model_scale = { "scale", float_binder, model_scale_data };
 	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
 	//        Otherwise, do whatever you like here
 
@@ -270,13 +284,13 @@ int main(int argc, char* argv[])
 	RenderPass object_pass(-1,
 			object_pass_input,
 			{
-			  vertex_shader,
+			  obj_vertex_shader,
 			  geometry_shader,
 			  fragment_shader
 			},
 			{ std_model, std_view, std_proj,
 			  std_light,
-			  std_camera, object_alpha },
+			  std_camera, object_alpha, height_model, look_dir_model, model_scale, tilt_normal_model },
 			{ "fragment_color" }
 			);
 
@@ -287,8 +301,8 @@ int main(int argc, char* argv[])
 	mesh_pass_input.assign_index(skel_lines.data(), skel_lines.size(), 2);
 	RenderPass mesh_pass(-1,
 			mesh_pass_input,
-			{vertex_shader, line_geometry_shader, line_fragment_shader},
-			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
+			{obj_vertex_shader, line_geometry_shader, line_fragment_shader},
+			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model, look_dir_model},
 			{ "fragment_color"}
 			);
 
@@ -297,8 +311,8 @@ int main(int argc, char* argv[])
 	cyl_pass_input.assign_index(cyl_lines.data(), cyl_lines.size(), 2);
 	RenderPass cyl_pass(-1,
 			cyl_pass_input,
-			{vertex_shader, line_geometry_shader, cyl_fragment_shader},
-			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
+			{obj_vertex_shader, line_geometry_shader, cyl_fragment_shader},
+			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model, look_dir_model},
 			{ "fragment_color"}
 			);
 
@@ -325,11 +339,12 @@ int main(int argc, char* argv[])
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
 	floor_pass_input.assign(1, "normal", floor_normals.data(), floor_normals.size(), 4, GL_FLOAT);
+	floor_pass_input.assign(2, "moisture", moisture_values.data(), moisture_values.size(), 1, GL_FLOAT);
 	floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
 	RenderPass floor_pass(-1,
 			floor_pass_input,
 			{ floor_vertex_shader, floor_geometry_shader, floor_fragment_shader},
-			{ floor_model, std_view, std_proj, std_light },
+			{ floor_model, std_view, std_proj, std_light, floor_max_height, floor_min_height },
 			{ "fragment_color" }
 			);
 
@@ -396,9 +411,11 @@ int main(int argc, char* argv[])
 			if(floorMap.isDirty()){
 				floor_vertices.clear();
 				floor_normals.clear();
-				floorMap.updateFloor(floor_vertices, floor_normals);
+				moisture_values.clear();
+				floorMap.updateFloor(floor_vertices, floor_normals, moisture_values);
 				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
 				floor_pass.updateVBO(1, floor_normals.data(), floor_normals.size());
+				floor_pass.updateVBO(2, moisture_values.data(), moisture_values.size());
 			}
 			floor_pass.setup();
 			// Draw our triangles.

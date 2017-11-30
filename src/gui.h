@@ -47,6 +47,9 @@ public:
 
 	glm::vec4 getMouseFar() { return glm::vec4(intersect, 1); }
 
+	glm::vec3 * getLook() { return &look_; }
+
+	float* getScale() { return &scale; }
 
 	bool setCurrentBone(int i);
 
@@ -67,13 +70,15 @@ private:
 	int current_button_ = -1;
 	int frame_rate;
 	float roll_speed_ = 0.1;
+	float scale = 0.5f;
 	float last_x_ = 0.0f, last_y_ = 0.0f, current_x_ = 0.0f, current_y_ = 0.0f;
-	float camera_distance_ = 30.0;
+	float camera_distance_ = 35.0 * scale;
 	float pan_speed_ = 0.1f;
 	float rotation_speed_ = 0.02f;
 	float zoom_speed_ = 0.1f;
 	float aspect_;
 	float frame = 1000.0f/60.0f;
+	float walk_speed = 0.4f;
 
 	std::chrono::high_resolution_clock::time_point current_time;
 	std::chrono::duration<float, std::milli> delta_time;
