@@ -355,6 +355,17 @@ public:
 			return 0;
 	}
 
+	//Revert bone to original state
+	void revert(){
+		tangent = originalTangent;
+		binormal = originalBinormal;
+		normal = originalNormal;
+		dirty = false;
+		for(unsigned i = 0; i < children.size(); i++){
+			children.at(i)->revert();
+		}
+	}
+
 	//Rotate bone by rotation_speed on a given axis
 	void rotate(float rotation_speed, glm::vec3 axis){
 

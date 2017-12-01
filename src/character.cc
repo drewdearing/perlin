@@ -14,6 +14,10 @@ glm::vec3 Character::getCenter(){
 	return center;
 }
 
+void Character::setArmRotation(float r){
+	arm_rotation = r;
+}
+
 void Character::setScale(float s){
 	scale = s;
 }
@@ -48,17 +52,17 @@ void Character::build(){
 	uv_coordinates = mesh.uv_coordinates;
 }
 
-ShaderUniform Character::tilt_normal(){
+ShaderUniform Character::model_normal(){
 	auto vector3_binder = [](int loc, const void* data) {
 		glUniform3fv(loc, 1, (const GLfloat*)data);
 	};
 	auto tilt_normal_data = [this]() -> const void* {
 		return &this->normal;
 	};
-	return { "tilt_normal", vector3_binder, tilt_normal_data };
+	return { "model_normal", vector3_binder, tilt_normal_data };
 }
 
-ShaderUniform Character::height_model(){
+ShaderUniform Character::model_height(){
 	auto float_binder = [](int loc, const void* data) {
 		glUniform1fv(loc, 1, (const GLfloat*)data);
 	};
@@ -137,4 +141,14 @@ void Character::setBoneID(unsigned b, int id){
 				break;
 		}
 	}
+}
+
+void Character::rest(){
+	right_arm_upper->revert();
+	left_arm_upper->revert();
+	left_leg_upper->revert();
+	right_leg_upper->revert();
+	right_arm_upper->rotate(-0.7 * arm_rotation, right_arm_upper->getOriginalNormal());
+	left_arm_upper->rotate(0.7 * arm_rotation, left_arm_upper->getOriginalNormal());
+	current_leg_rotation = 0;
 }

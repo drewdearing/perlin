@@ -37,8 +37,8 @@ void GUI::assignCharacter(Character * c)
 	character->updateLook(look_);
 	character->updateNormal(floorMap->getNormal(0,0));
 	center_ = character->getCenter();
-	std::cout<<"center: "<<glm::to_string(center_)<<std::endl;
 	eye_ = center_ - look_ * camera_distance_;
+	character->rest();
 }
 
 void GUI::assignFloorMap(PerlinMap * map){
@@ -74,9 +74,12 @@ void GUI::keyCallback(int key, int scancode, int action, int mods)
 		fps_mode_ = !fps_mode_;
 		if(!fps_mode_){
 			character->height_offset = floorMap->getElevation(0,0);
-			center_ = character->getCenter();
-			eye_ = center_ - look_ * camera_distance_;
+			character->normal = glm::vec3(floorMap->getNormal(0,0));
 		}
+		else
+			character->normal = glm::vec3(0.0f, 1.0f, 0.0f);
+		center_ = character->getCenter();
+		eye_ = center_ - look_ * camera_distance_;
 	} else if (key == GLFW_KEY_T && action != GLFW_RELEASE) {
 		transparent_ = !transparent_;
 	} else if (key == GLFW_KEY_F && action != GLFW_RELEASE) {

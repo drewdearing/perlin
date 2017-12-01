@@ -5,7 +5,7 @@ uniform vec3 camera_position;
 uniform float height_offset;
 uniform vec3 look_dir;
 uniform float scale;
-uniform vec3 tilt_normal;
+uniform vec3 model_normal;
 in vec4 vertex_position;
 in vec4 normal;
 in vec2 uv;
@@ -19,7 +19,7 @@ void main() {
 	vec3 default_look = vec3(0.0, 0.0, -1.0);
 	vec3 new_look = normalize(vec3(look_dir.x, 0.0, look_dir.z));
 
-	vec3 new_normal = tilt_normal;
+	vec3 new_normal = model_normal;
 	vec3 new_binormal = new_look;
 	vec3 new_tangent = normalize(cross(new_normal, new_binormal));
 	new_binormal = cross(new_normal, new_tangent);

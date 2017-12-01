@@ -20,6 +20,10 @@ private:
 	RenderDataInput object_pass_input;
 	glm::vec4 mesh_center;
 	std::vector<glm::vec2> uv_coordinates;
+	float arm_rotation;
+	float current_leg_rotation = 0.0f;
+	float rotation_speed = 0.02f;
+	float walking_speed = 0.3f;
 	
 	Bone* right_arm_upper; //0
 	Bone* right_arm_lower; //1
@@ -53,6 +57,8 @@ public:
 
 	glm::vec3 getCenter();
 
+	void setArmRotation(float r);
+
 	void setScale(float s);
 
 	void setFile(std::string f);
@@ -63,9 +69,9 @@ public:
 
 	void build();
 
-	ShaderUniform tilt_normal();
+	ShaderUniform model_normal();
 
-	ShaderUniform height_model();
+	ShaderUniform model_height();
 
 	ShaderUniform model_scale();
 
@@ -78,6 +84,8 @@ public:
 	RenderPass * pass();
 
 	void setBoneID(unsigned b, int id);
+
+	void rest();
 };
 
 #endif

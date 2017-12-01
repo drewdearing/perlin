@@ -122,10 +122,30 @@ int main(int argc, char* argv[])
 
 	//Create Character
 	std::vector<Character*> characters;
+
+	//Meiko
 	Character character = Character("../assets/pmd/Meiko_Sakine.pmd", 0.5f);
+	character.setBoneID(0, 32);
+	character.setBoneID(4, 14);
+	character.setBoneID(2, 53);
+	character.setBoneID(6, 56);
+	character.setBoneID(10, 0);
+	character.setBoneID(11, 5);
+	character.setArmRotation(-1);
+
+	//Miku
 	Character character2 = Character("../assets/pmd/Miku_Hatsune.pmd", 0.5f);
+	character2.setBoneID(0, 18);
+	character2.setBoneID(4, 48);
+	character2.setBoneID(2, 38);
+	character2.setBoneID(6, 63);
+	character2.setBoneID(10, 0);
+	character2.setBoneID(11, 8);
+	character2.setArmRotation(1);
+
 	characters.push_back(&character);
 	characters.push_back(&character2);
+
 	Character* current_character = characters[0];
 
 	//GUI object needs the mesh object for bone manipulation.
@@ -205,11 +225,12 @@ int main(int argc, char* argv[])
 	ShaderUniform floor_min_height = { "min_height", float_binder, min_height_map };
 	ShaderUniform camera_look_dir = { "look_dir", vector3_binder, look_direction_data };
 
-	for(int i = 0; i < characters.size(); i++){
+	for(unsigned i = 0; i < characters.size(); i++){
 		Character * curr_char = characters[i];
 		curr_char->buildPass(
 			{ obj_vertex_shader, geometry_shader, fragment_shader },
-			{ std_model, std_view, std_proj, std_light, std_camera, object_alpha, curr_char->height_model(), camera_look_dir, curr_char->model_scale(), curr_char->tilt_normal()},
+			{ std_model, std_view, std_proj, std_light, std_camera, object_alpha, curr_char->model_height(),
+				curr_char->model_scale(), curr_char->model_normal(), camera_look_dir },
 			{ "fragment_color" }
 			);
 	}
