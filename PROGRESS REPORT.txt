@@ -1,11 +1,49 @@
+Perlin Noise Map Generation Progress Report
+===========================================
+
 Drew Dearing
 dpd539
 
 Jesus Martinez
 jgm2276
 
-Successfully created skeleton
-Started shading the bones,
-not working so far, but we are close.
+Eric Lee
+el24786
 
-Build Normally.
+===========================================
+
+Completed Features.
+
+-Use Perlin Noise to randomly generate terrain (Drew)
+-Moisture Perlin Map which dictates biomes (Eric/Drew)
+-Different Elevation/Biome Shading (Eric/ Jesus)
+-Player Controlled Model that can explore world (Drew)
+-Character Swapping (Jesus)
+
+Features In Progress.
+-Character Animation (Jesus)
+-Tree/Structure Map (Eric)
+-Ground Texturing and Skybox (Drew)
+
+Paper Explanation
+The article we use explains in great detail how perlin noise can be used to generate elevation maps.
+However, they also explain how noise can be used to randomly place biomes and structures on the maps.
+
+Plan to complete Project.
+The project so far as been develop to be able to easily add the later features as we progress.
+Simple physics will be the easiest to develop given our current environement.
+
+Plan.
+
+We plan to use Perlin Noise to randomly generate terrain, which could potentially be used in a real game.
+Minimal Requirements for this project will include a randomly generated world (possibly infinite) with custom biomes, a model that will be able to be controlled by the user and explore the world, simple physics for player gravity and jumping,
+and randomly placed structures and enviromental stuff (like trees). Stretch goals include, animated models, swimming physics, different camera views (first person, third person), autonomous creatures that roam the earth, modifiable terrain, and a working gametype.
+
+What we learn
+
+We learn how to use perlin noise to generate aesthetically pleasing random environments. Building on top of project 5, animating meshes and storing preset animations and models for use by the player. Any additional features such as implenting
+physics engines will also be learned. An interesting article on RedBlobGames (https://www.redblobgames.com/maps/terrain-from-noise/) will be used for inspiration and information.
+
+Realistic Expectations
+
+We know we will not get to most of the features listed in the plan, but we hope to get through the minimum requirements along with a few of the additional features, especially since some of the additional features are more doable than others.
