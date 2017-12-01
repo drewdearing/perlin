@@ -99,9 +99,7 @@ void Mesh::updateAnimation()
 }
 
 glm::vec3 Mesh::getCenter(){
-	glm::vec3 originalCenter =  0.7f * glm::vec3(bounds.min + bounds.max);
-
-	return glm::vec3(tilt_normal) * originalCenter.y;
+	return 0.7f * glm::vec3(bounds.min + bounds.max);
 }
 
 
@@ -114,4 +112,3 @@ void Mesh::computeBounds()
 		bounds.max = glm::max(glm::vec3(vert), bounds.max);
 	}
 }
-

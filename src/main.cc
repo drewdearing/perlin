@@ -1,11 +1,11 @@
 #include <GL/glew.h>
 #include <dirent.h>
 
-#include "bone_geometry.h"
 #include "procedure_geometry.h"
 #include "render_pass.h"
 #include "config.h"
 #include "gui.h"
+#include "character.h"
 
 #include <algorithm>
 #include <fstream>
@@ -20,7 +20,7 @@
 #include <debuggl.h>
 
 int window_width = 800, window_height = 600;
-const std::string window_title = "HOLY SHAT";
+const std::string window_title = "Perlin";
 
 const char* vertex_shader =
 #include "shaders/default.vert"
@@ -114,61 +114,27 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec4> floor_vertices;
 	std::vector<glm::uvec3> floor_faces;
 	std::vector<glm::vec4> floor_normals;
-	std::vector<glm::vec4> skel_vertices;
-	std::vector<glm::uvec2> skel_lines;
-	std::vector<glm::vec4> cyl_vertices;
-	std::vector<glm::uvec2> cyl_lines;
-	std::vector<glm::vec4> norm_vertices;
-	std::vector<glm::uvec2> norm_lines;
-	std::vector<glm::vec4> binorm_vertices;
-	std::vector<glm::uvec2> binorm_lines;
 	std::vector<float> moisture_values;
 
-	/*
-		create perlin map with
-		1000x1000 vertices
-		6 octaves
-		frequency of 8
-		minimum height = -350
-		maximum height = 100
-		vertex distance of 5
-		render radius of 25 vertices
-		non-explicit seed
-	*/
+	//Perlin Map and Moisture Map
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
 	PerlinMap moistureMap = PerlinMap(1000, 1000, 4, 5.0, 0, 1, 5, 25);
 
 	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
 	moistureMap.createHeights(moisture_values);
-	
-	// FIXME: add code to create bone and cylinder geometry
-	Mesh mesh;
-	//std::string model_string = "../assets/pmd/Meiko_Sakine.pmd";
-	std::string model_string = "../assets/pmd/Miku_Hatsune.pmd";
-	mesh.loadpmd(model_string);
-	std::cout << "Loaded object  with  " << mesh.vertices.size()
-		<< " vertices and " << mesh.faces.size() << " faces.\n";
 
-	glm::vec4 mesh_center = glm::vec4(0.0f);
-	for (size_t i = 0; i < mesh.vertices.size(); ++i) {
-		mesh_center += mesh.vertices[i];
-	}
-	mesh_center /= mesh.vertices.size();
-	mesh.height_offset = floorMap.getElevation(0,0);
-	mesh.tilt_normal = floorMap.getNormal(0,0);
+	//Create Character
+	std::vector<Character*> characters;
+	Character character = Character("../assets/pmd/Meiko_Sakine.pmd", &floorMap, 0.5f);
+	Character character2 = Character("../assets/pmd/Miku_Hatsune.pmd", &floorMap, 0.5f);
+	characters.push_back(&character);
+	characters.push_back(&character2);
+	Character* current_character = characters[0];
 
-
-	create_skel(mesh, skel_vertices, skel_lines);
-	create_cyl(cyl_lines);
-	norm_lines.push_back(glm::uvec2(0, 1));
-	binorm_lines.push_back(glm::uvec2(0, 1));
-
-	/*
-	 * GUI object needs the mesh object for bone manipulation.
-	 */
-	gui.assignMesh(&mesh);
-	gui.assignModel(model_string);
+	//GUI object needs the mesh object for bone manipulation.
+	gui.assignCharacter(&character);
 	gui.assignFloorMap(&floorMap);
+	gui.assignCharacterList(&characters, &current_character);
 
 	glm::vec4 light_position = glm::vec4(0.0f, 100.0f, 0.0f, 1.0f);
 	MatrixPointers mats; // Define MatrixPointers here for lambda to capture
@@ -181,10 +147,6 @@ int main(int argc, char* argv[])
 	 */
 	auto matrix_binder = [](int loc, const void* data) {
 		glUniformMatrix4fv(loc, 1, GL_FALSE, (const GLfloat*)data);
-	};
-	auto bone_matrix_binder = [&mesh](int loc, const void* data) {
-		auto nelem = mesh.getNumberOfBones();
-		glUniformMatrix4fv(loc, nelem, GL_FALSE, (const GLfloat*)data);
 	};
 	auto vector_binder = [](int loc, const void* data) {
 		glUniform4fv(loc, 1, (const GLfloat*)data);
@@ -225,121 +187,36 @@ int main(int argc, char* argv[])
 		else
 			return &non_transparet;
 	};
-	glm::mat4 mesh_model_matrix = glm::mat4(1.0f);
-	auto line_mesh_data = [&mats]() -> const void* {
-		return mats.model;
-	};
-	auto cyl_mesh_data = [&mats]() -> const void* {
-		return mats.model;
-	};
-	auto norm_mesh_data = [&mats]() -> const void* {
-		return mats.model;
-	};
-	auto binorm_mesh_data = [&mats]() -> const void* {
-		return mats.model;
-	};
-	auto height_offset_data = [&mesh]() -> const void* {
-		return &mesh.height_offset;
-	};
-	auto tilt_normal_data = [&mesh]() -> const void* {
-		return &mesh.tilt_normal;
-	};
-	auto look_direction_data = [&gui]() -> const void* {
-		return gui.getLook();
-	};
 	auto min_height_map = [&floorMap]() -> const void* {
 		return floorMap.getMinHeight();
 	};
 	auto max_height_map = [&floorMap]() -> const void* {
 		return floorMap.getMaxHeight();
 	};
-	auto model_scale_data = [&gui]() -> const void* {
-		return gui.getScale();
+	auto look_direction_data = [&gui]() -> const void* {
+		return gui.getLook();
 	};
-
-	// FIXME: add more lambdas for data_source if you want to use RenderPass.
-	//        Otherwise, do whatever you like here
+	
+	//Uniforms
 	ShaderUniform std_model = { "model", matrix_binder, std_model_data };
 	ShaderUniform floor_model = { "model", matrix_binder, floor_model_data };
-	ShaderUniform height_model = { "height_offset", float_binder, height_offset_data };
 	ShaderUniform std_view = { "view", matrix_binder, std_view_data };
 	ShaderUniform std_camera = { "camera_position", vector3_binder, std_camera_data };
 	ShaderUniform std_proj = { "projection", matrix_binder, std_proj_data };
 	ShaderUniform std_light = { "light_position", vector_binder, std_light_data };
 	ShaderUniform object_alpha = { "alpha", float_binder, alpha_data };
-	ShaderUniform line_mesh = { "line_mesh", bone_matrix_binder, line_mesh_data };
-	ShaderUniform cyl_mesh = { "cyl_mesh", bone_matrix_binder, cyl_mesh_data };
-	ShaderUniform norm_mesh = { "norm_mesh", bone_matrix_binder, norm_mesh_data };
-	ShaderUniform binorm_mesh = { "binorm_mesh", bone_matrix_binder, binorm_mesh_data };
-	ShaderUniform look_dir_model = { "look_dir", vector3_binder, look_direction_data };
-	ShaderUniform tilt_normal_model = { "tilt_normal", vector_binder, tilt_normal_data };
 	ShaderUniform floor_max_height = { "max_height", float_binder, max_height_map };
 	ShaderUniform floor_min_height = { "min_height", float_binder, min_height_map };
-	ShaderUniform model_scale = { "scale", float_binder, model_scale_data };
-	// FIXME: define more ShaderUniforms for RenderPass if you want to use it.
-	//        Otherwise, do whatever you like here
+	ShaderUniform camera_look_dir = { "look_dir", vector3_binder, look_direction_data };
 
-	std::vector<glm::vec2>& uv_coordinates = mesh.uv_coordinates;
-	RenderDataInput object_pass_input;
-	object_pass_input.assign(0, "vertex_position", nullptr, mesh.vertices.size(), 4, GL_FLOAT);
-	object_pass_input.assign(1, "normal", mesh.vertex_normals.data(), mesh.vertex_normals.size(), 4, GL_FLOAT);
-	object_pass_input.assign(2, "uv", uv_coordinates.data(), uv_coordinates.size(), 2, GL_FLOAT);
-	object_pass_input.assign_index(mesh.faces.data(), mesh.faces.size(), 3);
-	object_pass_input.useMaterials(mesh.materials);
-	RenderPass object_pass(-1,
-			object_pass_input,
-			{
-			  obj_vertex_shader,
-			  geometry_shader,
-			  fragment_shader
-			},
-			{ std_model, std_view, std_proj,
-			  std_light,
-			  std_camera, object_alpha, height_model, look_dir_model, model_scale, tilt_normal_model },
+	for(int i = 0; i < characters.size(); i++){
+		Character * curr_char = characters[i];
+		curr_char->buildPass(
+			{ obj_vertex_shader, geometry_shader, fragment_shader },
+			{ std_model, std_view, std_proj, std_light, std_camera, object_alpha, curr_char->height_model(), camera_look_dir, curr_char->model_scale(), curr_char->tilt_normal()},
 			{ "fragment_color" }
 			);
-
-	// FIXME: Create the RenderPass objects for bones here.
-	//        Otherwise do whatever you like.
-	RenderDataInput mesh_pass_input;
-	mesh_pass_input.assign(0, "vertex_position", skel_vertices.data(), skel_vertices.size(), 4, GL_FLOAT);
-	mesh_pass_input.assign_index(skel_lines.data(), skel_lines.size(), 2);
-	RenderPass mesh_pass(-1,
-			mesh_pass_input,
-			{obj_vertex_shader, line_geometry_shader, line_fragment_shader},
-			{line_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model, look_dir_model},
-			{ "fragment_color"}
-			);
-
-	RenderDataInput cyl_pass_input;
-	cyl_pass_input.assign(0, "vertex_position", cyl_vertices.data(), cyl_vertices.size(), 4, GL_FLOAT);
-	cyl_pass_input.assign_index(cyl_lines.data(), cyl_lines.size(), 2);
-	RenderPass cyl_pass(-1,
-			cyl_pass_input,
-			{obj_vertex_shader, line_geometry_shader, cyl_fragment_shader},
-			{cyl_mesh, std_view, std_proj, std_light, std_camera, object_alpha, height_model, look_dir_model},
-			{ "fragment_color"}
-			);
-
-	RenderDataInput norm_pass_input;
-	norm_pass_input.assign(0, "vertex_position", norm_vertices.data(), norm_vertices.size(), 4, GL_FLOAT);
-	norm_pass_input.assign_index(norm_lines.data(), norm_lines.size(), 2);
-	RenderPass norm_pass(-1,
-			norm_pass_input,
-			{vertex_shader, line_geometry_shader, norm_fragment_shader},
-			{norm_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
-			{ "fragment_color"}
-			);
-
-	RenderDataInput binorm_pass_input;
-	binorm_pass_input.assign(0, "vertex_position", binorm_vertices.data(), binorm_vertices.size(), 4, GL_FLOAT);
-	binorm_pass_input.assign_index(binorm_lines.data(), binorm_lines.size(), 2);
-	RenderPass binorm_pass(-1,
-			binorm_pass_input,
-			{vertex_shader, line_geometry_shader, binorm_fragment_shader},
-			{binorm_mesh, std_view, std_proj, std_light, std_camera, object_alpha},
-			{ "fragment_color"}
-			);
+	}
 
 	RenderDataInput floor_pass_input;
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
@@ -354,8 +231,6 @@ int main(int argc, char* argv[])
 			);
 
 	float aspect = 0.0f;
-	//std::cout << "center = " << mesh.getCenter() << "\n";
-
 	bool draw_floor = true;
 	bool draw_skeleton = true;
 	bool draw_object = true;
@@ -379,39 +254,7 @@ int main(int argc, char* argv[])
 		gui.updateMatrices();
 		mats = gui.getMatrixPointers();
 
-		int current_bone = gui.getCurrentBone();
-
-		draw_cylinder = (current_bone != -1 && gui.isTransparent());
-
-		// FIXME: Draw bones first.
-
-		if(draw_skeleton){
-			skel_vertices.clear();
-			skel_lines.clear();
-			create_skel(mesh, skel_vertices, skel_lines);
-			mesh_pass.updateVBO(0, skel_vertices.data(), skel_vertices.size());
-			mesh_pass.setup();
-			CHECK_GL_ERROR(glDrawElements(GL_LINES, skel_lines.size() * 2, GL_UNSIGNED_INT, 0));
-		}
-
-		if(draw_cylinder){
-			cyl_vertices = (mesh.skeleton.getBone(current_bone))->cylVertices();
-			cyl_pass.updateVBO(0, cyl_vertices.data(), cyl_vertices.size());
-			cyl_pass.setup();
-			CHECK_GL_ERROR(glDrawElements(GL_LINES, cyl_lines.size() * 2, GL_UNSIGNED_INT, 0));
-
-			norm_vertices = (mesh.skeleton.getBone(current_bone))->normVertices();
-			norm_pass.updateVBO(0, norm_vertices.data(), norm_vertices.size());
-			norm_pass.setup();
-			CHECK_GL_ERROR(glDrawElements(GL_LINES, norm_lines.size() * 2, GL_UNSIGNED_INT, 0));
-
-			binorm_vertices = (mesh.skeleton.getBone(current_bone))->binormVertices();
-			binorm_pass.updateVBO(0, binorm_vertices.data(), binorm_vertices.size());
-			binorm_pass.setup();
-			CHECK_GL_ERROR(glDrawElements(GL_LINES, binorm_lines.size() * 2, GL_UNSIGNED_INT, 0));
-		}
-
-		// Then draw floor.
+		//draw floor.
 		if (draw_floor) {
 			if(floorMap.isDirty()){
 				floor_vertices.clear();
@@ -431,10 +274,10 @@ int main(int argc, char* argv[])
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {
-				mesh.updateAnimation();
-				object_pass.updateVBO(0,
-						      mesh.animated_vertices.data(),
-						      mesh.animated_vertices.size());
+				current_character->getMesh()->updateAnimation();
+				current_character->pass()->updateVBO(0,
+						      current_character->getMesh()->animated_vertices.data(),
+						      current_character->getMesh()->animated_vertices.size());
 #if 0
 				// For debugging if you need it.
 				for (int i = 0; i < 4; i++) {
@@ -443,9 +286,9 @@ int main(int argc, char* argv[])
 #endif
 				gui.clearPose();
 			}
-			object_pass.setup();
+			current_character->pass()->setup();
 			int mid = 0;
-			while (object_pass.renderWithMaterial(mid))
+			while (current_character->pass()->renderWithMaterial(mid))
 				mid++;
 #if 0	
 			// For debugging also
