@@ -477,7 +477,6 @@ struct Mesh {
 	std::vector<glm::vec4> face_normals;
 	std::vector<glm::vec2> uv_coordinates;
 	std::vector<Material> materials;
-	glm::vec4 tilt_normal;
 	BoundingBox bounds;
 	Skeleton skeleton;
 	float height_offset;

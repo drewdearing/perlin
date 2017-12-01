@@ -7,6 +7,7 @@
 #include "PerlinMap.h"
 #include <chrono>
 
+class Character;
 struct Mesh;
 
 /*
@@ -19,11 +20,12 @@ struct MatrixPointers {
 class GUI {
 public:
 	GUI();
-	GUI(GLFWwindow*);
+	GUI(GLFWwindow*, PerlinMap*);
 	~GUI();
-	void assignMesh(Mesh*);
+	void assignCharacter(Character * c);
 	void assignModel(const std::string& model);
 	void assignFloorMap(PerlinMap *);
+	void assignCharacterList(std::vector<Character *>* list, Character ** current);
 	void updateTime();
 	void updateFrameRate();
 
@@ -59,10 +61,14 @@ public:
 
 private:
 	GLFWwindow* window_;
-	Mesh* mesh_;
+	Character* character;
 	PerlinMap* floorMap;
+	Character** curr_char;
+	std::vector<Character *>* char_list;
 
 	int window_width_, window_height_;
+
+	unsigned char_id = 0;
 
 	bool drag_state_ = false;
 	bool fps_mode_ = false;
