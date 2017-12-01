@@ -271,7 +271,13 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			if(is_running)
 				revertBoneRotation(root_top);
 			is_running = false;
+			current_rotation = 0;
 		}
+		mesh_->height_offset = floorMap->getElevation(0,0);
+		mesh_->tilt_normal = floorMap->getNormal(0,0);
+		center_ = mesh_->getCenter() * scale;
+		center_.y += mesh_->height_offset;
+		pose_changed_ = true;
 		pose_changed_ = true;
 		return true;
 	} else if (key == GLFW_KEY_S) {

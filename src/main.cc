@@ -123,6 +123,7 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec4> binorm_vertices;
 	std::vector<glm::uvec2> binorm_lines;
 	std::vector<float> moisture_values;
+	std::vector<float> tree_values;
 
 	/*
 		create perlin map with
@@ -136,10 +137,36 @@ int main(int argc, char* argv[])
 		non-explicit seed
 	*/
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
+
+	/*
+		create perlin map with
+		1000x1000 vertices
+		4 octaves
+		frequency of 5
+		minimum height = 0
+		maximum height = 1
+		vertex distance of 5
+		render radius of 25 vertices
+		non-explicit seed
+	*/
 	PerlinMap moistureMap = PerlinMap(1000, 1000, 4, 5.0, 0, 1, 5, 25);
+
+	/*
+		create perlin map with
+		1000x1000 vertices
+		4 octaves
+		frequency of 8
+		minimum height = 0
+		maximum height = 1
+		vertex distance of 5
+		render radius of 25 vertices
+		non-explicit seed
+	*/
+	PerlinMap treeMap = PerlinMap(1000, 1000, 4, 8.0, 0, 1, 5, 25);
 
 	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
 	moistureMap.createHeights(moisture_values);
+	treeMap.createHeights(tree_values);
 	
 	// FIXME: add code to create bone and cylinder geometry
 	Mesh mesh;
@@ -345,6 +372,7 @@ int main(int argc, char* argv[])
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
 	floor_pass_input.assign(1, "normal", floor_normals.data(), floor_normals.size(), 4, GL_FLOAT);
 	floor_pass_input.assign(2, "moisture", moisture_values.data(), moisture_values.size(), 1, GL_FLOAT);
+	floor_pass_input.assign(3, "tree", tree_values.data(), tree_values.size(), 1, GL_FLOAT);
 	floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
 	RenderPass floor_pass(-1,
 			floor_pass_input,
@@ -417,13 +445,17 @@ int main(int argc, char* argv[])
 				floor_vertices.clear();
 				floor_normals.clear();
 				moisture_values.clear();
+				tree_values.clear();
 				floorMap.updateFloor(floor_vertices, floor_normals);
 				glm::vec2 floorCenter = floorMap.getCenter();
 				moistureMap.setCenter(floorCenter.x, floorCenter.y);
 				moistureMap.createHeights(moisture_values);
+				treeMap.setCenter(floorCenter.x, floorCenter.y);
+				treeMap.createHeights(tree_values);
 				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
 				floor_pass.updateVBO(1, floor_normals.data(), floor_normals.size());
 				floor_pass.updateVBO(2, moisture_values.data(), moisture_values.size());
+				floor_pass.updateVBO(3, tree_values.data(), tree_values.size());
 			}
 			floor_pass.setup();
 			// Draw our triangles.
