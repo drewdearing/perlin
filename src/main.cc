@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 	character2.setBoneID(0, 18);
 	character2.setBoneID(4, 48);
 	character2.setBoneID(2, 38);
-	character2.setBoneID(6, 63);
+	character2.setBoneID(6, 68);
 	character2.setBoneID(10, 0);
 	character2.setBoneID(11, 8);
 	character2.setArmRotation(1);
@@ -299,6 +299,7 @@ int main(int argc, char* argv[])
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {
+				// gui.animation_walk();
 				current_character->getMesh()->updateAnimation();
 				current_character->pass()->updateVBO(0,
 						      current_character->getMesh()->animated_vertices.data(),

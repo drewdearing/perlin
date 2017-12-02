@@ -57,6 +57,10 @@ public:
 
 	bool setCurrentBone(int i);
 
+	void finishAnimation();
+
+	void animation_walk();
+
 	bool isTransparent() const { return transparent_; }
 
 private:
@@ -93,6 +97,8 @@ private:
 	float current_rotation = 0.0f;
 
 	bool waifuMiku = true;
+	bool is_animating = false;
+	bool two_step = false;
 	//std::string model_;
 
 	//BONES FOR MODEL//

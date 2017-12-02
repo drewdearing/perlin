@@ -21,7 +21,7 @@ private:
 	glm::vec4 mesh_center;
 	std::vector<glm::vec2> uv_coordinates;
 	float arm_rotation;
-	float current_leg_rotation = 0.0f;
+	float current_rotation = 0.0f;
 	float rotation_speed = 0.02f;
 	float walking_speed = 0.3f;
 	
@@ -84,6 +84,8 @@ public:
 	RenderPass * pass();
 
 	void setBoneID(unsigned b, int id);
+
+	bool animate_walk(float rotation);
 
 	void rest();
 };

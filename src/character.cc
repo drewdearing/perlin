@@ -143,6 +143,13 @@ void Character::setBoneID(unsigned b, int id){
 	}
 }
 
+bool Character::animate_walk(float rotation){
+	right_arm_upper->rotate(rotation, glm::normalize(right_arm_upper->getBinormal()));
+	left_arm_upper->rotate(-rotation, glm::normalize(left_arm_upper->getBinormal()));
+	right_leg_upper->rotate(rotation, glm::normalize(right_leg_upper->getBinormal()));
+	left_leg_upper->rotate(rotation, glm::normalize(left_leg_upper->getBinormal()));
+}
+
 void Character::rest(){
 	right_arm_upper->revert();
 	left_arm_upper->revert();
@@ -150,5 +157,5 @@ void Character::rest(){
 	right_leg_upper->revert();
 	right_arm_upper->rotate(-0.7 * arm_rotation, right_arm_upper->getOriginalNormal());
 	left_arm_upper->rotate(0.7 * arm_rotation, left_arm_upper->getOriginalNormal());
-	current_leg_rotation = 0;
+	current_rotation = 0;
 }
