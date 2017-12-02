@@ -199,8 +199,8 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	if (key == GLFW_KEY_W) {
 		if(action != GLFW_RELEASE){
 			is_animating = true;
-			animation_walk();
-			//pose_changed_ = true;
+			//animation_walk();
+			pose_changed_ = true;
 
 		}
 		else{
@@ -262,7 +262,6 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 }
 
 void GUI::animation_walk(){
-	std::cout << "is_animating: " << is_animating << std::endl;
 	glm::vec2 c = floorMap->getCenter();
 	glm::vec3 dir_f;
 	glm::vec3 dir_s;

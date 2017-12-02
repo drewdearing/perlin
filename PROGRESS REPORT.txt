@@ -4,7 +4,7 @@ Perlin Noise Map Generation Progress Report
 Drew Dearing
 dpd539
 
-Jesus Martinez
+Jesus Martinez (Jesse)
 jgm2276
 
 Eric Lee
@@ -16,12 +16,13 @@ Completed Features.
 
 -Use Perlin Noise to randomly generate terrain (Drew)
 -Moisture Perlin Map which dictates biomes (Eric/Drew)
--Different Elevation/Biome Shading (Eric/ Jesus)
+-Different Elevation/Biome Shading (Eric/ Jesse)
 -Player Controlled Model that can explore world (Drew)
--Character Swapping (Jesus)
+-Character Swapping (Jesse)
+-Walking Animation (Jesse)
 
 Features In Progress.
--Character Animation (Jesus)
+-More Character Animation (Jesse)
 -Tree/Structure Map (Eric)
 -Ground Texturing and Skybox (Drew)
 
@@ -30,7 +31,7 @@ The article we use explains in great detail how perlin noise can be used to gene
 However, they also explain how noise can be used to randomly place biomes and structures on the maps.
 
 Plan to complete Project.
-The project so far as been develop to be able to easily add the later features as we progress.
+The project so far has been developed to be able to easily add the later features as we progress.
 Simple physics will be the easiest to develop given our current environement.
 
 Plan.
