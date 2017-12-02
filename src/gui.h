@@ -42,7 +42,7 @@ public:
 	glm::vec3 getCenter() const { return center_; }
 	const glm::vec3& getCamera() const { return eye_; }
 	bool isPoseDirty() const { return pose_changed_; }
-	void clearPose() { pose_changed_ = false; }
+	void clearPose() { if(!is_animating)pose_changed_ = false; }
 	const float* getLightPositionPtr() const { return &light_position_[0]; }
 	
 	int getCurrentBone() const { return current_bone_; }

@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {
-				// gui.animation_walk();
+				gui.animation_walk();
 				current_character->getMesh()->updateAnimation();
 				current_character->pass()->updateVBO(0,
 						      current_character->getMesh()->animated_vertices.data(),

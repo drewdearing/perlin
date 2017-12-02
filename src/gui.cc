@@ -196,38 +196,20 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
 	}
 
-	if (key == GLFW_KEY_W || is_animating) {
-		if(action == GLFW_PRESS) is_animating = true;	//don't interrupt animation
-		if(action != GLFW_RELEASE || is_animating){
-			floorMap->setCenter(c.x+dir_f.x, c.y+dir_f.z);
-			if(fps_mode_){
-				character->height_offset += dir_f.y;
-				center_.y += dir_f.y;
-			}
-			else{
-				character->height_offset = floorMap->getElevation(0,0);
-				character->normal = glm::vec3(floorMap->getNormal(0,0));
-				center_ = character->getCenter();
-			}
+	if (key == GLFW_KEY_W) {
+		if(action != GLFW_RELEASE){
+			is_animating = true;
+			animation_walk();
+			//pose_changed_ = true;
 
-			//DO ANIMATION//
-
-			character->animate_walk(rotation_speed_*4);
-			current_rotation += rotation_speed_*4;
-
-			if(current_rotation >= walking_speed || current_rotation <= -walking_speed) rotation_speed_ *= -1.0f;
-
-			if(current_rotation <= -walking_speed) two_step = true;
-
-			if(two_step && current_rotation < std::abs(rotation_speed_*4)) is_animating = false;
-
-			eye_ = center_ - look_ * camera_distance_;
-			pose_changed_ = true;
 		}
 		else{
-			character->rest();
-			current_rotation = 0;
-			pose_changed_ = true;
+			if(!is_animating){
+				character->rest();
+				current_rotation = 0;
+				pose_changed_ = true;
+				two_step = false;
+			}
 		}
 		return true;
 	} else if (key == GLFW_KEY_S) {
@@ -279,6 +261,48 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 	return false;
 }
 
+void GUI::animation_walk(){
+	std::cout << "is_animating: " << is_animating << std::endl;
+	glm::vec2 c = floorMap->getCenter();
+	glm::vec3 dir_f;
+	glm::vec3 dir_s;
+	float speed = walking_speed * character->scale * floorMap->getVertDistance();
+
+	if(fps_mode_){
+		dir_f = speed * glm::normalize(glm::vec3(look_.z, look_.y, look_.x));
+		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, tangent_.y, tangent_.x));
+	}
+	else{
+		dir_f = speed * glm::normalize(glm::vec3(look_.z, 0, look_.x));
+		dir_s = speed * glm::normalize(glm::vec3(tangent_.z, 0, tangent_.x));
+	}
+	if(is_animating){
+		floorMap->setCenter(c.x+dir_f.x, c.y+dir_f.z);
+			if(fps_mode_){
+				character->height_offset += dir_f.y;
+				center_.y += dir_f.y;
+			}
+			else{
+				character->height_offset = floorMap->getElevation(0,0);
+				character->normal = glm::vec3(floorMap->getNormal(0,0));
+				center_ = character->getCenter();
+			}
+
+			//DO ANIMATION//
+
+			character->animate_walk(rotation_speed_);
+			current_rotation += rotation_speed_;
+
+			if(current_rotation >= walking_speed || current_rotation <= -walking_speed) rotation_speed_ *= -1.0f;
+
+			if(current_rotation <= -walking_speed) two_step = true;
+
+			if(two_step && std::abs(current_rotation) < std::abs(rotation_speed_)) is_animating = false;
+
+			eye_ = center_ - look_ * camera_distance_;
+			pose_changed_ = true;
+	}
+}
 
 // Delegrate to the actual GUI object.
 void GUI::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
