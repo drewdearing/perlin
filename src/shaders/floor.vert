@@ -20,5 +20,6 @@ void main() {
 	vs_normal = normal;
 	vs_moisture = moisture;
 	vs_uv = uv;
+	vs_tree = tree;
 }
 )zzz"
