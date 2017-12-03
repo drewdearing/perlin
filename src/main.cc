@@ -34,6 +34,10 @@ const char* floor_vertex_shader =
 #include "shaders/floor.vert"
 ;
 
+const char* water_vertex_shader =
+#include "shaders/water.vert"
+;
+
 const char* geometry_shader =
 #include "shaders/default.geom"
 ;
@@ -52,6 +56,10 @@ const char* fragment_shader =
 
 const char* floor_fragment_shader =
 #include "shaders/floor.frag"
+;
+
+const char* water_fragment_shader =
+#include "shaders/water.frag"
 ;
 
 const char* line_fragment_shader =
@@ -110,15 +118,20 @@ int main(int argc, char* argv[])
 	std::vector<glm::vec4> floor_normals;
 	std::vector<float> moisture_values;
 	std::vector<float> tree_values;
+	std::vector<glm::vec4> water_vertices;
+	std::vector<glm::uvec3> water_faces;
+	std::vector<glm::vec4> water_normals;
 
 	//Perlin Map and Moisture Map
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
 	PerlinMap moistureMap = PerlinMap(1000, 1000, 4, 5.0, 0, 1, 5, 25);
 	PerlinMap treeMap = PerlinMap(1000, 1000, 4, 8.0, 0, 1, 5, 25);
+	PerlinMap waterMap = PerlinMap(1000, 1000, 4, 8.0, 0, 1, 5, 25);
 
 	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
 	moistureMap.createHeights(moisture_values);
 	treeMap.createHeights(tree_values);
+	waterMap.createFloor(water_vertices, water_faces, water_normals);
 
 	//Create GUI
 	GUI gui(window, &floorMap);
@@ -251,11 +264,21 @@ int main(int argc, char* argv[])
 			{ "fragment_color" }
 			);
 
+	RenderDataInput water_pass_input;
+	water_pass_input.assign(0, "vertex_position", water_vertices.data(), water_vertices.size(), 4, GL_FLOAT);
+	water_pass_input.assign(1, "normal", water_normals.data(), water_normals.size(), 4, GL_FLOAT);
+	water_pass_input.assign_index(water_faces.data(), water_faces.size(), 3);
+	RenderPass water_pass(-1,
+			water_pass_input,
+			{ water_vertex_shader, geometry_shader, water_fragment_shader},
+			{ floor_model, std_view, std_proj, std_light, floor_max_height, floor_min_height },
+			{ "fragment_color" }
+			);
+
 	float aspect = 0.0f;
 	bool draw_floor = true;
-	bool draw_skeleton = true;
+	bool draw_water = true;
 	bool draw_object = true;
-	bool draw_cylinder = true;
 	gui.updateTime();
 
 	while (!glfwWindowShouldClose(window)) {
@@ -296,6 +319,16 @@ int main(int argc, char* argv[])
 			floor_pass.setup();
 			// Draw our triangles.
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
+		}
+		if(draw_water){
+			water_vertices.clear();
+			glm::vec2 floorCenter = floorMap.getCenter();
+			waterMap.setCenter(floorCenter.x, floorCenter.y);
+			waterMap.updateFloor(water_vertices, water_normals);
+			water_pass.updateVBO(0, water_vertices.data(), water_vertices.size());
+			water_pass.setup();
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, water_faces.size() * 3, GL_UNSIGNED_INT, 0));
+			waterMap.updateZ(0.1);
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {
