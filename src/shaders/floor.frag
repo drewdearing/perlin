@@ -3,7 +3,6 @@ R"zzz(
 in vec4 face_normal;
 in vec4 vertex_normal;
 in float vertex_moisture;
-in float vertex_tree;
 in vec4 light_direction;
 in vec4 world_position;
 uniform float min_height;

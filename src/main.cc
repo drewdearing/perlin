@@ -255,7 +255,6 @@ int main(int argc, char* argv[])
 	floor_pass_input.assign(0, "vertex_position", floor_vertices.data(), floor_vertices.size(), 4, GL_FLOAT);
 	floor_pass_input.assign(1, "normal", floor_normals.data(), floor_normals.size(), 4, GL_FLOAT);
 	floor_pass_input.assign(2, "moisture", moisture_values.data(), moisture_values.size(), 1, GL_FLOAT);
-	floor_pass_input.assign(3, "tree", tree_values.data(), tree_values.size(), 1, GL_FLOAT);
 	floor_pass_input.assign_index(floor_faces.data(), floor_faces.size(), 3);
 	RenderPass floor_pass(-1,
 			floor_pass_input,
@@ -314,7 +313,6 @@ int main(int argc, char* argv[])
 				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
 				floor_pass.updateVBO(1, floor_normals.data(), floor_normals.size());
 				floor_pass.updateVBO(2, moisture_values.data(), moisture_values.size());
-				floor_pass.updateVBO(3, tree_values.data(), tree_values.size());
 			}
 			floor_pass.setup();
 			// Draw our triangles.
