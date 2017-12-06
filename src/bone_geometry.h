@@ -493,6 +493,7 @@ struct Mesh {
 	float height_offset;
 
 	void loadpmd(const std::string& fn);
+	void loadobj(const std::string& fn);
 	void updateAnimation();
 	int getNumberOfBones() const { return skeleton.numBones(); }
 	glm::vec3 getCenter();

@@ -50,6 +50,24 @@ void Character::build(){
 	}
 	mesh_center /= mesh.vertices.size();
 	uv_coordinates = mesh.uv_coordinates;
+	has_bones = true;
+}
+
+void Character::buildObj(){
+	mesh.loadobj(file);
+	std::cout << "OBJ: Loaded object  with  " << mesh.vertices.size()
+		<< " vertices and " << mesh.faces.size() << " faces.\n";
+
+	glm::vec4 mesh_center = glm::vec4(0.0f);
+	for (size_t i = 0; i < mesh.vertices.size(); ++i) {
+		mesh_center += mesh.vertices[i];
+	}
+	mesh_center /= mesh.vertices.size();
+	uv_coordinates = mesh.uv_coordinates;
+	has_bones = false;
+
+	for(int i = 0; i < mesh.faces.size(); i++)
+		std::cout<<"Face "<<i<<": "<<glm::to_string(mesh.faces.at(i))<<std::endl;
 }
 
 ShaderUniform Character::model_normal(){
@@ -101,7 +119,7 @@ RenderPass * Character::pass(){
 }
 
 void Character::setBoneID(unsigned b, int id){
-	if(b <= 11){
+	if(b <= 11 && has_bones){
 		switch(b){
 			case 0:
 				right_arm_upper = mesh.skeleton.getBone(id);
@@ -144,18 +162,23 @@ void Character::setBoneID(unsigned b, int id){
 }
 
 bool Character::animate_walk(float rotation){
-	right_arm_upper->rotate(rotation, glm::normalize(right_arm_upper->getBinormal()));
-	left_arm_upper->rotate(-rotation, glm::normalize(left_arm_upper->getBinormal()));
-	right_leg_upper->rotate(rotation, glm::normalize(right_leg_upper->getBinormal()));
-	left_leg_upper->rotate(rotation, glm::normalize(left_leg_upper->getBinormal()));
+	if(has_bones){
+		right_arm_upper->rotate(rotation, glm::normalize(right_arm_upper->getBinormal()));
+		left_arm_upper->rotate(-rotation, glm::normalize(left_arm_upper->getBinormal()));
+		right_leg_upper->rotate(rotation, glm::normalize(right_leg_upper->getBinormal()));
+		left_leg_upper->rotate(rotation, glm::normalize(left_leg_upper->getBinormal()));
+	}
+	return true;
 }
 
 void Character::rest(){
-	right_arm_upper->revert();
-	left_arm_upper->revert();
-	left_leg_upper->revert();
-	right_leg_upper->revert();
-	right_arm_upper->rotate(-0.7 * arm_rotation, right_arm_upper->getOriginalNormal());
-	left_arm_upper->rotate(0.7 * arm_rotation, left_arm_upper->getOriginalNormal());
-	current_rotation = 0;
+	if(has_bones){
+		right_arm_upper->revert();
+		left_arm_upper->revert();
+		left_leg_upper->revert();
+		right_leg_upper->revert();
+		right_arm_upper->rotate(-0.7 * arm_rotation, right_arm_upper->getOriginalNormal());
+		left_arm_upper->rotate(0.7 * arm_rotation, left_arm_upper->getOriginalNormal());
+		current_rotation = 0;
+	}
 }

@@ -253,6 +253,34 @@ public:
 		}
 	}
 
+	void createThresh(std::vector<glm::vec4>& vertices, float thresh){
+		float elevation;
+
+		int min_x = std::max((int)ceil(centerX - float(radius)), 0);
+		int max_x = std::min((int)floor(centerX + float(radius)), width-1);
+		int min_y = std::max((int)ceil(centerY - float(radius)), 0);
+		int max_y = std::min((int)floor(centerY + float(radius)), height-1);
+
+		if(min_x == 0)
+			max_x = diameter_x - 1;
+		else if(max_x == width-1)
+			min_x = width - diameter_x;
+		if(min_y == 0)
+			max_y = diameter_y - 1;
+		else if(max_y == height-1)
+			min_y = height - diameter_y;
+
+		for(int y = min_y; y <= max_y; y++){
+			for(int x = min_x; x <= max_x; x++){
+				elevation = getVertexElevation(x, y);
+				if(elevation >= thresh)
+					vertices.push_back(getVertexPoint(x, y));
+			}
+		}
+
+		dirty = false;
+	}
+
 	void updateFloor(std::vector<glm::vec4>& vertices, std::vector<glm::vec4>& normals){
 		int currentX;
 		int currentY;

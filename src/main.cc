@@ -117,7 +117,7 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec3> floor_faces;
 	std::vector<glm::vec4> floor_normals;
 	std::vector<float> moisture_values;
-	std::vector<float> tree_values;
+	std::vector<glm::vec4> tree_vertices;
 	std::vector<glm::vec4> water_vertices;
 	std::vector<glm::uvec3> water_faces;
 	std::vector<glm::vec4> water_normals;
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
 
 	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
 	moistureMap.createHeights(moisture_values);
-	treeMap.createHeights(tree_values);
+	treeMap.createThresh(tree_vertices, 0.5);
 	waterMap.createFloor(water_vertices, water_faces, water_normals);
 
 	//Create GUI
@@ -159,8 +159,12 @@ int main(int argc, char* argv[])
 	character2.setBoneID(11, 8);
 	character2.setArmRotation(1);
 
+	//Tree
+	Character tree_mesh = Character("../assets/obj/lowpolytree.obj", 3.0f, true);
+
 	characters.push_back(&character);
 	characters.push_back(&character2);
+	characters.push_back(&tree_mesh);
 
 	Character* current_character = characters[0];
 
@@ -244,7 +248,7 @@ int main(int argc, char* argv[])
 	for(unsigned i = 0; i < characters.size(); i++){
 		Character * curr_char = characters[i];
 		curr_char->buildPass(
-			{ obj_vertex_shader, geometry_shader, fragment_shader },
+			{ obj_vertex_shader, geometry_shader, water_fragment_shader },
 			{ std_model, std_view, std_proj, std_light, std_camera, object_alpha, curr_char->model_height(),
 				curr_char->model_scale(), curr_char->model_normal(), camera_look_dir },
 			{ "fragment_color" }
@@ -303,13 +307,13 @@ int main(int argc, char* argv[])
 				floor_vertices.clear();
 				floor_normals.clear();
 				moisture_values.clear();
-				tree_values.clear();
+				tree_vertices.clear();
 				floorMap.updateFloor(floor_vertices, floor_normals);
 				glm::vec2 floorCenter = floorMap.getCenter();
 				moistureMap.setCenter(floorCenter.x, floorCenter.y);
-				moistureMap.createHeights(moisture_values);
 				treeMap.setCenter(floorCenter.x, floorCenter.y);
-				treeMap.createHeights(tree_values);
+				moistureMap.createHeights(moisture_values);
+				treeMap.createThresh(tree_vertices, 0.5);
 				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
 				floor_pass.updateVBO(1, floor_normals.data(), floor_normals.size());
 				floor_pass.updateVBO(2, moisture_values.data(), moisture_values.size());
@@ -318,7 +322,7 @@ int main(int argc, char* argv[])
 			// Draw our triangles.
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
 		}
-		if(draw_water){
+		if(0){
 			water_vertices.clear();
 			glm::vec2 floorCenter = floorMap.getCenter();
 			waterMap.setCenter(floorCenter.x, floorCenter.y);

@@ -16,6 +16,7 @@ class Character {
 private:
 	std::string file;
 	Mesh mesh;
+	bool has_bones;
 	RenderPass * character_pass;
 	RenderDataInput object_pass_input;
 	glm::vec4 mesh_center;
@@ -53,6 +54,17 @@ public:
 		build();
 	}
 
+	Character(std::string f, float s, bool obj){
+		setFile(f);
+		setScale(s);
+		if(obj)
+			buildObj();
+		else{
+			
+			build();
+		}
+	}
+
 	Mesh * getMesh();
 
 	glm::vec3 getCenter();
@@ -68,6 +80,8 @@ public:
 	void updateLook(glm::vec3 l);
 
 	void build();
+
+	void buildObj();
 
 	ShaderUniform model_normal();
 
