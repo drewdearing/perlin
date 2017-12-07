@@ -248,7 +248,7 @@ int main(int argc, char* argv[])
 	for(unsigned i = 0; i < characters.size(); i++){
 		Character * curr_char = characters[i];
 		curr_char->buildPass(
-			{ obj_vertex_shader, geometry_shader, water_fragment_shader },
+			{ obj_vertex_shader, geometry_shader, fragment_shader },
 			{ std_model, std_view, std_proj, std_light, std_camera, object_alpha, curr_char->model_height(),
 				curr_char->model_scale(), curr_char->model_normal(), camera_look_dir },
 			{ "fragment_color" }

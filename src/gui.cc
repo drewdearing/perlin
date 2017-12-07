@@ -38,6 +38,7 @@ void GUI::assignCharacter(Character * c)
 	character->updateLook(look_);
 	character->updateNormal(floorMap->getNormal(0,0));
 	center_ = character->getCenter();
+	camera_distance_ = 35.0f * character->scale;
 	eye_ = center_ - look_ * camera_distance_;
 	character->rest();
 }

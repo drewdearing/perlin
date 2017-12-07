@@ -66,8 +66,8 @@ void Character::buildObj(){
 	uv_coordinates = mesh.uv_coordinates;
 	has_bones = false;
 
-	for(int i = 0; i < mesh.faces.size(); i++)
-		std::cout<<"Face "<<i<<": "<<glm::to_string(mesh.faces.at(i))<<std::endl;
+	for(int i = 0; i < mesh.vertices.size(); i++)
+		std::cout<<"Verex "<<i<<": "<<glm::to_string(mesh.vertices.at(i))<<std::endl;
 }
 
 ShaderUniform Character::model_normal(){
