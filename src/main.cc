@@ -38,6 +38,10 @@ const char* water_vertex_shader =
 #include "shaders/water.vert"
 ;
 
+const char* tree_vertex_shader =
+#include "shaders/tree.vert"
+;
+
 const char* geometry_shader =
 #include "shaders/default.geom"
 ;
@@ -76,6 +80,10 @@ const char* norm_fragment_shader =
 
 const char* binorm_fragment_shader =
 #include "shaders/binorm.frag"
+;
+
+const char* tree_fragment_shader =
+#include "shaders/tree.frag"
 ;
 
 // FIXME: Add more shaders here.
@@ -117,7 +125,6 @@ int main(int argc, char* argv[])
 	std::vector<glm::uvec3> floor_faces;
 	std::vector<glm::vec4> floor_normals;
 	std::vector<float> moisture_values;
-	std::vector<glm::vec4> tree_vertices;
 	std::vector<glm::vec4> water_vertices;
 	std::vector<glm::uvec3> water_faces;
 	std::vector<glm::vec4> water_normals;
@@ -125,12 +132,10 @@ int main(int argc, char* argv[])
 	//Perlin Map and Moisture Map
 	PerlinMap floorMap = PerlinMap(1000, 1000, 6, 8.0, -350, 100, 5, 25);
 	PerlinMap moistureMap = PerlinMap(1000, 1000, 4, 5.0, 0, 1, 5, 25);
-	PerlinMap treeMap = PerlinMap(1000, 1000, 4, 8.0, 0, 1, 5, 25);
 	PerlinMap waterMap = PerlinMap(1000, 1000, 4, 8.0, 0, 1, 5, 25);
 
 	floorMap.createFloor(floor_vertices, floor_faces, floor_normals);
 	moistureMap.createHeights(moisture_values);
-	treeMap.createThresh(tree_vertices, 0.5);
 	waterMap.createFloor(water_vertices, water_faces, water_normals);
 
 	//Create GUI
@@ -159,12 +164,8 @@ int main(int argc, char* argv[])
 	character2.setBoneID(11, 8);
 	character2.setArmRotation(1);
 
-	//Tree
-	Character tree_mesh = Character("../assets/obj/lowpolytree.obj", 3.0f, true);
-
 	characters.push_back(&character);
 	characters.push_back(&character2);
-	characters.push_back(&tree_mesh);
 
 	Character* current_character = characters[0];
 
@@ -263,7 +264,7 @@ int main(int argc, char* argv[])
 	RenderPass floor_pass(-1,
 			floor_pass_input,
 			{ floor_vertex_shader, floor_geometry_shader, floor_fragment_shader},
-			{ floor_model, std_view, std_proj, std_light, floor_max_height, floor_min_height },
+			{ floor_model, std_view, std_proj, std_light, std_camera, floor_max_height, floor_min_height },
 			{ "fragment_color" }
 			);
 
@@ -274,7 +275,7 @@ int main(int argc, char* argv[])
 	RenderPass water_pass(-1,
 			water_pass_input,
 			{ water_vertex_shader, geometry_shader, water_fragment_shader},
-			{ floor_model, std_view, std_proj, std_light, floor_max_height, floor_min_height },
+			{ floor_model, std_view, std_proj, std_light, std_camera, floor_max_height, floor_min_height },
 			{ "fragment_color" }
 			);
 
@@ -307,13 +308,10 @@ int main(int argc, char* argv[])
 				floor_vertices.clear();
 				floor_normals.clear();
 				moisture_values.clear();
-				tree_vertices.clear();
 				floorMap.updateFloor(floor_vertices, floor_normals);
 				glm::vec2 floorCenter = floorMap.getCenter();
 				moistureMap.setCenter(floorCenter.x, floorCenter.y);
-				treeMap.setCenter(floorCenter.x, floorCenter.y);
 				moistureMap.createHeights(moisture_values);
-				treeMap.createThresh(tree_vertices, 0.5);
 				floor_pass.updateVBO(0, floor_vertices.data(), floor_vertices.size());
 				floor_pass.updateVBO(1, floor_normals.data(), floor_normals.size());
 				floor_pass.updateVBO(2, moisture_values.data(), moisture_values.size());
@@ -321,16 +319,6 @@ int main(int argc, char* argv[])
 			floor_pass.setup();
 			// Draw our triangles.
 			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, floor_faces.size() * 3, GL_UNSIGNED_INT, 0));
-		}
-		if(0){
-			water_vertices.clear();
-			glm::vec2 floorCenter = floorMap.getCenter();
-			waterMap.setCenter(floorCenter.x, floorCenter.y);
-			waterMap.updateFloor(water_vertices, water_normals);
-			water_pass.updateVBO(0, water_vertices.data(), water_vertices.size());
-			water_pass.setup();
-			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, water_faces.size() * 3, GL_UNSIGNED_INT, 0));
-			waterMap.updateZ(0.1);
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {
@@ -345,6 +333,16 @@ int main(int argc, char* argv[])
 			int mid = 0;
 			while (current_character->pass()->renderWithMaterial(mid))
 				mid++;
+		}
+		if(draw_water){
+			water_vertices.clear();
+			glm::vec2 floorCenter = floorMap.getCenter();
+			waterMap.setCenter(floorCenter.x, floorCenter.y);
+			waterMap.updateFloor(water_vertices, water_normals);
+			water_pass.updateVBO(0, water_vertices.data(), water_vertices.size());
+			water_pass.setup();
+			CHECK_GL_ERROR(glDrawElements(GL_TRIANGLES, water_faces.size() * 3, GL_UNSIGNED_INT, 0));
+			waterMap.updateZ(0.01);
 		}
 		// Poll and swap.
 		glfwPollEvents();

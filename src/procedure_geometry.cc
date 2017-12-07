@@ -51,3 +51,33 @@ void create_cyl(std::vector<glm::uvec2>& cyl_lines){
 	cyl_lines.push_back(glm::vec2(2, 6));
 	cyl_lines.push_back(glm::vec2(3, 7));
 }
+
+void create_tree(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces){
+	vertices.push_back(glm::vec4(-1, 0, 1, 1));
+	vertices.push_back(glm::vec4(-1, 0, -1, 1));
+	vertices.push_back(glm::vec4(1, 0, -1, 1));
+	vertices.push_back(glm::vec4(1, 0, -1, 1));
+	vertices.push_back(glm::vec4(-1, 2, 1, 1));
+	vertices.push_back(glm::vec4(-1, 2, -1, 1));
+	vertices.push_back(glm::vec4(1, 2, -1, 1));
+	vertices.push_back(glm::vec4(1, 2, -1, 1));
+
+	faces.push_back(glm::uvec3(0, 3, 2));
+	faces.push_back(glm::uvec3(0, 2, 1));
+
+	faces.push_back(glm::uvec3(3, 0, 4));
+	faces.push_back(glm::uvec3(3, 4, 7));
+
+	faces.push_back(glm::uvec3(2, 3, 7));
+	faces.push_back(glm::uvec3(2, 7, 6));
+
+	faces.push_back(glm::uvec3(1, 2, 6));
+	faces.push_back(glm::uvec3(1, 6, 5));
+
+	faces.push_back(glm::uvec3(0, 1, 5));
+	faces.push_back(glm::uvec3(0, 5, 4));
+
+	faces.push_back(glm::uvec3(7, 4, 5));
+	faces.push_back(glm::uvec3(7, 5, 6));
+
+}

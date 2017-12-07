@@ -79,8 +79,10 @@ void Mesh::loadobj(const std::string& fn)
 	bool loadout = loader.LoadFile(fn);
 	if(loadout){
 		for (int i = 0; i < loader.LoadedMeshes.size(); i++){
-			unsigned vertex_start = vertices.size();
 			objl::Mesh curMesh = loader.LoadedMeshes[i];
+			std::cout<<"vert: "<<curMesh.Vertices.size()<<std::endl;
+			std::cout<<"ind: "<<curMesh.Indices.size()<<std::endl;
+			unsigned vertex_start = vertices.size();
 			for (int j = 0; j < curMesh.Vertices.size(); j++){
 				glm::vec4 v = glm::vec4(curMesh.Vertices[j].Position.X, curMesh.Vertices[j].Position.Y, curMesh.Vertices[j].Position.Z, 1);
 				glm::vec4 n = glm::vec4(curMesh.Vertices[j].Normal.X, curMesh.Vertices[j].Normal.Y, curMesh.Vertices[j].Normal.Z, 1);

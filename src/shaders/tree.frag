@@ -19,10 +19,10 @@ void main() {
   vec3 min_color;
   vec3 max_color;
   
-  color = vec3(68, 68, 122);
+  color = vec3(1, 0, 0);
 
   color /= 255.0f;
 
-  fragment_color = vec4(dot_nl * color, 0.5);
+  fragment_color = vec4(dot_nl * color, 1.0);
 }
 )zzz"

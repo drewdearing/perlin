@@ -13,4 +13,6 @@ void create_floor(std::vector<glm::vec4>& floor_vertices, std::vector<glm::uvec3
 void create_skel(Mesh& mesh, std::vector<glm::vec4>& skel_vertices, std::vector<glm::uvec2>& skel_lines);
 
 void create_cyl(std::vector<glm::uvec2>& cyl_lines);
+
+void create_tree(std::vector<glm::vec4>& vertices, std::vector<glm::uvec3>& faces);
 #endif

@@ -21,8 +21,9 @@ void main() {
   vec3 min_color;
   vec3 max_color;
   
-  vec3 ocean = vec3(68, 68, 122);
   vec3 beach = vec3(160, 144, 119);
+  //vec3 ocean = vec3(68, 68, 122);
+  vec3 ocean = beach;
 
   vec3 scorched = vec3(85, 85, 85);
   vec3 bare = vec3(136, 136, 136);
@@ -41,14 +42,14 @@ void main() {
   vec3 tropical_seasonal_forest = vec3(85, 153, 68);
   vec3 tropical_rain_forest = vec3(51, 119, 85);
 
-  if (e < 0.1) {
+  if (e < 0.25) {
     color = ocean;
   }
-  else if (e < 0.12) {
+  else if (e < 0.4) {
     color = beach;
   }
-  else if (e < 0.3) {
-    t1 = (e-0.12)/(0.3 - 0.12);
+  else if (e < 0.5) {
+    t1 = (e-0.4)/(0.5 - 0.4);
     min_color = beach;
     if (m < 0.16)
       max_color = subtropical_desert;
@@ -97,7 +98,7 @@ void main() {
       min_color.z = tropical_seasonal_forest.z + (tropical_rain_forest.z - tropical_seasonal_forest.z) * t2;
     }
 
-    t1 = (e-0.3)/(0.6 - 0.3);
+    t1 = (e-0.5)/(0.6 - 0.5);
     if (m < 0.16)
       max_color = temperate_desert;
     else if (m < 0.50) {
