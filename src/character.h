@@ -45,6 +45,8 @@ public:
 	glm::vec3 normal;
 	glm::vec3 binormal;
 	glm::vec3 tangent;
+	float gravity = -0.5f;
+	float velocity = 0;
 
 	Character(){};
 

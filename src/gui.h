@@ -28,7 +28,7 @@ public:
 	void assignCharacterList(std::vector<Character *>* list, Character ** current);
 	void updateTime();
 	void updateFrameRate();
-
+	void animateCharacter();
 	void keyCallback(int key, int scancode, int action, int mods);
 	void mousePosCallback(double mouse_x, double mouse_y);
 	void mouseButtonCallback(int button, int action, int mods);

@@ -141,6 +141,19 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 	}
 }
 
+void GUI::animateCharacter(){
+	if(character->height_offset != floorMap->getElevation(0,0)){
+		character->velocity += character->gravity * (delta_time.count()/frame);
+		character->height_offset += character->velocity;
+		if(character->height_offset <= floorMap->getElevation(0,0)){
+			character->height_offset = floorMap->getElevation(0,0);
+			character->velocity = 0;
+		}
+		center_ = character->getCenter();
+		eye_ = center_ - look_ * camera_distance_;
+	}
+}
+
 void GUI::mouseButtonCallback(int button, int action, int mods)
 {
 	drag_state_ = (action == GLFW_PRESS);
@@ -255,8 +268,16 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			center_.y += 1;
 			eye_ = center_ - look_ * camera_distance_;
 		}
+		else{
+			if(character->height_offset == floorMap->getElevation(0,0)){
+				character->velocity = 4.0f;
+				character->height_offset += character->velocity;
+			}
+			center_ = character->getCenter();
+			eye_ = center_ - look_ * camera_distance_;
+		}
 		return true;
-	} else if (key == GLFW_KEY_LEFT_SHIFT) {
+	} else if (key == GLFW_KEY_X) {
 		if(fps_mode_){
 			character->height_offset -= 1;
 			center_.y -= 1;

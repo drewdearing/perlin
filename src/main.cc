@@ -300,6 +300,7 @@ int main(int argc, char* argv[])
 		glCullFace(GL_BACK);
 		
 		gui.updateMatrices();
+		gui.animateCharacter();
 		mats = gui.getMatrixPointers();
 
 		//draw floor.
