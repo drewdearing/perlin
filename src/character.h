@@ -48,13 +48,15 @@ public:
 
 	Character(){};
 
-	Character(std::string f, float s){
+	Character(std::string f, float s, bool bones){
+		setBones(bones);
 		setFile(f);
 		setScale(s);
 		build();
 	}
 
-	Character(std::string f, float s, bool obj){
+	Character(std::string f, float s, bool bones, bool obj){
+		setBones(bones);
 		setFile(f);
 		setScale(s);
 		if(obj)
@@ -70,6 +72,8 @@ public:
 	glm::vec3 getCenter();
 
 	void setArmRotation(float r);
+
+	void setBones(bool b);
 
 	void setScale(float s);
 
@@ -99,7 +103,9 @@ public:
 
 	void setBoneID(unsigned b, int id);
 
-	bool animate_walk(float rotation);
+	void walk();
+
+	void walk_reverse();
 
 	void rest();
 };

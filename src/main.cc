@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 	std::vector<Character*> characters;
 
 	//Meiko
-	Character character = Character("../assets/pmd/Meiko_Sakine.pmd", 0.5f);
+	Character character = Character("../assets/pmd/Meiko_Sakine.pmd", 0.5f, true);
 	character.setBoneID(0, 32);
 	character.setBoneID(4, 14);
 	character.setBoneID(2, 53);
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 	character.setArmRotation(-1);
 
 	//Miku
-	Character character2 = Character("../assets/pmd/Miku_Hatsune.pmd", 0.5f);
+	Character character2 = Character("../assets/pmd/Miku_Hatsune.pmd", 0.5f, true);
 	character2.setBoneID(0, 18);
 	character2.setBoneID(4, 48);
 	character2.setBoneID(2, 38);
@@ -322,7 +322,6 @@ int main(int argc, char* argv[])
 		}
 		if (draw_object) {
 			if (gui.isPoseDirty()) {
-				gui.animation_walk();
 				current_character->getMesh()->updateAnimation();
 				current_character->pass()->updateVBO(0,
 						      current_character->getMesh()->animated_vertices.data(),
