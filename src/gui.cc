@@ -105,6 +105,7 @@ void GUI::updateTime(){
 }
 
 void GUI::updateFrameRate(){
+	
 	if(display_fr){
 		frame_rate = floor(1000.0f/delta_time.count());
 		std::cout<<frame_rate<<std::endl;
@@ -143,7 +144,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 
 void GUI::animateCharacter(){
 	if(character->height_offset != floorMap->getElevation(0,0)){
-		character->velocity += character->gravity * (delta_time.count()/frame);
+		character->velocity += character->gravity * (delta_time.count()/(frame));
 		character->height_offset += character->velocity;
 		if(character->height_offset <= floorMap->getElevation(0,0)){
 			character->height_offset = floorMap->getElevation(0,0);
@@ -151,6 +152,9 @@ void GUI::animateCharacter(){
 		}
 		center_ = character->getCenter();
 		eye_ = center_ - look_ * camera_distance_;
+
+		std::cout << "DELTA TIME: " << delta_time.count()/frame << std::endl;
+		//std::cout << "HEIGHT OFFSET: " << character->height_offset << std::endl;
 	}
 }
 
@@ -282,6 +286,12 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			character->height_offset -= 1;
 			center_.y -= 1;
 			eye_ = center_ - look_ * camera_distance_;
+		}
+		return true;
+	} else if (key == GLFW_KEY_L) {
+		if(action == GLFW_PRESS){
+			character->dance(1);
+			pose_changed_ = true;	
 		}
 		return true;
 	}

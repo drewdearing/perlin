@@ -25,6 +25,7 @@ private:
 	float current_rotation = 0.0f;
 	float rotation_speed = 0.02f;
 	float walking_speed = 0.3f;
+	int step = 0;
 	
 	Bone* right_arm_upper; //0
 	Bone* right_arm_lower; //1
@@ -108,6 +109,13 @@ public:
 	void walk();
 
 	void walk_reverse();
+
+	/***********
+	 * 	DANCES *
+	 ***********/
+	void dance_floss(int& step);
+
+	void dance(int style);
 
 	void rest();
 };

@@ -89,6 +89,8 @@ private:
 	float walking_speed = 0.3f;
 	float current_rotation = 0.0f;
 
+	float timer = 0.0f;
+
 	bool waifuMiku = true;
 	//std::string model_;
 
