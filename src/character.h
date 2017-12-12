@@ -109,6 +109,8 @@ public:
 
 	void walk_reverse();
 
+	void strafe(bool isRight = true);
+
 	void rest();
 };
 

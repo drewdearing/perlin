@@ -165,8 +165,11 @@ void Character::walk(){
 		current_rotation += rotation_speed;
 		if(current_rotation >= walking_speed || current_rotation <= -walking_speed)
 			rotation_speed *= -1.0;
+		//Arms
 		right_arm_upper->rotate(rotation_speed, glm::normalize(right_arm_upper->getBinormal()));
 		left_arm_upper->rotate(-rotation_speed, glm::normalize(left_arm_upper->getBinormal()));
+
+		//Legs
 		right_leg_upper->rotate(rotation_speed, glm::normalize(right_leg_upper->getBinormal()));
 		left_leg_upper->rotate(rotation_speed, glm::normalize(left_leg_upper->getBinormal()));
 	}
@@ -181,6 +184,16 @@ void Character::walk_reverse(){
 		left_arm_upper->rotate(rotation_speed, glm::normalize(left_arm_upper->getBinormal()));
 		right_leg_upper->rotate(-rotation_speed, glm::normalize(right_leg_upper->getBinormal()));
 		left_leg_upper->rotate(-rotation_speed, glm::normalize(left_leg_upper->getBinormal()));
+	}
+}
+
+void Character::strafe(bool isRight){
+	if(has_bones){
+		current_rotation -= rotation_speed;
+		if(current_rotation >= (walking_speed) || current_rotation <= -(walking_speed))
+			rotation_speed *= -1.0;
+		right_leg_upper->rotate(-rotation_speed, glm::normalize(right_leg_upper->getNormal()));
+		left_leg_upper->rotate(-rotation_speed, glm::normalize(left_leg_upper->getNormal()));
 	}
 }
 

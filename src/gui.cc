@@ -225,7 +225,9 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		eye_ = center_ - look_ * camera_distance_;
 		return true;
-	} else if (key == GLFW_KEY_S) {
+	} 
+
+	else if (key == GLFW_KEY_S) {
 		floorMap->setCenter(c.x-dir_f.x, c.y-dir_f.z);
 		if(fps_mode_){
 			character->height_offset -= dir_f.y;
@@ -244,25 +246,44 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 		}
 		eye_ = center_ - look_ * camera_distance_;
 		return true;
-	} else if (key == GLFW_KEY_A) {
+	} 
+
+	else if (key == GLFW_KEY_A) {
 		floorMap->setCenter(c.x-dir_s.x, c.y-dir_s.z);
 		if(!fps_mode_){
 			character->height_offset = floorMap->getElevation(0,0);
 			character->normal = glm::vec3(floorMap->getNormal(0,0));
 			center_ = character->getCenter();
-			eye_ = center_ - look_ * camera_distance_;
+			character->strafe(false);
+			pose_changed_ = true;
 		}
+		if(action == GLFW_RELEASE){
+			character->rest();
+			pose_changed_ = true;
+		}
+		eye_ = center_ - look_ * camera_distance_;
 		return true;
-	} else if (key == GLFW_KEY_D) {
+	} 
+
+	else if (key == GLFW_KEY_D) {
 		floorMap->setCenter(c.x+dir_s.x, c.y+dir_s.z);
 		if(!fps_mode_){
 			character->height_offset = floorMap->getElevation(0,0);
 			character->normal = glm::vec3(floorMap->getNormal(0,0));
 			center_ = character->getCenter();
-			eye_ = center_ - look_ * camera_distance_;
+			character->strafe();
+			pose_changed_ = true;
+			
 		}
+		if(action == GLFW_RELEASE){
+			character->rest();
+			pose_changed_ = true;
+		}
+		eye_ = center_ - look_ * camera_distance_;
 		return true;
-	} else if (key == GLFW_KEY_SPACE) {
+	} 
+
+	else if (key == GLFW_KEY_SPACE) {
 		if(fps_mode_){
 			character->height_offset += 1;
 			center_.y += 1;
@@ -277,7 +298,9 @@ bool GUI::captureWASDUPDOWN(int key, int action)
 			eye_ = center_ - look_ * camera_distance_;
 		}
 		return true;
-	} else if (key == GLFW_KEY_X) {
+	} 
+
+	else if (key == GLFW_KEY_X) {
 		if(fps_mode_){
 			character->height_offset -= 1;
 			center_.y -= 1;
