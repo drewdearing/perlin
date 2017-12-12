@@ -203,6 +203,28 @@ void Character::dance_floss(int& step){
 			right_arm_upper->rotate(0.6, glm::normalize(right_arm_upper->getBinormal()));
 			left_arm_upper->rotate(-0.7, glm::normalize(left_arm_upper->getNormal()));
 		} break;
+		case 3:{
+			rest();
+			root_top -> rotate(0.04, glm::normalize(root_top->getBinormal()));
+			root_bottom -> rotate(-0.05, glm::normalize(root_bottom->getBinormal()));
+			right_arm_upper->rotate(0.9, glm::normalize(right_arm_upper->getNormal()));
+			//rotate this arm instead for Meiko
+			//right_arm_upper->rotate(-0.6, glm::normalize(right_arm_upper->getBinormal()));
+			left_arm_upper->rotate(0.9, glm::normalize(left_arm_upper->getNormal()));
+			//rotate this for Miku
+			left_arm_upper->rotate(-0.6, glm::normalize(left_arm_upper->getBinormal()));
+		} break;
+		case 4:{
+			rest();
+			root_top -> rotate(-0.04, glm::normalize(root_top->getBinormal()));
+			root_bottom -> rotate(0.05, glm::normalize(root_bottom->getBinormal()));
+			right_arm_upper->rotate(-0.9, glm::normalize(right_arm_upper->getNormal()));
+			//rotate this arm instead for Meiko
+			//right_arm_upper->rotate(-0.6, glm::normalize(right_arm_upper->getBinormal()));
+			left_arm_upper->rotate(-0.9, glm::normalize(left_arm_upper->getNormal()));
+			//rotate this for Miku
+			left_arm_upper->rotate(0.6, glm::normalize(left_arm_upper->getBinormal()));
+		} break;
 		default:{
 			rest();
 		}
@@ -213,7 +235,7 @@ void Character::dance(int style){
 	if(style == 1){
 		++step;
 		dance_floss(step);
-		step = step%5;
+		step = step%6;
 		
 		// left_arm_upper->rotate(-0.6, glm::normalize(left_arm_upper->getBinormal()));
 		// right_leg_upper->rotate(-rotation_speed, glm::normalize(right_leg_upper->getBinormal()));
