@@ -142,7 +142,7 @@ void GUI::mousePosCallback(double mouse_x, double mouse_y)
 }
 
 void GUI::animateCharacter(){
-	if(character->height_offset != floorMap->getElevation(0,0)){
+	if(!fps_mode_ && character->height_offset != floorMap->getElevation(0,0)){
 		character->velocity += character->gravity * (delta_time.count()/frame);
 		character->height_offset += character->velocity;
 		if(character->height_offset <= floorMap->getElevation(0,0)){
