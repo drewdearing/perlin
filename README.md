@@ -15,43 +15,41 @@ cd build
 ```
 
 ## Project Features
+
+<a id="camera"></a>
+### Camera Movement + Animation
+<a href="#camera"><img src="/assets/gifs/animationcamera.gif"/></a>
+For camera rotation, we use the GPU in order to parallelize the process.
+Additionally, we made it so that as the character moves, she will animate movement in her legs.
+
 <a id="characterswapping"></a>
 ### Character Swapping
 <a href="#characterswapping"><img src="/assets/gifs/character_swap.gif"/></a>
-```
 We construct different render passes for each Character, and store all relevant information in a Character Class, and the input handler can switch between different character models without losing the stored character information.
-```
+
 <a id="gravity"></a>
 ### Gravity Attempt
 <a href="#gravity"><img src="/assets/gifs/gravity-1.gif"/></a>
-```
 We have the character jump directly upwards on the y-axis, using simple physics simulation.
 Velocity = Initial Velocity + (Acceleration * Time)
 If we’re in the air, we check every frame to make sure if we are equal to height of the land or below it, and if so, set the height to the floor of the map.
-```
 
 <a id="water"></a>
 ### Water Animation
 <a href="#water"><img src="/assets/gifs/water-1.gif"/></a>
-```
 We have a set water level and render water at that height.
 We use 3D Perlin Noise to simulate the shifting tides of the water.
-```
 
 <a id="perlinlevels"></a>
 ### Perlin Levels and Moisture Map
 <a href="#perlinlevels"><img src="/assets/gifs/water2snow-1.gif"/></a>
-```
 We use Perlin Noise to generate 2 maps: Elevation and Moisture.
 We use the elevation values to determine what height the map will be, and use the elevation and moisture values in order to determine different biomes, represented by a blended color.
-```
 
 <a id="freecam"></a>
 ### Free-Cam Mode
 <a href="#freecam"><img src="/assets/gifs/fps_mode-2.gif"/></a>
-```
 You can change to free cam mode in order to fly and explore the map. This way, you can see the entire map in all of its radius-bounded glory and creation.
-```
 
 # Acknowledgement 
 
