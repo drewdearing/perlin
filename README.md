@@ -15,6 +15,7 @@ cd build
 ```
 
 ## Project Features
+<a id="cameramovement"></a>
 ### Camera Movement + Animation
 <a href="#"><img src="/assets/gifs/animationcamera.gif"/></a>
 
