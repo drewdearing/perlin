@@ -19,6 +19,7 @@ cd build
 <a id="camera"></a>
 ### Camera Movement + Animation
 <a href="#camera"><img src="/assets/gifs/animationcamera.gif"/></a>
+
 For camera rotation, we use the GPU in order to parallelize the process.
 Additionally, we made it so that as the character moves, she will animate movement in her legs.
 
