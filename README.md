@@ -16,7 +16,7 @@ cd build
 
 ## Project Features
 ### Camera Movement + Animation
-<img href="http://drewdearing.com/perlin/gif/animationcamera.gif"/>
+<img src="http://drewdearing.com/perlin/gif/animationcamera.gif"/>
 
 
 
