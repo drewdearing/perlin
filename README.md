@@ -1,7 +1,6 @@
 # Getting Started
 
 ## Build
-
 ```
 mkdir build
 cd build
@@ -10,13 +9,20 @@ make -j8
 ```
 
 ## Execution
-
 ```
 cd build
 ./bin/skinning
 ```
 
+## Project Features
+### Camera Movement + Animation
+![Alt Text](http://drewdearing.com/perlin/gif/animationcamera.gif)
+
+
+
 # Acknowledgement 
+
+Made by Drew Dearing, Jesus Martinez, and Eric Lee.
 
 This bone animation code is based on the skinning project written by
 Randall Smith for 2015 Spring Graphics Course.
