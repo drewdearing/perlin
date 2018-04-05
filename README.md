@@ -2,9 +2,6 @@
 
 ## Build
 
-You are already quite familar with the graphics projects, so
-TL;DR:
-
 ```
 mkdir build
 cd build
