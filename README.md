@@ -16,7 +16,7 @@ cd build
 
 ## Project Features
 ### Camera Movement + Animation
-<img src="/assets/gifs/animationcamera.gif"/>
+<a href="#"><img src="/assets/gifs/animationcamera.gif"/></a>
 
 
 
